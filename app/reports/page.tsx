@@ -1,0 +1,196 @@
+import { getDeposits } from '@/app/actions/wallet';
+import { getBuyTransactions, getSellTransactions, getDividends } from '@/app/actions/transactions';
+import Link from 'next/link';
+import { clsx } from 'clsx';
+import { Prisma } from '@prisma/client';
+
+function formatPkr(amount: Prisma.Decimal | number) {
+  return new Prisma.Decimal(amount).toNumber().toLocaleString('en-PK', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  });
+}
+
+function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right' }[] }) {
+  return (
+    <thead className="bg-gray-50">
+      <tr>
+        {cols.map((col, i) => (
+          <th
+            key={i}
+            className={clsx(
+              "px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-500",
+              col.align === 'right' ? "text-right" : "text-left"
+            )}
+          >
+            {col.label}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
+}
+
+async function DepositsHistory() {
+  const data = await getDeposits();
+  return (
+    <table className="min-w-full divide-y divide-gray-200">
+      <TableHeader cols={[
+        { label: 'Date' },
+        { label: 'Note' },
+        { label: 'Amount', align: 'right' },
+      ]} />
+      <tbody className="divide-y divide-gray-200 bg-white">
+        {data.map((row) => (
+          <tr key={row.id}>
+            <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+              {new Date(row.depositDate).toLocaleDateString('en-PK')}
+            </td>
+            <td className="px-4 py-4 text-sm text-gray-500 italic">{row.note || '-'}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-gray-900">
+              {formatPkr(row.amount)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+async function BuyHistory() {
+  const data = await getBuyTransactions();
+  return (
+    <table className="min-w-full divide-y divide-gray-200">
+      <TableHeader cols={[
+        { label: 'Date' },
+        { label: 'Stock' },
+        { label: 'Qty', align: 'right' },
+        { label: 'Rate', align: 'right' },
+        { label: 'Total', align: 'right' },
+      ]} />
+      <tbody className="divide-y divide-gray-200 bg-white">
+        {data.map((row) => (
+          <tr key={row.id}>
+            <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+              {new Date(row.buyDate).toLocaleDateString('en-PK')}
+            </td>
+            <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{row.stock.symbol}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{row.quantity}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{formatPkr(row.buyRate)}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-gray-900">{formatPkr(row.totalCost)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+async function SellHistory() {
+  const data = await getSellTransactions();
+  return (
+    <table className="min-w-full divide-y divide-gray-200">
+      <TableHeader cols={[
+        { label: 'Date' },
+        { label: 'Stock' },
+        { label: 'Qty', align: 'right' },
+        { label: 'Rate', align: 'right' },
+        { label: 'Proceeds', align: 'right' },
+        { label: 'P/L', align: 'right' },
+      ]} />
+      <tbody className="divide-y divide-gray-200 bg-white">
+        {data.map((row) => (
+          <tr key={row.id}>
+            <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+              {new Date(row.sellDate).toLocaleDateString('en-PK')}
+            </td>
+            <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{row.stock.symbol}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{row.quantity}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{formatPkr(row.sellRate)}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-gray-900">{formatPkr(row.totalProceeds)}</td>
+            <td className={clsx(
+              "whitespace-nowrap px-4 py-4 text-right text-sm font-bold",
+              Number(row.realizedGainLoss) >= 0 ? "text-green-600" : "text-red-600"
+            )}>
+              {formatPkr(row.realizedGainLoss)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+async function DividendHistory() {
+  const data = await getDividends();
+  return (
+    <table className="min-w-full divide-y divide-gray-200">
+      <TableHeader cols={[
+        { label: 'Date' },
+        { label: 'Stock' },
+        { label: 'Amount', align: 'right' },
+      ]} />
+      <tbody className="divide-y divide-gray-200 bg-white">
+        {data.map((row) => (
+          <tr key={row.id}>
+            <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
+              {new Date(row.dividendDate).toLocaleDateString('en-PK')}
+            </td>
+            <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{row.stock.symbol}</td>
+            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-green-600">
+              {formatPkr(row.dividendAmount)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export default async function ReportsPage({ searchParams }: { searchParams?: Promise<{ tab?: string }> }) {
+  const params = await searchParams;
+  const currentTab = params?.tab || 'deposits';
+
+  const tabs = [
+    { id: 'deposits', label: 'Deposits' },
+    { id: 'buys', label: 'Buys' },
+    { id: 'sells', label: 'Sells' },
+    { id: 'dividends', label: 'Dividends' },
+  ];
+
+  return (
+    <div className="max-w-5xl mx-auto">
+      <header className="mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-900">Reports & History</h1>
+        <p className="mt-1 text-sm text-gray-500">Detailed record of all financial activities.</p>
+      </header>
+
+      <div className="mb-6 border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.id}
+              href={`/reports?tab=${tab.id}`}
+              className={clsx(
+                "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors",
+                currentTab === tab.id
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              )}
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          {currentTab === 'deposits' && <DepositsHistory />}
+          {currentTab === 'buys' && <BuyHistory />}
+          {currentTab === 'sells' && <SellHistory />}
+          {currentTab === 'dividends' && <DividendHistory />}
+        </div>
+      </div>
+    </div>
+  );
+}

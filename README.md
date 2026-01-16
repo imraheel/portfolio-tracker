@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal Stock Investment Tracker (PSIT)
+
+PSIT is a simple, offline-first, personal-use investment tracking system specifically designed for managing stock investments in **Pakistani Rupees (PKR)**. It prioritizes simplicity, accuracy, and full manual control over real-time market integration.
+
+## Key Features
+
+- **Wallet Management:** Track deposits and maintain an accurate available balance.
+- **Stock Transactions:** Record Buy and Sell transactions.
+- **FIFO Cost Basis:** Mandatory First-In-First-Out logic for accurate realized gain/loss calculation.
+- **Dividend Tracking:** Log dividend income per stock to see total returns.
+- **Manual Price Updates:** Update current stock prices manually to calculate unrealized gains/losses.
+- **Portfolio Analytics:** Real-time calculation of invested amount, current value, and P/L (Realized & Unrealized).
+- **Data Management:** Export and Import functionality for local backups.
+- **Offline-First:** All data is stored locally in a SQLite database.
+
+## Tech Stack
+
+- **Framework:** [Next.js](https://nextjs.org/) (App Router)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Database:** [SQLite](https://www.sqlite.org/) via [Prisma ORM](https://www.prisma.io/)
+- **Validation:** [Zod](https://zod.dev/)
+- **Icons:** [Lucide React](https://lucide.dev/)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js (Latest LTS recommended)
+- npm, yarn, or pnpm
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd personal-stock-investment-tracker
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. **Database Migration:**
+   Initialize your local SQLite database:
+   ```bash
+   npx prisma migrate dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. **Access the application:**
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Business Rules
 
-## Deploy on Vercel
+- **Currency:** Primary currency is PKR (`Rs.`).
+- **Date Format:** `DD-MM-YYYY`.
+- **Wallet Balance:** `Total Deposits - Total Buy Costs + Total Sell Proceeds + Total Dividends`.
+- **Validation:** "Buy" transactions require sufficient wallet balance; "Sell" transactions require sufficient stock quantity.
+- **FIFO Logic:** Sell transactions consume the oldest buy lots first.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/actions/`: Server Actions containing the core business logic.
+- `app/components/`: Reusable UI components.
+- `prisma/`: Database schema and migrations.
+- `lib/`: Shared utility functions and Prisma client instance.
+
+## Backup and Restore
+
+The application includes a settings page where you can export all your data to a JSON-based backup file and import it back to restore your state. Note that importing data replaces all existing records in the database.
+
+## License
+
+This project is for personal use.
