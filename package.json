@@ -28,7 +28,9 @@
     ],
     "mac": {
       "category": "public.app-category.finance",
-      "target": "dmg"
+      "target": "dmg",
+      "identity": null,
+      "asar": false
     }
   },
   "prisma": {
