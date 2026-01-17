@@ -45,6 +45,7 @@ PSIT is a simple, offline-first, personal-use investment tracking system specifi
 3. **Database Migration:**
    Initialize your local SQLite database:
    ```bash
+   npx prisma generate
    npx prisma migrate dev
    ```
 

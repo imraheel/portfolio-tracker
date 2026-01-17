@@ -80,4 +80,17 @@
 - [x] **Manual Testing & Logic Verification**
     - [x] Verify Wallet Balance math (fixed string concatenation bug).
     - [x] Verify FIFO sell logic (sell partial lots, check remaining cost basis).
-    - [x] Check CSV round-trip (Verified logic in actions).
+        - [x] Check CSV round-trip (Verified logic in actions).
+    
+    ## Phase 6: Electron Desktop Integration
+    - [x] **Setup & Dependencies**
+        - [x] Install `electron`, `electron-builder`, `concurrently`, `wait-on`.
+        - [x] Add Electron main process (`electron/main.js`).
+        - [x] Configure `package.json` with main entry and scripts.
+    - [ ] **Native Features & Packaging**
+        - [x] Implement persistent SQLite storage in `userData` directory.
+        - [x] Add basic macOS application menu.
+        - [x] Configure `electron-builder` for macOS DMG creation.
+        - [ ] Add Application Icon (optional/placeholder).
+        - [ ] Verify production build and server spawning logic.
+    
