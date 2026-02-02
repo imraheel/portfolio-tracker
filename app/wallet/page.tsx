@@ -54,6 +54,8 @@ async function DepositsTable() {
   );
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function WalletPage() {
   const balance = await getWalletBalance();
   const deposits = await getDeposits();

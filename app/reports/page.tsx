@@ -145,6 +145,8 @@ async function DividendHistory() {
   );
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function ReportsPage({ searchParams }: { searchParams?: Promise<{ tab?: string }> }) {
   const params = await searchParams;
   const currentTab = params?.tab || 'deposits';

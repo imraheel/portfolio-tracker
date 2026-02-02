@@ -155,6 +155,8 @@ async function DividendsTable() {
     );
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function TransactionsPage({ searchParams }: { searchParams?: Promise<{ view?: string }> }) {
   const params = await searchParams;
   const currentView = params?.view === 'sell' ? 'sell' : (params?.view === 'dividends' ? 'dividends' : 'buy');

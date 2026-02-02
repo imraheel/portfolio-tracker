@@ -128,6 +128,8 @@ function HoldingsTable({ metrics }: { metrics: HoldingMetric[] }) {
   );
 }
 
+export const dynamic = 'force-dynamic';
+
 // The main page component
 export default async function Home() {
   const balance = await getWalletBalance();

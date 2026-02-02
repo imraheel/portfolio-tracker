@@ -18,11 +18,15 @@
       "output": "dist"
     },
     "files": [
-      "**/*",
-      "!src/**/*",
-      "!tsconfig.json",
-      "!README.md",
-      "!.gitignore",
+      "electron/**/*",
+      ".next/**/*",
+      "app/**/*",
+      "lib/**/*",
+      "public/**/*",
+      "node_modules/**/*",
+      "package.json",
+      ".env",
+      "!**/*.map",
       "!.next/cache/**/*"
     ],
     "mac": {
@@ -36,7 +40,6 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.93.3",
     "clsx": "^2.1.1",
-    "electron-is-dev": "^3.0.1",
     "lucide-react": "^0.562.0",
     "next": "16.1.2",
     "papaparse": "^5.5.3",
