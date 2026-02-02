@@ -6,7 +6,7 @@ Personal Stock Investment Tracker (PSIT)
 
 ## Purpose & Vision
 
-The purpose of this application is to provide a **simple, offline-first, personal-use investment tracking system** to manage stock 
+The purpose of this application is to provide a **simple, cloud-based, personal-use investment tracking system** to manage stock 
 investments in **Pakistani Rupees (PKR)**. The application will allow manual tracking of deposits, stock purchases, and current 
 stock prices to calculate capital gains or losses.
 
@@ -28,8 +28,8 @@ transparency, and full manual control**.
 * **Frontend**: Next.js (App Router)
 * **Language**: TypeScript
 * **Styling**: Tailwind CSS
-* **Database**: SQLite (local)
-* **ORM (suggested)**: Prisma or Drizzle ORM
+* **Database**: Supabase (PostgreSQL)
+* **Database Client**: Supabase Client (@supabase/supabase-js)
 
 ---
 
@@ -60,9 +60,9 @@ Tracks how much money you deposit into your investment account.
 
 * `id`
 * `amount` (PKR)
-* `depositDate`
+* `deposit_date`
 * `note` (optional)
-* `createdAt`
+* `created_at`
 
 #### Calculations
 
@@ -78,7 +78,7 @@ A reference table to avoid repeated symbol entry.
 
 * `id`
 * `symbol` (e.g., PSO, ENGRO)
-* `companyName` (optional)
+* `company_name` (optional)
 * `sector` (optional)
 
 ---
@@ -97,13 +97,13 @@ Tracks when and how stocks are bought and updates wallet balance.
 #### Fields
 
 * `id`
-* `stockSymbol`
+* `stock_id` (references stocks)
 * `quantity`
-* `buyRate` (PKR per share)
-* `totalCost` (auto-calculated)
-* `buyDate`
+* `buy_rate` (PKR per share)
+* `total_cost` (auto-calculated)
+* `buy_date`
 * `notes` (optional)
-* `createdAt`
+* `created_at`
 
 #### Calculations
 
@@ -127,45 +127,20 @@ Tracks selling of stocks and updates wallet balance.
 #### Fields
 
 * `id`
-* `stockSymbol`
+* `stock_id` (references stocks)
 * `quantity`
-* `sellRate` (PKR per share)
-* `totalProceeds` (auto-calculated)
-* `sellDate`
+* `sell_rate` (PKR per share)
+* `total_proceeds` (auto-calculated)
+* `realized_gain_loss` (auto-calculated via FIFO)
+* `sell_date`
 * `notes` (optional)
-* `createdAt`
+* `created_at`
 
 #### Calculations
 
 ```
 Total Proceeds = quantity × sellRate
-Realized Gain/Loss = Total Proceeds − Cost of Sold Shares
-```
-
----
-
-Tracks when and how stocks were bought.
-
-#### Features
-
-* Add stock purchase
-* View all purchases
-* Edit/Delete purchase
-
-#### Fields
-
-* `id`
-* `stockSymbol`
-* `quantity`
-* `buyRate` (PKR per share)
-* `totalCost` (auto-calculated)
-* `buyDate`
-* `notes` (optional)
-
-#### Calculations
-
-```
-Total Cost = quantity × buyRate
+Realized Gain/Loss = Total Proceeds − Cost of Sold Shares (FIFO)
 ```
 
 ---
@@ -183,9 +158,9 @@ Allows manual entry of current stock prices for unrealized P/L calculation.
 #### Fields
 
 * `id`
-* `stockSymbol`
-* `currentPrice` (PKR)
-* `updatedAt`
+* `stock_id` (references stocks)
+* `current_price` (PKR)
+* `updated_at`
 
 ---
 
@@ -202,27 +177,11 @@ Tracks dividend income per stock.
 #### Fields
 
 * `id`
-* `stockSymbol`
-* `dividendAmount` (PKR)
-* `dividendDate`
+* `stock_id` (references stocks)
+* `dividend_amount` (PKR)
+* `dividend_date`
 * `notes` (optional)
-* `createdAt`
-
----
-
-Allows manual entry of current stock prices.
-
-#### Features
-
-* Update current price for any stock
-* Overwrite previous price
-
-#### Fields
-
-* `id`
-* `stockSymbol`
-* `currentPrice` (PKR)
-* `updatedAt`
+* `created_at`
 
 ---
 
@@ -247,25 +206,6 @@ Realized Gain/Loss = Σ(Sell Proceeds) − Σ(Cost of Sold Shares)
 ```
 Total Returns = Realized P/L + Unrealized P/L + Dividends
 ```
-
----
-
-Shows profit or loss per stock and overall portfolio.
-
-#### Per Stock Calculations
-
-```
-Invested Amount = Σ(quantity × buyRate)
-Current Value = Σ(quantity × currentPrice)
-Capital Gain/Loss = Current Value − Invested Amount
-Gain % = (Gain / Invested Amount) × 100
-```
-
-#### Features
-
-* Gain/Loss per stock
-* Total portfolio gain/loss
-* Color indicators (Green = Profit, Red = Loss)
 
 ---
 
@@ -296,36 +236,15 @@ Single screen overview of all investments.
 * Current Price
 * Invested Amount
 * Current Value
-* Gain/Loss (PKR & %)
+* Gain/Loss (PKR)
 
 ---
 
-Single screen overview of all investments.
-
-#### Widgets
-
-* Total Deposits
-* Total Invested Amount
-* Current Portfolio Value
-* Total Profit / Loss
-
-#### Stock Table Columns
-
-* Stock Symbol
-* Quantity
-* Avg Buy Price
-* Current Price
-* Invested Amount
-* Current Value
-* Gain/Loss (PKR & %)
-
----
-
-### 7. Reports & History
+### 9. Reports & History
 
 #### Features
 
-* Transaction history (deposits + purchases)
+* Transaction history (deposits + purchases + sells + dividends)
 * Stock-wise breakdown
 * Date-wise filtering
 
@@ -335,22 +254,15 @@ Single screen overview of all investments.
 
 ### Features
 
-* Export full data to CSV
-* Import CSV to restore data
-* Separate CSV per table
-
-### Tables Covered
-
-* Deposits
-* Stock Buys
-* Stock Sells
-* Dividends
-* Stock Prices
+* Export full data to JSON
+* Import JSON to restore data
+* All tables covered (Stocks, Deposits, Buys, Sells, Dividends, Prices)
 
 ### Rules
 
 * Import overwrites existing data
 * Validation before import
+* Symbol-based mapping for portability
 
 ---
 
@@ -358,18 +270,19 @@ Single screen overview of all investments.
 
 ### Performance
 
-* Instant load (local SQLite)
-* No external APIs
+* Fast load times (cloud-based PostgreSQL)
+* No external market APIs
 
 ### Security
 
-* Local-only data storage
-* No authentication required (Phase 1)
+* Cloud data storage via Supabase
+* Row Level Security (RLS) policies
+* Service Role Key for admin operations
 
-### Backup (Future Scope)
+### Backup
 
-* Export database to JSON/CSV
-* Manual backup option
+* JSON export/import functionality
+* Automatic Supabase backups
 
 ---
 
@@ -382,15 +295,6 @@ Single screen overview of all investments.
 * `stock_buy_transactions`
 * `stock_sell_transactions`
 * `dividends`
-* `stock_prices`
-
----
-
-### Tables
-
-* `deposits`
-* `stocks`
-* `stock_purchases`
 * `stock_prices`
 
 ---
@@ -413,27 +317,14 @@ Single screen overview of all investments.
 
 ---
 
-* No stock selling in Phase 1
-* No dividend tracking initially
-* No live market data
-
----
-
 ## Future Enhancements (Out of Scope for Now)
 
 * Charts & analytics
 * Portfolio performance over time
-* Cloud backup
+* Multi-device sync (already supported via Supabase)
 * Password protection
-
----
-
-* Sell transactions
-* Dividend income tracking
-* Broker fees & taxes
-* Charts & visual analytics
 * Multi-currency support
-* Cloud sync
+* Real-time market data integration
 
 ---
 
@@ -449,8 +340,8 @@ Single screen overview of all investments.
 * Correct gain/loss calculation
 * Simple and fast to use
 * No unnecessary complexity
+* Data accessible from any device
 
 ---
 
 **End of PRD**
-

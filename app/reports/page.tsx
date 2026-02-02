@@ -2,10 +2,9 @@ import { getDeposits } from '@/app/actions/wallet';
 import { getBuyTransactions, getSellTransactions, getDividends } from '@/app/actions/transactions';
 import Link from 'next/link';
 import { clsx } from 'clsx';
-import { Prisma } from '@prisma/client';
 
-function formatPkr(amount: Prisma.Decimal | number) {
-  return new Prisma.Decimal(amount).toNumber().toLocaleString('en-PK', {
+function formatPkr(amount: number) {
+  return amount.toLocaleString('en-PK', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
   });
@@ -44,7 +43,7 @@ async function DepositsHistory() {
         {data.map((row) => (
           <tr key={row.id}>
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-              {new Date(row.depositDate).toLocaleDateString('en-PK')}
+              {row.deposit_date ? new Date(row.deposit_date).toLocaleDateString('en-PK') : '-'}
             </td>
             <td className="px-4 py-4 text-sm text-gray-500 italic">{row.note || '-'}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-gray-900">
@@ -72,7 +71,7 @@ async function BuyHistory() {
         {data.map((row) => (
           <tr key={row.id}>
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-              {new Date(row.buyDate).toLocaleDateString('en-PK')}
+              {row.buy_date ? new Date(row.buy_date).toLocaleDateString('en-PK') : '-'}
             </td>
             <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{row.stock.symbol}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{row.quantity}</td>
@@ -101,7 +100,7 @@ async function SellHistory() {
         {data.map((row) => (
           <tr key={row.id}>
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-              {new Date(row.sellDate).toLocaleDateString('en-PK')}
+              {row.sell_date ? new Date(row.sell_date).toLocaleDateString('en-PK') : '-'}
             </td>
             <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{row.stock.symbol}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{row.quantity}</td>
@@ -133,7 +132,7 @@ async function DividendHistory() {
         {data.map((row) => (
           <tr key={row.id}>
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-              {new Date(row.dividendDate).toLocaleDateString('en-PK')}
+              {row.dividend_date ? new Date(row.dividend_date).toLocaleDateString('en-PK') : '-'}
             </td>
             <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{row.stock.symbol}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-green-600">

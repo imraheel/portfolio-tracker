@@ -1,23 +1,29 @@
-import { prisma } from '@/lib/prisma';
+import { getStocks } from '@/app/actions/stocks';
+import { createClient } from '@/lib/supabase/server';
 import { StockForm } from './StockForm';
 import { UpdatePriceForm } from './UpdatePriceForm';
 
-function formatPkr(amount: any) {
+function formatPkr(amount: number) {
     return Number(amount).toLocaleString('en-PK', {
         maximumFractionDigits: 2,
         minimumFractionDigits: 2,
     });
 }
 
+async function getStockPrices() {
+  const supabase = await createClient();
+  const { data: prices } = await supabase
+    .from('stock_prices')
+    .select('*');
+  return prices || [];
+}
+
 async function StocksTable() {
-  const stocks = await prisma.stock.findMany({
-    include: {
-      currentPrice: true,
-    },
-    orderBy: {
-      symbol: 'asc',
-    },
-  });
+  const stocks = await getStocks();
+  const prices = await getStockPrices();
+  
+  // Create a map of stock_id to price for quick lookup
+  const priceMap = new Map(prices.map(p => [p.stock_id, p.current_price]));
 
   return (
     <section className="mt-8">
@@ -39,13 +45,13 @@ async function StocksTable() {
                     <span className="font-bold text-gray-900">{stock.symbol}</span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm text-gray-900">{stock.companyName || '-'}</div>
+                    <div className="text-sm text-gray-900">{stock.company_name || '-'}</div>
                     <div className="text-xs text-gray-500">{stock.sector || '-'}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right">
                     <UpdatePriceForm 
                       stockId={stock.id} 
-                      currentPrice={stock.currentPrice?.currentPrice.toString() ?? '0'} 
+                      currentPrice={priceMap.get(stock.id)?.toString() ?? '0'} 
                     />
                   </td>
                 </tr>

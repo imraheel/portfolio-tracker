@@ -1,13 +1,11 @@
-import { getWalletBalance } from '@/app/actions/wallet';
+import { getWalletBalance, getDeposits } from '@/app/actions/wallet';
 import { getPortfolioMetrics, HoldingMetric } from '@/app/actions/portfolio';
-import { prisma } from '@/lib/prisma';
 import { clsx } from 'clsx';
-import { Prisma } from '@prisma/client';
 
 // --- HELPER FUNCTIONS & COMPONENTS ---
 
-function formatPkr(amount: Prisma.Decimal | number) {
-  return new Prisma.Decimal(amount).toNumber().toLocaleString('en-PK', {
+function formatPkr(amount: number) {
+  return amount.toLocaleString('en-PK', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
   });
@@ -20,23 +18,23 @@ function StatCard({
     showSign = false 
 }: { 
     title: string; 
-    value: Prisma.Decimal | number;
+    value: number;
     isCurrency?: boolean;
     showSign?: boolean;
 }) {
-    const decValue = new Prisma.Decimal(value);
-    const isNegative = decValue.isNegative();
+    const isNegative = value < 0;
+    const absValue = Math.abs(value);
     
     return (
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">{title}</h3>
             <p className={clsx("mt-2 text-2xl font-bold", {
-                "text-green-600": showSign && !isNegative && !decValue.isZero(),
+                "text-green-600": showSign && !isNegative && value !== 0,
                 "text-red-600": showSign && isNegative,
-                "text-gray-900": !showSign || decValue.isZero(),
+                "text-gray-900": !showSign || value === 0,
             })}>
                 {isCurrency && "Rs. "}
-                {isCurrency ? formatPkr(decValue.abs()) : decValue.toString()}
+                {isCurrency ? formatPkr(absValue) : value.toString()}
                 {showSign && isNegative && " (-)"}
             </p>
         </div>
@@ -50,11 +48,11 @@ function DashboardSummary({ metrics, balance, totalDeposited }: {
     balance: number,
     totalDeposited: number
 }) {
-  const portfolioValue = metrics.reduce((sum, m) => sum.add(m.currentValue), new Prisma.Decimal(0));
-  const unrealizedPl = metrics.reduce((sum, m) => sum.add(m.unrealizedGainLoss), new Prisma.Decimal(0));
-  const realizedPl = metrics.reduce((sum, m) => sum.add(m.realizedGainLoss), new Prisma.Decimal(0));
-  const totalDividends = metrics.reduce((sum, m) => sum.add(m.totalDividends), new Prisma.Decimal(0));
-  const totalInvested = metrics.reduce((sum, m) => sum.add(m.investedAmount), new Prisma.Decimal(0));
+  const portfolioValue = metrics.reduce((sum, m) => sum + m.currentValue, 0);
+  const unrealizedPl = metrics.reduce((sum, m) => sum + m.unrealizedGainLoss, 0);
+  const realizedPl = metrics.reduce((sum, m) => sum + m.realizedGainLoss, 0);
+  const totalDividends = metrics.reduce((sum, m) => sum + m.totalDividends, 0);
+  const totalInvested = metrics.reduce((sum, m) => sum + m.investedAmount, 0);
 
   return (
     <div className="space-y-8">
@@ -110,10 +108,10 @@ function HoldingsTable({ metrics }: { metrics: HoldingMetric[] }) {
                   <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-gray-900">{formatPkr(m.investedAmount)}</td>
                   <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-gray-900">{formatPkr(m.currentValue)}</td>
                   <td className={clsx("whitespace-nowrap px-4 py-4 text-right text-sm font-bold", {
-                      "text-green-600": !m.unrealizedGainLoss.isNegative(),
-                      "text-red-600": m.unrealizedGainLoss.isNegative(),
+                      "text-green-600": m.unrealizedGainLoss >= 0,
+                      "text-red-600": m.unrealizedGainLoss < 0,
                   })}>
-                      {m.unrealizedGainLoss.isNegative() ? "" : "+"}{formatPkr(m.unrealizedGainLoss)}
+                      {m.unrealizedGainLoss < 0 ? "" : "+"}{formatPkr(m.unrealizedGainLoss)}
                   </td>
                 </tr>
               ))}
@@ -134,10 +132,8 @@ function HoldingsTable({ metrics }: { metrics: HoldingMetric[] }) {
 export default async function Home() {
   const balance = await getWalletBalance();
   const metrics = await getPortfolioMetrics();
-  
-  const { _sum: { amount: totalDeposited } } = await prisma.deposit.aggregate({
-    _sum: { amount: true }
-  });
+  const deposits = await getDeposits();
+  const totalDeposited = deposits.reduce((sum, d) => sum + d.amount, 0);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -149,7 +145,7 @@ export default async function Home() {
       <DashboardSummary 
         metrics={metrics} 
         balance={balance} 
-        totalDeposited={Number(totalDeposited ?? 0)} 
+        totalDeposited={totalDeposited} 
       />
       <HoldingsTable metrics={metrics} />
     </div>

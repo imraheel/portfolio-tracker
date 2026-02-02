@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -10,7 +10,7 @@ const StockSchema = z.object({
   sector: z.string().optional(),
 });
 
-export async function addStock(prevState: any, formData: FormData) {
+export async function addStock(prevState: unknown, formData: FormData) {
   const validatedFields = StockSchema.safeParse({
     symbol: formData.get('symbol'),
     companyName: formData.get('companyName'),
@@ -27,23 +27,31 @@ export async function addStock(prevState: any, formData: FormData) {
   const { symbol, companyName, sector } = validatedFields.data;
 
   try {
-    const existingStock = await prisma.stock.findUnique({
-      where: { symbol },
-    });
+    const supabase = await createClient();
+
+    // Check if stock already exists
+    const { data: existingStock } = await supabase
+      .from('stocks')
+      .select('id')
+      .eq('symbol', symbol.toUpperCase())
+      .single();
 
     if (existingStock) {
       return { message: 'Stock with this symbol already exists.' };
     }
 
-    await prisma.stock.create({
-      data: {
+    // Insert new stock
+    const { error } = await supabase
+      .from('stocks')
+      .insert({
         symbol: symbol.toUpperCase(),
-        companyName,
-        sector,
-      },
-    });
+        company_name: companyName,
+        sector: sector,
+      });
 
-    revalidatePath('/stocks'); // Revalidate the stocks page
+    if (error) throw error;
+
+    revalidatePath('/stocks');
     return { message: `Added stock ${symbol.toUpperCase()}.` };
   } catch (error) {
     console.error('Database Error:', error);
@@ -53,12 +61,16 @@ export async function addStock(prevState: any, formData: FormData) {
 
 export async function getStocks() {
   try {
-    const stocks = await prisma.stock.findMany({
-      orderBy: {
-        symbol: 'asc',
-      },
-    });
-    return stocks;
+    const supabase = await createClient();
+    
+    const { data: stocks, error } = await supabase
+      .from('stocks')
+      .select('*')
+      .order('symbol', { ascending: true });
+
+    if (error) throw error;
+
+    return stocks || [];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch stocks.');
@@ -70,30 +82,53 @@ const PriceUpdateSchema = z.object({
   currentPrice: z.coerce.number().nonnegative(),
 });
 
-export async function updateStockPrice(prevState: any, formData: FormData) {
-    const validatedFields = PriceUpdateSchema.safeParse({
-        stockId: formData.get('stockId'),
-        currentPrice: formData.get('currentPrice'),
-    });
+export async function updateStockPrice(prevState: unknown, formData: FormData) {
+  const validatedFields = PriceUpdateSchema.safeParse({
+    stockId: formData.get('stockId'),
+    currentPrice: formData.get('currentPrice'),
+  });
 
-    if (!validatedFields.success) {
-        return { message: 'Invalid price data.' };
-    }
+  if (!validatedFields.success) {
+    return { message: 'Invalid price data.' };
+  }
 
-    const { stockId, currentPrice } = validatedFields.data;
+  const { stockId, currentPrice } = validatedFields.data;
 
-    try {
-        await prisma.stockPrice.upsert({
-            where: { stockId },
-            update: { currentPrice },
-            create: { stockId, currentPrice },
+  try {
+    const supabase = await createClient();
+
+    // Check if price record exists
+    const { data: existingPrice } = await supabase
+      .from('stock_prices')
+      .select('id')
+      .eq('stock_id', stockId)
+      .single();
+
+    if (existingPrice) {
+      // Update existing price
+      const { error } = await supabase
+        .from('stock_prices')
+        .update({ current_price: currentPrice })
+        .eq('stock_id', stockId);
+      
+      if (error) throw error;
+    } else {
+      // Insert new price
+      const { error } = await supabase
+        .from('stock_prices')
+        .insert({
+          stock_id: stockId,
+          current_price: currentPrice,
         });
-
-        revalidatePath('/'); // Revalidate dashboard
-        revalidatePath('/stocks');
-        return { message: 'Price updated.' };
-    } catch (error) {
-        console.error('Database Error:', error);
-        return { message: 'Database Error: Failed to update price.' };
+      
+      if (error) throw error;
     }
+
+    revalidatePath('/');
+    revalidatePath('/stocks');
+    return { message: 'Price updated.' };
+  } catch (error) {
+    console.error('Database Error:', error);
+    return { message: 'Database Error: Failed to update price.' };
+  }
 }

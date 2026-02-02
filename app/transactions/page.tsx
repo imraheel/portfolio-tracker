@@ -11,10 +11,9 @@ import { clsx } from 'clsx';
 import { BuyForm } from './BuyForm';
 import { SellForm } from './SellForm';
 import { DividendForm } from './DividendForm';
-import { Prisma } from '@prisma/client';
 
-function formatPkr(amount: Prisma.Decimal | number) {
-  return new Prisma.Decimal(amount).toNumber().toLocaleString('en-PK', {
+function formatPkr(amount: number) {
+  return Number(amount).toLocaleString('en-PK', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
   });
@@ -57,7 +56,7 @@ async function BuyTransactionsTable() {
             {transactions.map((tx) => (
               <tr key={tx.id} className="hover:bg-gray-50">
                 <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-                    {new Intl.DateTimeFormat('en-PK').format(new Date(tx.buyDate))}
+                    {new Intl.DateTimeFormat('en-PK').format(new Date(tx.buy_date))}
                 </td>
                 <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{tx.stock.symbol}</td>
                 <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{tx.quantity.toLocaleString()}</td>
@@ -95,7 +94,7 @@ async function SellTransactionsTable() {
               {transactions.map((tx) => (
                 <tr key={tx.id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-                    {new Intl.DateTimeFormat('en-PK').format(new Date(tx.sellDate))}
+                    {new Intl.DateTimeFormat('en-PK').format(new Date(tx.sell_date))}
                   </td>
                   <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{tx.stock.symbol}</td>
                   <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{tx.quantity.toLocaleString()}</td>
@@ -136,7 +135,7 @@ async function DividendsTable() {
                         {dividends.map((div) => (
                             <tr key={div.id} className="hover:bg-gray-50">
                                 <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
-                                    {new Intl.DateTimeFormat('en-PK').format(new Date(div.dividendDate))}
+                                    {new Intl.DateTimeFormat('en-PK').format(new Date(div.dividend_date))}
                                 </td>
                                 <td className="whitespace-nowrap px-4 py-4 text-sm font-bold text-gray-900">{div.stock.symbol}</td>
                                 <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-green-600">

@@ -1,11 +1,9 @@
 import { getDeposits, getWalletBalance } from '@/app/actions/wallet';
-import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { DepositForm } from './DepositForm';
 import { DeleteDepositButton } from './DeleteDepositButton';
 
-function formatPkr(amount: Prisma.Decimal | number) {
-  return new Prisma.Decimal(amount).toNumber().toLocaleString('en-PK', {
+function formatPkr(amount: number) {
+  return amount.toLocaleString('en-PK', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
   });
@@ -32,7 +30,7 @@ async function DepositsTable() {
               {deposits.map((deposit) => (
                 <tr key={deposit.id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {new Intl.DateTimeFormat('en-PK').format(new Date(deposit.depositDate))}
+                    {deposit.deposit_date ? new Intl.DateTimeFormat('en-PK').format(new Date(deposit.deposit_date)) : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 italic">{deposit.note || '-'}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-bold text-gray-900">
@@ -58,10 +56,8 @@ async function DepositsTable() {
 
 export default async function WalletPage() {
   const balance = await getWalletBalance();
-  
-  const { _sum: { amount: totalDeposited } } = await prisma.deposit.aggregate({
-    _sum: { amount: true }
-  });
+  const deposits = await getDeposits();
+  const totalDeposited = deposits.reduce((sum, d) => sum + d.amount, 0);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -77,7 +73,7 @@ export default async function WalletPage() {
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Capital</h3>
-          <p className="mt-2 text-2xl font-bold text-gray-900">Rs. {formatPkr(totalDeposited ?? 0)}</p>
+          <p className="mt-2 text-2xl font-bold text-gray-900">Rs. {formatPkr(totalDeposited)}</p>
         </div>
       </div>
 

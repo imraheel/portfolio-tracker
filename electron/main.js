@@ -6,6 +6,8 @@ const { spawn } = require('child_process');
 let mainWindow;
 let nextProcess;
 
+// Note: Database migrations removed - using Supabase PostgreSQL instead of local SQLite
+
 function createMenu() {
   const template = [
     {
@@ -108,7 +110,7 @@ function createWindow() {
   });
 }
 
-function startNextServer(dbUrl) {
+function startNextServer() {
   if (isDev) return;
 
   // In production, we run 'next start'
@@ -118,8 +120,7 @@ function startNextServer(dbUrl) {
     cwd: path.join(__dirname, '../'),
     env: {
       ...process.env,
-      NODE_ENV: 'production',
-      DATABASE_URL: dbUrl
+      NODE_ENV: 'production'
     }
   });
 
@@ -132,47 +133,11 @@ function startNextServer(dbUrl) {
   });
 }
 
-async function runMigrations(dbUrl) {
-  return new Promise((resolve, reject) => {
-    const prismaPath = path.join(__dirname, '../node_modules/.bin/prisma');
-    const migrationProcess = spawn(prismaPath, ['migrate', 'deploy'], {
-      cwd: path.join(__dirname, '../'),
-      env: {
-        ...process.env,
-        DATABASE_URL: dbUrl
-      }
-    });
-
-    migrationProcess.stdout.on('data', (data) => {
-      console.log(`Prisma: ${data}`);
-    });
-
-    migrationProcess.stderr.on('data', (data) => {
-      console.error(`Prisma Error: ${data}`);
-    });
-
-    migrationProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`Prisma migration failed with code ${code}`));
-      }
-    });
-  });
-}
-
 app.on('ready', async () => {
-  // Set database path for Prisma
-  const userDataPath = app.getPath('userData');
-  const dbPath = path.join(userDataPath, 'dev.db');
-  const dbUrl = `file:${dbPath}`;
-  
   try {
     if (!isDev) {
-      process.env.DATABASE_URL = dbUrl;
-      console.log('Running migrations...');
-      await runMigrations(dbUrl);
-      startNextServer(dbUrl);
+      console.log('Starting Next.js server...');
+      startNextServer();
     }
     
     createMenu();

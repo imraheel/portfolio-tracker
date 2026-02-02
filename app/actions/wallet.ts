@@ -1,9 +1,8 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
 
 const DepositSchema = z.object({
   amount: z.coerce.number().positive('Amount must be positive'),
@@ -11,7 +10,7 @@ const DepositSchema = z.object({
   note: z.string().optional(),
 });
 
-export async function addDeposit(prevState: any, formData: FormData) {
+export async function addDeposit(prevState: unknown, formData: FormData) {
   const validatedFields = DepositSchema.safeParse({
     amount: formData.get('amount'),
     depositDate: formData.get('depositDate'),
@@ -28,13 +27,17 @@ export async function addDeposit(prevState: any, formData: FormData) {
   const { amount, depositDate, note } = validatedFields.data;
 
   try {
-    await prisma.deposit.create({
-      data: {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from('deposits')
+      .insert({
         amount,
-        depositDate,
+        deposit_date: depositDate.toISOString(),
         note,
-      },
-    });
+      });
+
+    if (error) throw error;
 
     revalidatePath('/');
     revalidatePath('/wallet');
@@ -45,13 +48,18 @@ export async function addDeposit(prevState: any, formData: FormData) {
   }
 }
 
-export async function deleteDeposit(prevState: any, formData: FormData) {
+export async function deleteDeposit(prevState: unknown, formData: FormData) {
   const id = Number(formData.get('id'));
 
   try {
-    await prisma.deposit.delete({
-      where: { id },
-    });
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from('deposits')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     revalidatePath('/');
     revalidatePath('/wallet');
@@ -64,12 +72,20 @@ export async function deleteDeposit(prevState: any, formData: FormData) {
 
 export async function getDeposits() {
   try {
-    const deposits = await prisma.deposit.findMany({
-      orderBy: {
-        depositDate: 'desc',
-      },
-    });
-    return deposits;
+    const supabase = await createClient();
+    
+    const { data: deposits, error } = await supabase
+      .from('deposits')
+      .select('*')
+      .order('deposit_date', { ascending: false });
+
+    if (error) throw error;
+
+    // Transform decimal amounts to numbers
+    return (deposits || []).map(d => ({
+      ...d,
+      amount: Number(d.amount),
+    }));
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch deposits.');
@@ -78,28 +94,39 @@ export async function getDeposits() {
 
 export async function getWalletBalance() {
   try {
-    const {
-      _sum: { amount: totalDeposits },
-    } = await prisma.deposit.aggregate({ _sum: { amount: true } });
+    const supabase = await createClient();
 
-    const {
-      _sum: { totalCost: totalBuys },
-    } = await prisma.stockBuyTransaction.aggregate({ _sum: { totalCost: true } });
+    // Get total deposits
+    const { data: depositsData } = await supabase
+      .from('deposits')
+      .select('amount');
+    
+    const totalDeposits = (depositsData || []).reduce((sum, d) => sum + Number(d.amount), 0);
 
-    const {
-      _sum: { totalProceeds: totalSells },
-    } = await prisma.stockSellTransaction.aggregate({ _sum: { totalProceeds: true } });
+    // Get total buy costs
+    const { data: buysData } = await supabase
+      .from('stock_buy_transactions')
+      .select('total_cost');
+    
+    const totalBuys = (buysData || []).reduce((sum, t) => sum + Number(t.total_cost), 0);
 
-    const {
-      _sum: { dividendAmount: totalDividends },
-    } = await prisma.dividend.aggregate({ _sum: { dividendAmount: true } });
+    // Get total sell proceeds
+    const { data: sellsData } = await supabase
+      .from('stock_sell_transactions')
+      .select('total_proceeds');
+    
+    const totalSells = (sellsData || []).reduce((sum, t) => sum + Number(t.total_proceeds), 0);
 
-    const balance = new Prisma.Decimal(totalDeposits ?? 0)
-      .minus(new Prisma.Decimal(totalBuys ?? 0))
-      .plus(new Prisma.Decimal(totalSells ?? 0))
-      .plus(new Prisma.Decimal(totalDividends ?? 0));
-      
-    return balance.toNumber();
+    // Get total dividends
+    const { data: dividendsData } = await supabase
+      .from('dividends')
+      .select('dividend_amount');
+    
+    const totalDividends = (dividendsData || []).reduce((sum, d) => sum + Number(d.dividend_amount), 0);
+
+    const balance = totalDeposits - totalBuys + totalSells + totalDividends;
+    
+    return balance;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch wallet balance.');
