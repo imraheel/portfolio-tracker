@@ -12,6 +12,9 @@ export default defineConfig({
     },
   },
   
+  // Base path for Electron (relative paths required for file:// protocol)
+  base: './',
+  
   // Build configuration
   build: {
     outDir: 'dist',
@@ -19,6 +22,18 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       output: {
+        // Use relative paths for Electron compatibility
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          if (!assetInfo.name) {
+            return 'assets/[name]-[hash][extname]';
+          }
+          if (/\.(css)$/i.test(assetInfo.name)) {
+            return 'assets/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        },
         manualChunks: {
           // Split vendor chunks for better caching
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
