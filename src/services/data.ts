@@ -68,6 +68,67 @@ interface MasterStockPrice {
   updated_at?: string;
 }
 
+interface MasterMutualFund {
+  symbol: string;
+  name: string;
+  description?: string;
+  currentMarketValue?: number;
+  current_market_value?: number;
+  createdAt?: string;
+  created_at?: string;
+}
+
+interface MasterMutualFundPurchase {
+  symbol: string;
+  amount: number;
+  purchaseDate?: string;
+  purchase_date?: string;
+  notes?: string;
+  createdAt?: string;
+  created_at?: string;
+}
+
+interface MasterMutualFundWithdrawal {
+  symbol: string;
+  amount: number;
+  withdrawalDate?: string;
+  withdrawal_date?: string;
+  notes?: string;
+  createdAt?: string;
+  created_at?: string;
+}
+
+interface MasterCryptocurrency {
+  symbol: string;
+  name: string;
+  currentTotalValue?: number;
+  current_total_value?: number;
+  createdAt?: string;
+  created_at?: string;
+}
+
+interface MasterCryptoPurchase {
+  symbol: string;
+  amountPkr?: number;
+  amount_pkr?: number;
+  purchaseDate?: string;
+  purchase_date?: string;
+  notes?: string;
+  createdAt?: string;
+  created_at?: string;
+}
+
+interface MasterCryptoWithdrawal {
+  symbol: string;
+  amountPkr?: number;
+  amount_pkr?: number;
+  withdrawalDate?: string;
+  withdrawal_date?: string;
+  notes?: string;
+  createdAt?: string;
+  created_at?: string;
+}
+
 interface MasterData {
   version: string;
   exportDate: string;
@@ -77,6 +138,12 @@ interface MasterData {
   sellTransactions: MasterSellTransaction[];
   dividends: MasterDividend[];
   stockPrices: MasterStockPrice[];
+  mutualFunds: MasterMutualFund[];
+  mutualFundPurchases: MasterMutualFundPurchase[];
+  mutualFundWithdrawals: MasterMutualFundWithdrawal[];
+  cryptocurrencies: MasterCryptocurrency[];
+  cryptoPurchases: MasterCryptoPurchase[];
+  cryptoWithdrawals: MasterCryptoWithdrawal[];
 }
 
 export async function exportDataAsJson() {
@@ -111,13 +178,47 @@ export async function exportDataAsJson() {
       .from('stock_prices')
       .select('*')
       .order('id');
+    
+    const { data: mutualFunds, error: mutualFundsError } = await supabase
+      .from('mutual_funds')
+      .select('*')
+      .order('id');
+    
+    const { data: mutualFundPurchases, error: mutualFundPurchasesError } = await supabase
+      .from('mutual_fund_purchases')
+      .select('*')
+      .order('id');
+    
+    const { data: mutualFundWithdrawals, error: mutualFundWithdrawalsError } = await supabase
+      .from('mutual_fund_withdrawals')
+      .select('*')
+      .order('id');
+    
+    const { data: cryptocurrencies, error: cryptocurrenciesError } = await supabase
+      .from('cryptocurrencies')
+      .select('*')
+      .order('id');
+    
+    const { data: cryptoPurchases, error: cryptoPurchasesError } = await supabase
+      .from('crypto_purchases')
+      .select('*')
+      .order('id');
+    
+    const { data: cryptoWithdrawals, error: cryptoWithdrawalsError } = await supabase
+      .from('crypto_withdrawals')
+      .select('*')
+      .order('id');
 
-    if (depositsError || stocksError || buyError || sellError || dividendsError || pricesError) {
+    if (depositsError || stocksError || buyError || sellError || dividendsError || pricesError ||
+        mutualFundsError || mutualFundPurchasesError || mutualFundWithdrawalsError ||
+        cryptocurrenciesError || cryptoPurchasesError || cryptoWithdrawalsError) {
       throw new Error('Failed to fetch data from database');
     }
 
-    // Create a symbol-based map for portability
+    // Create symbol-based maps for portability
     const stockMap = new Map(stocks?.map(s => [s.id, s.symbol]) || []);
+    const fundMap = new Map(mutualFunds?.map(f => [f.id, f.symbol]) || []);
+    const cryptoMap = new Map(cryptocurrencies?.map(c => [c.id, c.symbol]) || []);
 
     const masterData = {
       version: '1.0',
@@ -150,6 +251,34 @@ export async function exportDataAsJson() {
         symbol: stockMap.get(stock_id),
         currentPrice: Number(rest.current_price)
       })),
+      mutualFunds: (mutualFunds || []).map(({ id: _id, ...rest }) => ({ 
+        ...rest,
+        currentMarketValue: Number(rest.current_market_value)
+      })),
+      mutualFundPurchases: (mutualFundPurchases || []).map(({ id: _id, fund_id, ...rest }) => ({ 
+        ...rest,
+        symbol: fundMap.get(fund_id),
+        amount: Number(rest.amount)
+      })),
+      mutualFundWithdrawals: (mutualFundWithdrawals || []).map(({ id: _id, fund_id, ...rest }) => ({ 
+        ...rest,
+        symbol: fundMap.get(fund_id),
+        amount: Number(rest.amount)
+      })),
+      cryptocurrencies: (cryptocurrencies || []).map(({ id: _id, ...rest }) => ({ 
+        ...rest,
+        currentTotalValue: Number(rest.current_total_value)
+      })),
+      cryptoPurchases: (cryptoPurchases || []).map(({ id: _id, crypto_id, ...rest }) => ({ 
+        ...rest,
+        symbol: cryptoMap.get(crypto_id),
+        amountPkr: Number(rest.amount_pkr)
+      })),
+      cryptoWithdrawals: (cryptoWithdrawals || []).map(({ id: _id, crypto_id, ...rest }) => ({ 
+        ...rest,
+        symbol: cryptoMap.get(crypto_id),
+        amountPkr: Number(rest.amount_pkr)
+      })),
     };
 
     return { 
@@ -172,6 +301,12 @@ export async function importDataFromJson(jsonString: string) {
     }
 
     // 1. Clear all existing data in reverse order of dependencies
+    await supabase.from('crypto_withdrawals').delete().neq('id', 0);
+    await supabase.from('crypto_purchases').delete().neq('id', 0);
+    await supabase.from('cryptocurrencies').delete().neq('id', 0);
+    await supabase.from('mutual_fund_withdrawals').delete().neq('id', 0);
+    await supabase.from('mutual_fund_purchases').delete().neq('id', 0);
+    await supabase.from('mutual_funds').delete().neq('id', 0);
     await supabase.from('dividends').delete().neq('id', 0);
     await supabase.from('stock_sell_transactions').delete().neq('id', 0);
     await supabase.from('stock_buy_transactions').delete().neq('id', 0);
@@ -194,10 +329,47 @@ export async function importDataFromJson(jsonString: string) {
 
     if (stocksError) throw stocksError;
 
-    // Create symbol to ID mapping
+    // Create symbol to ID mapping for stocks
     const symbolToIdMap = new Map(insertedStocks?.map(s => [s.symbol, s.id]) || []);
 
-    // 3. Insert remaining data using the new ID map
+    // 2b. Insert Mutual Funds to generate new IDs
+    const mutualFundsToInsert = (masterData.mutualFunds || []).map((f: MasterMutualFund) => ({
+      symbol: f.symbol,
+      name: f.name,
+      description: f.description,
+      current_market_value: f.currentMarketValue || f.current_market_value,
+      created_at: f.createdAt || f.created_at
+    }));
+
+    const { data: insertedMutualFunds, error: mutualFundsError } = await supabase
+      .from('mutual_funds')
+      .insert(mutualFundsToInsert)
+      .select();
+
+    if (mutualFundsError) throw mutualFundsError;
+
+    // Create symbol to ID mapping for mutual funds
+    const fundSymbolToIdMap = new Map(insertedMutualFunds?.map(f => [f.symbol, f.id]) || []);
+
+    // 2c. Insert Cryptocurrencies to generate new IDs
+    const cryptocurrenciesToInsert = (masterData.cryptocurrencies || []).map((c: MasterCryptocurrency) => ({
+      symbol: c.symbol,
+      name: c.name,
+      current_total_value: c.currentTotalValue || c.current_total_value,
+      created_at: c.createdAt || c.created_at
+    }));
+
+    const { data: insertedCryptocurrencies, error: cryptocurrenciesError } = await supabase
+      .from('cryptocurrencies')
+      .insert(cryptocurrenciesToInsert)
+      .select();
+
+    if (cryptocurrenciesError) throw cryptocurrenciesError;
+
+    // Create symbol to ID mapping for cryptocurrencies
+    const cryptoSymbolToIdMap = new Map(insertedCryptocurrencies?.map(c => [c.symbol, c.id]) || []);
+
+    // 3. Insert remaining data using the new ID maps
     const depositsToInsert = masterData.deposits.map((d: MasterDeposit) => ({
       amount: d.amount,
       deposit_date: d.depositDate || d.deposit_date,
@@ -240,22 +412,64 @@ export async function importDataFromJson(jsonString: string) {
       updated_at: p.updatedAt || p.updated_at
     }));
 
+    const mutualFundPurchasesToInsert = (masterData.mutualFundPurchases || []).map((p: MasterMutualFundPurchase) => ({
+      fund_id: fundSymbolToIdMap.get(p.symbol),
+      amount: p.amount,
+      purchase_date: p.purchaseDate || p.purchase_date,
+      notes: p.notes,
+      created_at: p.createdAt || p.created_at
+    }));
+
+    const mutualFundWithdrawalsToInsert = (masterData.mutualFundWithdrawals || []).map((w: MasterMutualFundWithdrawal) => ({
+      fund_id: fundSymbolToIdMap.get(w.symbol),
+      amount: w.amount,
+      withdrawal_date: w.withdrawalDate || w.withdrawal_date,
+      notes: w.notes,
+      created_at: w.createdAt || w.created_at
+    }));
+
+    const cryptoPurchasesToInsert = (masterData.cryptoPurchases || []).map((p: MasterCryptoPurchase) => ({
+      crypto_id: cryptoSymbolToIdMap.get(p.symbol),
+      amount_pkr: p.amountPkr || p.amount_pkr,
+      purchase_date: p.purchaseDate || p.purchase_date,
+      notes: p.notes,
+      created_at: p.createdAt || p.created_at
+    }));
+
+    const cryptoWithdrawalsToInsert = (masterData.cryptoWithdrawals || []).map((w: MasterCryptoWithdrawal) => ({
+      crypto_id: cryptoSymbolToIdMap.get(w.symbol),
+      amount_pkr: w.amountPkr || w.amount_pkr,
+      withdrawal_date: w.withdrawalDate || w.withdrawal_date,
+      notes: w.notes,
+      created_at: w.createdAt || w.created_at
+    }));
+
     // Insert all data in parallel
     const [
       { error: depositsError },
       { error: buyError },
       { error: sellError },
       { error: dividendsError },
-      { error: pricesError }
+      { error: pricesError },
+      { error: mutualFundPurchasesInsertError },
+      { error: mutualFundWithdrawalsInsertError },
+      { error: cryptoPurchasesInsertError },
+      { error: cryptoWithdrawalsInsertError }
     ] = await Promise.all([
       supabase.from('deposits').insert(depositsToInsert),
       supabase.from('stock_buy_transactions').insert(buyTransactionsToInsert),
       supabase.from('stock_sell_transactions').insert(sellTransactionsToInsert),
       supabase.from('dividends').insert(dividendsToInsert),
-      supabase.from('stock_prices').insert(stockPricesToInsert)
+      supabase.from('stock_prices').insert(stockPricesToInsert),
+      supabase.from('mutual_fund_purchases').insert(mutualFundPurchasesToInsert),
+      supabase.from('mutual_fund_withdrawals').insert(mutualFundWithdrawalsToInsert),
+      supabase.from('crypto_purchases').insert(cryptoPurchasesToInsert),
+      supabase.from('crypto_withdrawals').insert(cryptoWithdrawalsToInsert)
     ]);
 
-    if (depositsError || buyError || sellError || dividendsError || pricesError) {
+    if (depositsError || buyError || sellError || dividendsError || pricesError ||
+        mutualFundPurchasesInsertError || mutualFundWithdrawalsInsertError ||
+        cryptoPurchasesInsertError || cryptoWithdrawalsInsertError) {
       throw new Error('Failed to insert data');
     }
 

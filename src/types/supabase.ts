@@ -91,3 +91,86 @@ export interface HoldingMetric {
   realizedGainLoss: number;
   totalDividends: number;
 }
+
+// Mutual Funds
+export interface MutualFund {
+  id: number;
+  symbol: string;
+  name: string;
+  description: string | null;
+  current_market_value: number;
+  created_at: string;
+}
+
+export interface MutualFundPurchase {
+  id: number;
+  fund_id: number;
+  amount: number;
+  purchase_date: string;
+  notes: string | null;
+  created_at: string;
+  fund?: { symbol: string; name: string };
+}
+
+export interface MutualFundWithdrawal {
+  id: number;
+  fund_id: number;
+  amount: number;
+  withdrawal_date: string;
+  notes: string | null;
+  created_at: string;
+  fund?: { symbol: string; name: string };
+}
+
+export interface MutualFundMetrics {
+  fundId: number;
+  symbol: string;
+  name: string;
+  totalPurchases: number;
+  totalWithdrawals: number;
+  netInvestment: number;
+  currentMarketValue: number;
+  gainLoss: number;
+  gainLossPercent: number;
+}
+
+// Crypto
+export interface Cryptocurrency {
+  id: number;
+  symbol: string;
+  name: string;
+  current_total_value: number;
+  created_at: string;
+}
+
+export interface CryptoPurchase {
+  id: number;
+  crypto_id: number;
+  amount_pkr: number;
+  purchase_date: string;
+  notes: string | null;
+  created_at: string;
+  cryptocurrency?: { symbol: string; name: string };
+}
+
+export interface CryptoWithdrawal {
+  id: number;
+  crypto_id: number;
+  amount_pkr: number;
+  withdrawal_date: string;
+  notes: string | null;
+  created_at: string;
+  cryptocurrency?: { symbol: string; name: string };
+}
+
+export interface CryptoMetrics {
+  cryptoId: number;
+  symbol: string;
+  name: string;
+  totalPurchases: number;
+  totalWithdrawals: number;
+  netInvestment: number;
+  currentTotalValue: number;
+  gainLoss: number;
+  gainLossPercent: number;
+}
