@@ -1,10 +1,15 @@
 import { useMutualFunds } from '@/hooks/useMutualFunds';
+import type { FundMetrics, MutualFund } from '@/services/mutualFunds';
 import { FundForm } from '@/components/mutualFunds/FundForm';
 import { UpdateMarketValueForm } from '@/components/mutualFunds/UpdateMarketValueForm';
 
-function FundsTable() {
-  const { funds, metrics, loading } = useMutualFunds();
+interface FundsTableProps {
+  funds: MutualFund[];
+  metrics: FundMetrics[];
+  loading: boolean;
+}
 
+function FundsTable({ funds, metrics, loading }: FundsTableProps) {
   if (loading) {
     return (
       <section className="mt-8">
@@ -102,6 +107,8 @@ function FundsTable() {
 }
 
 export default function FundsList() {
+  const { funds, metrics, loading } = useMutualFunds();
+
   return (
     <div className="max-w-6xl mx-auto">
       <header className="mb-8">
@@ -113,7 +120,7 @@ export default function FundsList() {
         <FundForm />
       </div>
 
-      <FundsTable />
+      <FundsTable funds={funds} metrics={metrics} loading={loading} />
     </div>
   );
 }

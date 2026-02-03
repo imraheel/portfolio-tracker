@@ -71,7 +71,7 @@ export async function addCryptocurrency(data: { symbol: string; name: string }) 
       .from('cryptocurrencies')
       .select('id')
       .eq('symbol', symbol.toUpperCase())
-      .single();
+      .maybeSingle();
 
     if (existingCrypto) {
       return { success: false, message: 'Cryptocurrency with this symbol already exists.' };

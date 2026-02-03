@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { clsx } from 'clsx';
 
 interface FormButtonProps {
@@ -9,26 +8,17 @@ interface FormButtonProps {
   disabled?: boolean;
 }
 
-export function FormButton({ 
-  label, 
-  loadingLabel = 'Processing...', 
+export function FormButton({
+  label,
+  loadingLabel = 'Processing...',
   className,
   variant = 'primary',
   disabled = false
 }: FormButtonProps) {
-  const [pending, setPending] = useState(false);
-
-  const handleClick = () => {
-    setPending(true);
-    // Reset after a short delay (form submission should complete by then)
-    setTimeout(() => setPending(false), 100);
-  };
-
   return (
     <button
       type="submit"
-      disabled={pending || disabled}
-      onClick={handleClick}
+      disabled={disabled}
       className={clsx(
         "inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50",
         {
@@ -38,7 +28,7 @@ export function FormButton({
         className
       )}
     >
-      {pending ? loadingLabel : label}
+      {disabled ? loadingLabel : label}
     </button>
   );
 }

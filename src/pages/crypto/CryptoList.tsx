@@ -1,10 +1,15 @@
 import { useCrypto } from '@/hooks/useCrypto';
+import type { CryptoMetrics, Cryptocurrency } from '@/services/crypto';
 import { CryptoForm } from '@/components/crypto/CryptoForm';
 import { UpdateTotalValueForm } from '@/components/crypto/UpdateTotalValueForm';
 
-function CryptoTable() {
-  const { cryptocurrencies, metrics, loading } = useCrypto();
+interface CryptoTableProps {
+  cryptocurrencies: Cryptocurrency[];
+  metrics: CryptoMetrics[];
+  loading: boolean;
+}
 
+function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
   if (loading) {
     return (
       <section className="mt-8">
@@ -101,6 +106,8 @@ function CryptoTable() {
 }
 
 export default function CryptoList() {
+  const { cryptocurrencies, metrics, loading } = useCrypto();
+
   return (
     <div className="max-w-6xl mx-auto">
       <header className="mb-8">
@@ -112,7 +119,7 @@ export default function CryptoList() {
         <CryptoForm />
       </div>
 
-      <CryptoTable />
+      <CryptoTable cryptocurrencies={cryptocurrencies} metrics={metrics} loading={loading} />
     </div>
   );
 }

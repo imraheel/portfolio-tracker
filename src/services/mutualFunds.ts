@@ -73,7 +73,7 @@ export async function addMutualFund(data: { symbol: string; name: string; descri
       .from('mutual_funds')
       .select('id')
       .eq('symbol', symbol.toUpperCase())
-      .single();
+      .maybeSingle();
 
     if (existingFund) {
       return { success: false, message: 'Mutual fund with this symbol already exists.' };
