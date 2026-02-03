@@ -4,64 +4,102 @@
   "private": true,
   "main": "electron/main.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "electron:dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron:build": "next build && electron-builder"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings 0",
+    "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "pnpm build && electron-builder",
+    "electron:build:mac": "pnpm build && electron-builder --mac",
+    "electron:build:win": "pnpm build && electron-builder --win",
+    "postinstall": "electron-builder install-app-deps"
   },
   "build": {
     "appId": "com.raheel.psit",
     "productName": "Personal Stock Tracker",
     "directories": {
-      "output": "dist"
+      "output": "dist-electron"
     },
     "files": [
       "electron/**/*",
-      ".next/**/*",
-      "app/**/*",
-      "lib/**/*",
-      "public/**/*",
+      "dist/**/*",
       "node_modules/**/*",
       "package.json",
-      ".env",
-      "!**/*.map",
-      "!.next/cache/**/*"
+      "!.env",
+      "!**/*.map"
     ],
     "mac": {
       "category": "public.app-category.finance",
-      "target": "dmg",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "identity": null,
-      "asar": false
-    }
+      "asar": false,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "extraResources": [
+      {
+        "from": ".env",
+        "to": ".env"
+      }
+    ]
   },
   "dependencies": {
-    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.93.3",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
-    "next": "16.1.2",
     "papaparse": "^5.5.3",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@eslint/js": "^9.39.2",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.19",
     "concurrently": "^9.2.1",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.2",
-    "tailwindcss": "^4",
+    "eslint": "^9.39.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "globals": "^17.3.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
     "typescript": "^5",
+    "typescript-eslint": "^8.54.0",
+    "vite": "^5.3.0",
+    "vite-plugin-electron": "^0.28.7",
     "wait-on": "^9.0.3"
   }
 }

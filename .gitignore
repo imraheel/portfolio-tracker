@@ -13,13 +13,10 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
 # production
 /build
 /dist
+/dist-electron
 
 # misc
 .DS_Store
@@ -39,9 +36,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
-/app/generated/prisma
+# vite
+.vite/
 
 # sqlite
 *.db
