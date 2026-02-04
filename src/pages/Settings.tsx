@@ -1,7 +1,28 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 import { Download, Upload, AlertTriangle, FileJson } from 'lucide-react';
 import { useDataExport } from '@/hooks/useDataExport';
+import { Card } from '@/components/ui/Card';
+
+const pageVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, staggerChildren: 0.15 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const buttonVariants = {
+  hover: { scale: 1.02 },
+  tap: { scale: 0.98 }
+};
 
 function ExportButton() {
   const { exportData, exporting } = useDataExport();
@@ -27,14 +48,17 @@ function ExportButton() {
   };
 
   return (
-    <button
+    <motion.button
       onClick={handleExport}
       disabled={exporting}
+      variants={buttonVariants}
+      whileHover="hover"
+      whileTap="tap"
       className="inline-flex items-center space-x-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-50"
     >
       <Download className="h-4 w-4" />
       <span>{exporting ? 'Generating Backup...' : 'Download Master Backup (.txt)'}</span>
-    </button>
+    </motion.button>
   );
 }
 
@@ -88,14 +112,17 @@ function ImportForm() {
                 </div>
             </div>
             
-            <button 
+            <motion.button 
                 type="submit" 
                 disabled={importing}
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
                 className="inline-flex items-center space-x-2 rounded-md bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-red-700 disabled:opacity-50"
             >
                 <Upload className="h-4 w-4" />
                 <span>{importing ? 'Restoring Data...' : 'Restore from Backup'}</span>
-            </button>
+            </motion.button>
         </form>
     )
 }
@@ -103,14 +130,30 @@ function ImportForm() {
 
 export default function Settings() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+      className="max-w-4xl mx-auto"
+    >
       <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900">Backup & Recovery</h1>
-        <p className="mt-1 text-sm text-gray-500">Manage your data portability with a single master backup file.</p>
+        <motion.h1 
+          variants={itemVariants}
+          className="text-3xl font-extrabold text-gray-900"
+        >
+          Backup & Recovery
+        </motion.h1>
+        <motion.p 
+          variants={itemVariants}
+          className="mt-1 text-sm text-gray-500"
+        >
+          Manage your data portability with a single master backup file.
+        </motion.p>
       </header>
 
       <div className="grid grid-cols-1 gap-8">
-        <section className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <motion.section variants={itemVariants}>
+          <Card hover>
             <div className="border-b border-gray-100 bg-gray-50 px-6 py-4">
                 <h2 className="text-sm font-bold uppercase tracking-widest text-gray-700">Export Master Data</h2>
             </div>
@@ -121,9 +164,11 @@ export default function Settings() {
                 </p>
                 <ExportButton />
             </div>
-        </section>
+          </Card>
+        </motion.section>
 
-        <section className="overflow-hidden rounded-lg border border-red-200 bg-white shadow-sm">
+        <motion.section variants={itemVariants}>
+          <Card hover>
             <div className="flex items-center space-x-2 border-b border-red-100 bg-red-50 px-6 py-4 text-red-700">
                 <AlertTriangle className="h-5 w-5" />
                 <h2 className="text-sm font-bold uppercase tracking-widest">Restore Master Data</h2>
@@ -135,8 +180,9 @@ export default function Settings() {
                 </div>
                 <ImportForm />
             </div>
-        </section>
+          </Card>
+        </motion.section>
       </div>
-    </div>
+    </motion.div>
   );
 }

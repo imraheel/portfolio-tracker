@@ -1,6 +1,31 @@
+import { motion } from 'framer-motion';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { DepositForm } from '@/components/stocks//DepositForm';
 import { DeleteDepositButton } from '@/components/stocks//DeleteDepositButton';
+import { Card } from '@/components/ui/Card';
+
+const pageVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const tableRowVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.05, duration: 0.3 }
+  })
+};
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', {
@@ -25,7 +50,12 @@ function DepositsTable() {
   return (
     <section className="mt-10">
       <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400">Transaction Log</h2>
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+      >
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -37,19 +67,27 @@ function DepositsTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {deposits.map((deposit) => (
-                <tr key={deposit.id} className="hover:bg-gray-50">
+              {deposits.map((deposit, i) => (
+                <motion.tr 
+                  key={deposit.id}
+                  custom={i}
+                  variants={tableRowVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+                  className="hover:bg-gray-50"
+                >
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
                     {deposit.deposit_date ? new Intl.DateTimeFormat('en-PK').format(new Date(deposit.deposit_date)) : '-'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 italic">{deposit.note || '-'}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-bold text-gray-900">
-                    {formatPkr(deposit.amount)}
+                    Rs. {formatPkr(deposit.amount)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right">
                     <DeleteDepositButton id={deposit.id} />
                   </td>
-                </tr>
+                </motion.tr>
               ))}
               {deposits.length === 0 && (
                 <tr>
@@ -59,7 +97,7 @@ function DepositsTable() {
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -68,32 +106,50 @@ export default function Wallet() {
   const { balance, totalDeposited, loading } = useWallet();
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+      className="max-w-4xl mx-auto"
+    >
       <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900">Deposits & Wallet</h1>
-        <p className="mt-1 text-sm text-gray-500">Manage your investment capital and available funds.</p>
+        <motion.h1 
+          variants={itemVariants}
+          className="text-3xl font-extrabold text-gray-900"
+        >
+          Deposits & Wallet
+        </motion.h1>
+        <motion.p 
+          variants={itemVariants}
+          className="mt-1 text-sm text-gray-500"
+        >
+          Manage your investment capital and available funds.
+        </motion.p>
       </header>
 
-      <div className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+      <motion.div 
+        variants={itemVariants}
+        className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2"
+      >
+        <Card hover>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Available Balance</h3>
           <p className="mt-2 text-2xl font-bold text-gray-900">
             {loading ? '...' : `Rs. ${formatPkr(balance)}`}
           </p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        </Card>
+        <Card hover>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Capital</h3>
           <p className="mt-2 text-2xl font-bold text-gray-900">
             {loading ? '...' : `Rs. ${formatPkr(totalDeposited)}`}
           </p>
-        </div>
-      </div>
+        </Card>
+      </motion.div>
 
-      <div className="mb-8">
+      <motion.div variants={itemVariants} className="mb-8">
         <DepositForm />
-      </div>
+      </motion.div>
 
       <DepositsTable />
-    </div>
+    </motion.div>
   );
 }

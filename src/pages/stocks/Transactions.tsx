@@ -1,5 +1,10 @@
 import { useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
+import { motion } from 'framer-motion';
+import { TrendingUp, DollarSign, ShoppingCart, ArrowDownCircle } from 'lucide-react';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { StatsGrid } from '@/components/ui/StatsGrid';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { useStocks } from '@/hooks/stocks/useStocks';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { usePortfolio } from '@/hooks/usePortfolio';
@@ -8,11 +13,24 @@ import { BuyForm } from '@/components/stocks//BuyForm';
 import { SellForm } from '@/components/stocks//SellForm';
 import { DividendForm } from '@/components/stocks//DividendForm';
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
+
 function formatPkr(amount: number) {
-  return Number(amount).toLocaleString('en-PK', {
+  return `Rs. ${Number(amount).toLocaleString('en-PK', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
-  });
+  })}`;
 }
 
 function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right' }[] }) {
@@ -23,7 +41,7 @@ function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right'
           <th
             key={i}
             className={clsx(
-              "px-4 py-3 text-xs font-bold uppercase tracking-wider text-gray-500",
+              "px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500",
               col.align === 'right' ? "text-right" : "text-left"
             )}
           >
@@ -185,55 +203,102 @@ export default function Transactions() {
   const { stocks } = useStocks();
   const { balance } = useWallet();
   const { holdingsMap } = usePortfolio();
+  const { buyTransactions, sellTransactions, dividends, loading } = useTransactions();
+
+  const totalInvested = buyTransactions.reduce((sum, tx) => sum + tx.total_cost, 0);
+  const totalSold = sellTransactions.reduce((sum, tx) => sum + tx.total_proceeds, 0);
+  const totalDividends = dividends.reduce((sum, div) => sum + div.dividend_amount, 0);
+  const netInvested = totalInvested - totalSold + totalDividends;
 
   const handleTabChange = (view: string) => {
     setSearchParams({ view });
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900">Trading Desk</h1>
-        <p className="mt-1 text-sm text-gray-500">Record and track your stock market activities.</p>
-      </header>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="max-w-7xl mx-auto space-y-6"
+    >
+      <PageHeader
+        title="Trading Desk"
+        description="Record and track your stock market activities."
+        breadcrumbs={[{ label: 'Stocks' }, { label: 'Transactions' }]}
+      />
 
-      <div className="mb-8 border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button 
-            onClick={() => handleTabChange('buy')}
-            className={clsx(
-                "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors", 
-                currentView === 'buy' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            )}
-          >
-            Buy Stocks
-          </button>
-          <button 
-            onClick={() => handleTabChange('sell')}
-            className={clsx(
-                "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors", 
-                currentView === 'sell' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            )}
-          >
-            Sell Stocks
-          </button>
-          <button 
-            onClick={() => handleTabChange('dividends')}
-            className={clsx(
-                "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors", 
-                currentView === 'dividends' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-            )}
-          >
-            Dividends
-          </button>
-        </nav>
-      </div>
+      <motion.div variants={itemVariants}>
+        <StatsGrid columns={4}>
+          <MetricCard
+            title="Total Invested"
+            value={formatPkr(totalInvested)}
+            icon={<ShoppingCart className="w-5 h-5" />}
+            color="blue"
+            loading={loading}
+          />
+          <MetricCard
+            title="Total Sold"
+            value={formatPkr(totalSold)}
+            icon={<ArrowDownCircle className="w-5 h-5" />}
+            color="green"
+            loading={loading}
+          />
+          <MetricCard
+            title="Total Dividends"
+            value={formatPkr(totalDividends)}
+            icon={<DollarSign className="w-5 h-5" />}
+            color="purple"
+            loading={loading}
+          />
+          <MetricCard
+            title="Net Invested"
+            value={formatPkr(netInvested)}
+            icon={<TrendingUp className="w-5 h-5" />}
+            color={netInvested >= 0 ? 'green' : 'red'}
+            loading={loading}
+          />
+        </StatsGrid>
+      </motion.div>
 
-      <div className="space-y-4">
+      <motion.div variants={itemVariants}>
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button 
+              onClick={() => handleTabChange('buy')}
+              className={clsx(
+                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors", 
+                  currentView === 'buy' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              )}
+            >
+              Buy Stocks
+            </button>
+            <button 
+              onClick={() => handleTabChange('sell')}
+              className={clsx(
+                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors", 
+                  currentView === 'sell' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              )}
+            >
+              Sell Stocks
+            </button>
+            <button 
+              onClick={() => handleTabChange('dividends')}
+              className={clsx(
+                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors", 
+                  currentView === 'dividends' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              )}
+            >
+              Dividends
+            </button>
+          </nav>
+        </div>
+      </motion.div>
+
+      <div className="space-y-6">
         {currentView === 'buy' && (<div><BuyForm stocks={stocks} balance={balance} /><BuyTransactionsTable /></div>)}
         {currentView === 'sell' && (<div><SellForm stocks={stocks} holdings={holdingsMap} /><SellTransactionsTable /></div>)}
         {currentView === 'dividends' && (<div><DividendForm stocks={stocks} /><DividendsTable /></div>)}
       </div>
-    </div>
+    </motion.div>
   );
 }

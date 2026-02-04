@@ -1,7 +1,31 @@
 import { useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
+import { motion } from 'framer-motion';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
+
+const pageVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const tableRowVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.05, duration: 0.3 }
+  })
+};
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', {
@@ -47,8 +71,15 @@ function DepositsHistory() {
         { label: 'Amount', align: 'right' },
       ]} />
       <tbody className="divide-y divide-gray-200 bg-white">
-        {deposits.map((row) => (
-          <tr key={row.id}>
+        {deposits.map((row, i) => (
+          <motion.tr 
+            key={row.id}
+            custom={i}
+            variants={tableRowVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+          >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
               {row.deposit_date ? new Date(row.deposit_date).toLocaleDateString('en-PK') : '-'}
             </td>
@@ -56,7 +87,7 @@ function DepositsHistory() {
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-gray-900">
               {formatPkr(row.amount)}
             </td>
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </table>
@@ -82,8 +113,15 @@ function BuyHistory() {
         { label: 'Total', align: 'right' },
       ]} />
       <tbody className="divide-y divide-gray-200 bg-white">
-        {buyTransactions.map((row) => (
-          <tr key={row.id}>
+        {buyTransactions.map((row, i) => (
+          <motion.tr 
+            key={row.id}
+            custom={i}
+            variants={tableRowVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+          >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
               {row.buy_date ? new Date(row.buy_date).toLocaleDateString('en-PK') : '-'}
             </td>
@@ -91,7 +129,7 @@ function BuyHistory() {
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{row.quantity}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-gray-600">{formatPkr(row.buy_rate)}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-gray-900">{formatPkr(row.total_cost)}</td>
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </table>
@@ -118,8 +156,15 @@ function SellHistory() {
         { label: 'P/L', align: 'right' },
       ]} />
       <tbody className="divide-y divide-gray-200 bg-white">
-        {sellTransactions.map((row) => (
-          <tr key={row.id}>
+        {sellTransactions.map((row, i) => (
+          <motion.tr 
+            key={row.id}
+            custom={i}
+            variants={tableRowVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+          >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
               {row.sell_date ? new Date(row.sell_date).toLocaleDateString('en-PK') : '-'}
             </td>
@@ -133,7 +178,7 @@ function SellHistory() {
             )}>
               {formatPkr(row.realized_gain_loss)}
             </td>
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </table>
@@ -157,8 +202,15 @@ function DividendHistory() {
         { label: 'Amount', align: 'right' },
       ]} />
       <tbody className="divide-y divide-gray-200 bg-white">
-        {dividends.map((row) => (
-          <tr key={row.id}>
+        {dividends.map((row, i) => (
+          <motion.tr 
+            key={row.id}
+            custom={i}
+            variants={tableRowVariants}
+            initial="hidden"
+            animate="visible"
+            whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+          >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-gray-600">
               {row.dividend_date ? new Date(row.dividend_date).toLocaleDateString('en-PK') : '-'}
             </td>
@@ -166,7 +218,7 @@ function DividendHistory() {
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-green-600">
               {formatPkr(row.dividend_amount)}
             </td>
-          </tr>
+          </motion.tr>
         ))}
       </tbody>
     </table>
@@ -189,18 +241,35 @@ export default function Reports() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+      className="max-w-5xl mx-auto"
+    >
       <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900">Reports & History</h1>
-        <p className="mt-1 text-sm text-gray-500">Detailed record of all financial activities.</p>
+        <motion.h1 
+          variants={itemVariants}
+          className="text-3xl font-extrabold text-gray-900"
+        >
+          Reports & History
+        </motion.h1>
+        <motion.p 
+          variants={itemVariants}
+          className="mt-1 text-sm text-gray-500"
+        >
+          Detailed record of all financial activities.
+        </motion.p>
       </header>
 
-      <div className="mb-6 border-b border-gray-200">
+      <motion.div variants={itemVariants} className="mb-6 border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => (
-            <button
+            <motion.button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className={clsx(
                 "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors",
                 currentTab === tab.id
@@ -209,19 +278,25 @@ export default function Reports() {
               )}
             >
               {tab.label}
-            </button>
+            </motion.button>
           ))}
         </nav>
-      </div>
+      </motion.div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <motion.div
+        key={currentTab}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+      >
         <div className="overflow-x-auto">
           {currentTab === 'deposits' && <DepositsHistory />}
           {currentTab === 'buys' && <BuyHistory />}
           {currentTab === 'sells' && <SellHistory />}
           {currentTab === 'dividends' && <DividendHistory />}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

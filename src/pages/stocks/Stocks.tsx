@@ -1,6 +1,30 @@
+import { motion } from 'framer-motion';
 import { useStocks } from '@/hooks/stocks/useStocks';
 import { StockForm } from '@/components/stocks/StockForm';
 import { UpdatePriceForm } from '@/components/stocks/UpdatePriceForm';
+
+const pageVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.4, staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const tableRowVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: { delay: i * 0.05, duration: 0.3 }
+  })
+};
 
 function StocksTable() {
   const { stocks, priceMap, loading } = useStocks();
@@ -17,8 +41,18 @@ function StocksTable() {
 
   return (
     <section className="mt-8">
-      <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400">Monitoring List</h2>
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <motion.h2 
+        variants={itemVariants}
+        className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400"
+      >
+        Monitoring List
+      </motion.h2>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+      >
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -29,8 +63,16 @@ function StocksTable() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {stocks.map((stock) => (
-                <tr key={stock.id} className="hover:bg-gray-50">
+              {stocks.map((stock, i) => (
+                <motion.tr 
+                  key={stock.id}
+                  custom={i}
+                  variants={tableRowVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
+                  className="hover:bg-gray-50"
+                >
                   <td className="whitespace-nowrap px-6 py-4">
                     <span className="font-bold text-gray-900">{stock.symbol}</span>
                   </td>
@@ -44,7 +86,7 @@ function StocksTable() {
                       currentPrice={priceMap.get(stock.id)?.toString() ?? '0'} 
                     />
                   </td>
-                </tr>
+                </motion.tr>
               ))}
               {stocks.length === 0 && (
                 <tr>
@@ -56,24 +98,39 @@ function StocksTable() {
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 export default function Stocks() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+      className="max-w-4xl mx-auto"
+    >
       <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900">Stock Prices</h1>
-        <p className="mt-1 text-sm text-gray-500">Manage symbols and update latest market prices.</p>
+        <motion.h1 
+          variants={itemVariants}
+          className="text-3xl font-extrabold text-gray-900"
+        >
+          Stock Prices
+        </motion.h1>
+        <motion.p 
+          variants={itemVariants}
+          className="mt-1 text-sm text-gray-500"
+        >
+          Manage symbols and update latest market prices.
+        </motion.p>
       </header>
       
-      <div className="mb-10">
+      <motion.div variants={itemVariants} className="mb-10">
         <StockForm />
-      </div>
+      </motion.div>
       
       <StocksTable />
-    </div>
+    </motion.div>
   );
 }
