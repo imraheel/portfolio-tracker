@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
-import { useWallet } from '@/hooks/useWallet';
+import { useWallet } from '@/hooks/stocks/useWallet';
 
 export function DepositForm() {
   const { addDeposit } = useWallet();

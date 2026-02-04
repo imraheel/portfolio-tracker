@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
-import { useCrypto } from '@/hooks/useCrypto';
-import type { Cryptocurrency } from '@/services/crypto';
+import { useCrypto } from '@/hooks/crypto/useCrypto';
+import type { Cryptocurrency } from '@/services/crypto/crypto';
 
 interface PurchaseFormProps {
   cryptocurrencies: Cryptocurrency[];

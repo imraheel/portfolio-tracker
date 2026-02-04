@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as mutualFundsService from '@/services/mutualFunds';
+import * as mutualFundsService from '@/services/mutualFunds/mutualFunds';
 import type {
   MutualFund,
   MutualFundPurchase,
   MutualFundWithdrawal,
   FundMetrics,
-} from '@/services/mutualFunds';
+} from '@/services/mutualFunds/mutualFunds';
 
 export function useMutualFunds() {
   const [funds, setFunds] = useState<MutualFund[]>([]);

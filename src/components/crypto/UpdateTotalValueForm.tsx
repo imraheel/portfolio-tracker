@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
-import { useCrypto } from '@/hooks/useCrypto';
+import { useCrypto } from '@/hooks/crypto/useCrypto';
 
 interface UpdateTotalValueFormProps {
   cryptoId: number;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as stocksService from '@/services/stocks';
-import type { Stock, StockPrice } from '@/services/stocks';
+import * as stocksService from '@/services/stocks/stocks';
+import type { Stock, StockPrice } from '@/services/stocks/stocks';
 
 export function useStocks() {
   const [stocks, setStocks] = useState<Stock[]>([]);

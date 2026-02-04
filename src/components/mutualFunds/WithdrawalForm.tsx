@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
-import { useMutualFunds } from '@/hooks/useMutualFunds';
-import type { MutualFund } from '@/services/mutualFunds';
+import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import type { MutualFund } from '@/services/mutualFunds/mutualFunds';
 
 interface WithdrawalFormProps {
   funds: MutualFund[];

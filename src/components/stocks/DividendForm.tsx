@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
-import { useTransactions } from '@/hooks/useTransactions';
-import type { Stock } from '@/services/stocks';
+import { useTransactions } from '@/hooks/stocks/useTransactions';
+import type { Stock } from '@/services/stocks/stocks';
 
 export function DividendForm({ stocks }: { stocks: Stock[] }) {
   const { addDividend } = useTransactions();

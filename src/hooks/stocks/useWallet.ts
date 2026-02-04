@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as walletService from '@/services/wallet';
-import type { Deposit } from '@/services/wallet';
+import * as walletService from '@/services/stocks/wallet';
+import type { Deposit } from '@/services/stocks/wallet';
 
 export function useWallet() {
   const [deposits, setDeposits] = useState<Deposit[]>([]);

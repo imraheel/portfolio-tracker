@@ -1,4 +1,4 @@
-import { useMutualFunds } from '@/hooks/useMutualFunds';
+import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
 import { WithdrawalForm } from '@/components/mutualFunds/WithdrawalForm';
 
 function WithdrawalsTable() {

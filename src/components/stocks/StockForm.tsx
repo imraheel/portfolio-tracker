@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
-import { useStocks } from '@/hooks/useStocks';
+import { useStocks } from '@/hooks/stocks/useStocks';
 
 export function StockForm() {
   const { addStock } = useStocks();

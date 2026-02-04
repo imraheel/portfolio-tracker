@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { clsx } from 'clsx';
 import { FormButton } from '@/components/FormButton';
-import { useTransactions } from '@/hooks/useTransactions';
-import type { Stock } from '@/services/stocks';
+import { useTransactions } from '@/hooks/stocks/useTransactions';
+import type { Stock } from '@/services/stocks/stocks';
 
 export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<number, number> }) {
   const { addSellTransaction } = useTransactions();

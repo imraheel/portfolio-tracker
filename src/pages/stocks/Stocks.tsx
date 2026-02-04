@@ -1,4 +1,4 @@
-import { useStocks } from '@/hooks/useStocks';
+import { useStocks } from '@/hooks/stocks/useStocks';
 import { StockForm } from '@/components/stocks/StockForm';
 import { UpdatePriceForm } from '@/components/stocks/UpdatePriceForm';
 

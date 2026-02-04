@@ -1,6 +1,6 @@
-import { useWallet } from '@/hooks/useWallet';
-import { DepositForm } from '@/components/wallet/DepositForm';
-import { DeleteDepositButton } from '@/components/wallet/DeleteDepositButton';
+import { useWallet } from '@/hooks/stocks/useWallet';
+import { DepositForm } from '@/components/stocks//DepositForm';
+import { DeleteDepositButton } from '@/components/stocks//DeleteDepositButton';
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', {

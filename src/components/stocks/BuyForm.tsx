@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { clsx } from 'clsx';
 import { FormButton } from '@/components/FormButton';
-import { useTransactions } from '@/hooks/useTransactions';
-import { useWallet } from '@/hooks/useWallet';
-import type { Stock } from '@/services/stocks';
+import { useTransactions } from '@/hooks/stocks/useTransactions';
+import { useWallet } from '@/hooks/stocks/useWallet';
+import type { Stock } from '@/services/stocks/stocks';
 
 export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number }) {
   const { addBuyTransaction } = useTransactions();

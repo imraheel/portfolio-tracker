@@ -1,4 +1,4 @@
-import { useCrypto } from '@/hooks/useCrypto';
+import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { PurchaseForm } from '@/components/crypto/PurchaseForm';
 
 function PurchasesTable() {

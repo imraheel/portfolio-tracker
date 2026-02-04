@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { useWallet } from '@/hooks/useWallet';
-import { useTransactions } from '@/hooks/useTransactions';
+import { useWallet } from '@/hooks/stocks/useWallet';
+import { useTransactions } from '@/hooks/stocks/useTransactions';
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', {

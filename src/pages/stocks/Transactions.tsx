@@ -1,12 +1,12 @@
 import { useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { useStocks } from '@/hooks/useStocks';
-import { useWallet } from '@/hooks/useWallet';
+import { useStocks } from '@/hooks/stocks/useStocks';
+import { useWallet } from '@/hooks/stocks/useWallet';
 import { usePortfolio } from '@/hooks/usePortfolio';
-import { useTransactions } from '@/hooks/useTransactions';
-import { BuyForm } from '@/components/transactions/BuyForm';
-import { SellForm } from '@/components/transactions/SellForm';
-import { DividendForm } from '@/components/transactions/DividendForm';
+import { useTransactions } from '@/hooks/stocks/useTransactions';
+import { BuyForm } from '@/components/stocks//BuyForm';
+import { SellForm } from '@/components/stocks//SellForm';
+import { DividendForm } from '@/components/stocks//DividendForm';
 
 function formatPkr(amount: number) {
   return Number(amount).toLocaleString('en-PK', {

@@ -25,10 +25,10 @@ pnpm lint                  # Run ESLint with max 0 warnings
 **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase + Electron
 
 **Key Directories:**
-- `src/components/` - Reusable UI components (organized by feature: wallet/, stocks/, transactions/)
-- `src/pages/` - Route components (Dashboard, Wallet, Stocks, Transactions, Reports, Settings)
-- `src/hooks/` - Custom React hooks (useStocks, useWallet, useTransactions, usePortfolio, useDataExport)
-- `src/services/` - Business logic and API calls (stocks.ts, wallet.ts, transactions.ts, portfolio.ts, data.ts)
+- `src/components/` - Reusable UI components (organized by investment type: stocks/, crypto/, mutualFunds/)
+- `src/pages/` - Route components (organized by investment type: stocks/, crypto/, mutualFunds/)
+- `src/hooks/` - Custom React hooks (organized by investment type: stocks/, crypto/, mutualFunds/)
+- `src/services/` - Business logic and API calls (organized by investment type: stocks/, crypto/, mutualFunds/)
 - `src/lib/supabase/` - Supabase client configuration
 - `src/types/` - TypeScript type definitions
 - `electron/` - Electron main process and preload scripts
@@ -36,9 +36,10 @@ pnpm lint                  # Run ESLint with max 0 warnings
 ## Code Style Guidelines
 
 ### Imports
-- Use path alias `@/` for all imports from src (e.g., `import { useStocks } from '@/hooks/useStocks'`)
+- Use path alias `@/` for all imports from src (e.g., `import { useStocks } from '@/hooks/stocks/useStocks'`)
 - Group imports: React/hooks first, then libraries, then local modules
 - Use named exports for hooks and services
+- Organize by investment type: import from ` '@/hooks/stocks/...'`, ` '@/hooks/crypto/...'`, ` '@/hooks/mutualFunds/...'`
 
 ### Types & Interfaces
 - Define interfaces in service files (e.g., `Stock`, `StockPrice` in stocks.ts)

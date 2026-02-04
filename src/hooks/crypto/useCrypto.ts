@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as cryptoService from '@/services/crypto';
+import * as cryptoService from '@/services/crypto/crypto';
 import type {
   Cryptocurrency,
   CryptoPurchase,
   CryptoWithdrawal,
   CryptoMetrics,
-} from '@/services/crypto';
+} from '@/services/crypto/crypto';
 
 export function useCrypto() {
   const [cryptocurrencies, setCryptocurrencies] = useState<Cryptocurrency[]>([]);

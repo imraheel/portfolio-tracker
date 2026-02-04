@@ -1,5 +1,5 @@
-import { useCrypto } from '@/hooks/useCrypto';
-import type { CryptoMetrics, Cryptocurrency } from '@/services/crypto';
+import { useCrypto } from '@/hooks/crypto/useCrypto';
+import type { CryptoMetrics, Cryptocurrency } from '@/services/crypto/crypto';
 import { CryptoForm } from '@/components/crypto/CryptoForm';
 import { UpdateTotalValueForm } from '@/components/crypto/UpdateTotalValueForm';
 

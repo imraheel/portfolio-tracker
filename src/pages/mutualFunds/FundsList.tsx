@@ -1,5 +1,5 @@
-import { useMutualFunds } from '@/hooks/useMutualFunds';
-import type { FundMetrics, MutualFund } from '@/services/mutualFunds';
+import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import type { FundMetrics, MutualFund } from '@/services/mutualFunds/mutualFunds';
 import { FundForm } from '@/components/mutualFunds/FundForm';
 import { UpdateMarketValueForm } from '@/components/mutualFunds/UpdateMarketValueForm';
 

@@ -1,4 +1,4 @@
-import { useCrypto } from '@/hooks/useCrypto';
+import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { WithdrawalForm } from '@/components/crypto/WithdrawalForm';
 
 function WithdrawalsTable() {

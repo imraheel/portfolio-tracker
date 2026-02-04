@@ -1,16 +1,18 @@
 # Personal Stock Investment Tracker (PSIT)
 
-PSIT is a simple, cloud-based, personal-use investment tracking system specifically designed for managing stock investments in **Pakistani Rupees (PKR)**. It prioritizes simplicity, accuracy, and full manual control over real-time market integration.
+PSIT is a simple, cloud-based, personal-use investment tracking system for managing **Stocks (PSX)**, **Mutual Funds**, and **Cryptocurrency** investments in **Pakistani Rupees (PKR)**. It prioritizes simplicity, accuracy, and full manual control over real-time market integration.
 
 ## Key Features
 
-- **Wallet Management:** Track deposits and maintain an accurate available balance.
-- **Stock Transactions:** Record Buy and Sell transactions.
-- **FIFO Cost Basis:** Mandatory First-In-First-Out logic for accurate realized gain/loss calculation.
+- **Multi-Asset Support:** Track Stocks (PSX), Mutual Funds, and Cryptocurrency investments.
+- **Wallet Management:** Track deposits and maintain an accurate available balance across all investments.
+- **Stock Transactions:** Record Buy and Sell transactions with FIFO cost basis.
+- **Mutual Funds:** Track purchases, withdrawals, and market value updates.
+- **Cryptocurrency:** Track crypto holdings, purchases, and withdrawals in PKR.
 - **Dividend Tracking:** Log dividend income per stock to see total returns.
-- **Manual Price Updates:** Update current stock prices manually to calculate unrealized gains/losses.
+- **Manual Price Updates:** Update current prices manually to calculate unrealized gains/losses.
 - **Portfolio Analytics:** Real-time calculation of invested amount, current value, and P/L (Realized & Unrealized).
-- **Data Management:** Export and Import functionality for backups.
+- **Data Management:** Export and Import functionality for all investment types.
 - **Cloud-Based:** All data is stored in Supabase PostgreSQL database (accessible from any device).
 - **Desktop App:** Available as a standalone Electron application for macOS and Windows.
 
@@ -113,28 +115,32 @@ The `.env` file is automatically bundled with the Electron app. Make sure it con
 ```
 src/
 ├── components/          # Reusable UI components
-│   ├── wallet/         # Wallet-related forms
-│   ├── stocks/         # Stock-related forms
-│   └── transactions/   # Transaction forms
+│   ├── stocks/         # Stock-related forms (StockForm, BuyForm, SellForm, etc.)
+│   ├── crypto/         # Crypto-related forms (CryptoForm, PurchaseForm, etc.)
+│   ├── mutualFunds/    # Mutual Fund forms (FundForm, PurchaseForm, etc.)
+│   ├── FormButton.tsx # Shared form button
+│   ├── Header.tsx     # App header
+│   ├── Layout.tsx     # App layout
+│   └── Sidebar.tsx    # Navigation sidebar
 ├── pages/              # Route components
-│   ├── Dashboard.tsx
-│   ├── Wallet.tsx
-│   ├── Stocks.tsx
-│   ├── Transactions.tsx
-│   ├── Reports.tsx
-│   └── Settings.tsx
-├── hooks/              # Custom React hooks
-│   ├── useWallet.ts
-│   ├── useStocks.ts
-│   ├── useTransactions.ts
-│   ├── usePortfolio.ts
-│   └── useDataExport.ts
-├── services/           # Business logic (API calls)
-│   ├── wallet.ts
-│   ├── stocks.ts
-│   ├── transactions.ts
-│   ├── portfolio.ts
-│   └── data.ts
+│   ├── stocks/        # Stock pages (Wallet, Stocks, Transactions)
+│   ├── crypto/        # Crypto pages (CryptoList, Purchases, Withdrawals)
+│   ├── mutualFunds/   # Mutual Fund pages (FundsList, Purchases, Withdrawals)
+│   ├── Dashboard.tsx  # Portfolio overview
+│   ├── Reports.tsx   # Reports and analytics
+│   └── Settings.tsx  # Settings and data management
+├── hooks/             # Custom React hooks
+│   ├── stocks/        # Stock hooks (useStocks, useTransactions, useWallet)
+│   ├── crypto/        # Crypto hooks (useCrypto)
+│   ├── mutualFunds/   # Mutual Fund hooks (useMutualFunds)
+│   ├── usePortfolio.ts  # Portfolio metrics aggregation
+│   └── useDataExport.ts  # Data export/import functionality
+├── services/          # Business logic (API calls)
+│   ├── stocks/        # Stock services (stocks, transactions, wallet)
+│   ├── crypto/        # Crypto services (crypto)
+│   ├── mutualFunds/   # Mutual Fund services (mutualFunds)
+│   ├── portfolio.ts   # Portfolio metrics calculation
+│   └── data.ts        # Data export/import
 ├── lib/supabase/       # Supabase client configuration
 │   └── client.ts
 ├── types/              # TypeScript type definitions

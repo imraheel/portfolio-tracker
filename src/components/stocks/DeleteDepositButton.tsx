@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { useWallet } from '@/hooks/useWallet';
+import { useWallet } from '@/hooks/stocks/useWallet';
 
 export function DeleteDepositButton({ id }: { id: number }) {
   const { deleteDeposit } = useWallet();

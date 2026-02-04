@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as transactionsService from '@/services/transactions';
-import type { BuyTransaction, SellTransaction, Dividend } from '@/services/transactions';
+import * as transactionsService from '@/services/stocks/transactions';
+import type { BuyTransaction, SellTransaction, Dividend } from '@/services/stocks/transactions';
 
 export function useTransactions() {
   const [buyTransactions, setBuyTransactions] = useState<BuyTransaction[]>([]);

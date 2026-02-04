@@ -1,8 +1,8 @@
 import { clsx } from 'clsx';
 import { usePortfolio } from '@/hooks/usePortfolio';
-import { useWallet } from '@/hooks/useWallet';
-import { useMutualFunds } from '@/hooks/useMutualFunds';
-import { useCrypto } from '@/hooks/useCrypto';
+import { useWallet } from '@/hooks/stocks/useWallet';
+import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import { useCrypto } from '@/hooks/crypto/useCrypto';
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', {

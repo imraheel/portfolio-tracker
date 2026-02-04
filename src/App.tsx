@@ -1,9 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import Wallet from './pages/Wallet';
-import Stocks from './pages/Stocks';
-import Transactions from './pages/Transactions';
+import Wallet from './pages/stocks/Wallet';
+import Stocks from './pages/stocks/Stocks';
+import Transactions from './pages/stocks/Transactions';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import MutualFundsList from './pages/mutualFunds/FundsList';
