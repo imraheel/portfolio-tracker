@@ -1,6 +1,6 @@
 {
   "name": "personal-stock-investment-tracker",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -34,8 +34,7 @@
         {
           "target": "dmg",
           "arch": [
-            "x64",
-            "arm64"
+            "x64"
           ]
         }
       ],
