@@ -20,11 +20,13 @@ function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
-        <Route path="wallet" element={<Wallet />} />
-        <Route path="stocks" element={<Stocks />} />
-        <Route path="transactions" element={<Transactions />} />
-        <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
+        
+        {/* Stocks Routes */}
+        <Route path="stocks" element={<Stocks />} />
+        <Route path="stocks/wallet" element={<Wallet />} />
+        <Route path="stocks/transactions" element={<Transactions />} />
+        <Route path="stocks/reports" element={<Reports />} />
         
         {/* Mutual Funds Routes */}
         <Route path="mutual-funds" element={<MutualFundsList />} />

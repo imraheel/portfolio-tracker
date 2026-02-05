@@ -324,9 +324,10 @@ export default function Dashboard() {
           onViewAll={() => window.location.hash = '#/stocks/transactions'}
         />
         <QuickActions
-          onDeposit={() => window.location.hash = '#/wallet'}
-          onBuyAsset={() => window.location.hash = '#/stocks'}
-          onViewReports={() => window.location.hash = '#/reports'}
+          onDeposit={() => window.location.hash = '#/stocks/wallet'}
+          onBuyAsset={() => window.location.hash = '#/stocks/transactions'}
+          onViewReports={() => window.location.hash = '#/stocks/reports'}
+          onViewWallet={() => window.location.hash = '#/stocks/wallet'}
         />
       </motion.div>
     </motion.div>

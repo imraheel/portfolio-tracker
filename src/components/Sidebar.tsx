@@ -35,10 +35,10 @@ const sections: NavSection[] = [
     name: 'Stocks',
     icon: TrendingUp,
     items: [
-      { name: 'Wallet', href: '/wallet', icon: Wallet },
       { name: 'Holdings', href: '/stocks', icon: Wallet },
-      { name: 'Transactions', href: '/transactions', icon: ArrowUpCircle, badge: 3 },
-      { name: 'Reports', href: '/reports', icon: BarChart3 },
+      { name: 'Wallet', href: '/stocks/wallet', icon: Wallet },
+      { name: 'Transactions', href: '/stocks/transactions', icon: ArrowUpCircle },
+      { name: 'Reports', href: '/stocks/reports', icon: BarChart3 },
     ],
   },
   {

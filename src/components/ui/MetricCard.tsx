@@ -98,7 +98,7 @@ export function MetricCard({
             ) : (
               <TrendingDownIcon className="h-4 w-4" />
             )}
-            <span>{Math.abs(trend.value)}%</span>
+            <span>{Math.abs(trend.value).toFixed(2)}%</span>
           </div>
         )}
       </div>

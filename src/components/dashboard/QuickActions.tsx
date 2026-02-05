@@ -11,6 +11,7 @@ export interface QuickActionsProps {
   onDeposit?: () => void;
   onBuyAsset?: () => void;
   onViewReports?: () => void;
+  onViewWallet?: () => void;
 }
 
 const actions = [
@@ -59,7 +60,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export function QuickActions({ onDeposit, onBuyAsset, onViewReports }: QuickActionsProps) {
+export function QuickActions({ onDeposit, onBuyAsset, onViewReports, onViewWallet }: QuickActionsProps) {
   const handleAction = (actionId: string) => {
     switch (actionId) {
       case 'deposit':
@@ -70,6 +71,9 @@ export function QuickActions({ onDeposit, onBuyAsset, onViewReports }: QuickActi
         break;
       case 'reports':
         onViewReports?.();
+        break;
+      case 'wallet':
+        onViewWallet?.();
         break;
       default:
         break;

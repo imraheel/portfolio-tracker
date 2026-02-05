@@ -40,7 +40,7 @@ const renderCustomizedLabel = (props: { cx: number; cy: number; midAngle?: numbe
       fill="white"
       textAnchor="middle"
       dominantBaseline="central"
-      fontSize={12}
+      fontSize={14}
       fontWeight={600}
     >
       {`${(safePercent * 100).toFixed(0)}%`}
@@ -53,8 +53,8 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { payl
     const data = payload[0].payload;
     return (
       <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
-        <p className="text-sm text-gray-500 mb-1">{data.name}</p>
-        <p className="text-lg font-semibold text-gray-900">{formatPKR(data.value)}</p>
+        <p className="text-sm text-gray-500">{data.name}</p>
+        <p className="font-semibold text-gray-900">{formatPKR(data.value)}</p>
       </div>
     );
   }
@@ -104,8 +104,8 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
         <p className="text-sm text-gray-500 mt-1">Portfolio breakdown by asset type</p>
       </div>
 
-      <div className="relative">
-        <div className="h-64">
+      <div>
+        <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -114,11 +114,11 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
                 cy="50%"
                 labelLine={false}
                 label={renderCustomizedLabel}
-                outerRadius={80}
+                outerRadius={120}
                 innerRadius={50}
                 dataKey="value"
                 animationDuration={1500}
-                paddingAngle={2}
+                paddingAngle={1}
               >
                 {data.map((entry, index) => (
                   <Cell
@@ -132,7 +132,7 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
                   />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip animationDuration={200} content={<CustomTooltip />} />
               <Legend
                 verticalAlign="bottom"
                 height={36}
@@ -140,13 +140,6 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
               />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-center -mt-8">
-            <p className="text-xs text-gray-400 uppercase tracking-wide">Total Value</p>
-            <p className="text-lg font-bold text-gray-900">{formatPKR(total)}</p>
-          </div>
         </div>
       </div>
     </motion.div>
