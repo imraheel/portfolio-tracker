@@ -46,8 +46,7 @@ export function PurchaseForm({ funds }: PurchaseFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg bg-white p-6 shadow-md">
-      <h2 className="mb-4 text-xl font-semibold">Record Purchase</h2>
+    <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="fundId" className="block text-sm font-medium text-gray-700">

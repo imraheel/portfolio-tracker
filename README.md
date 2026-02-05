@@ -12,6 +12,7 @@ PSIT is a simple, cloud-based, personal-use investment tracking system for manag
 - **Dividend Tracking:** Log dividend income per stock to see total returns.
 - **Manual Price Updates:** Update current prices manually to calculate unrealized gains/losses.
 - **Portfolio Analytics:** Real-time calculation of invested amount, current value, and P/L (Realized & Unrealized).
+- **Investment History Chart:** Visualize cumulative investments over time for Stocks, Mutual Funds, and Crypto.
 - **Data Management:** Export and Import functionality for all investment types.
 - **Cloud-Based:** All data is stored in Supabase PostgreSQL database (accessible from any device).
 - **Desktop App:** Available as a standalone Electron application for macOS and Windows.
@@ -118,6 +119,7 @@ src/
 │   ├── stocks/         # Stock-related forms (StockForm, BuyForm, SellForm, etc.)
 │   ├── crypto/         # Crypto-related forms (CryptoForm, PurchaseForm, etc.)
 │   ├── mutualFunds/    # Mutual Fund forms (FundForm, PurchaseForm, etc.)
+│   ├── dashboard/     # Dashboard charts (NetInvestmentChart, AssetAllocationChart, etc.)
 │   ├── FormButton.tsx # Shared form button
 │   ├── Header.tsx     # App header
 │   ├── Layout.tsx     # App layout
@@ -140,6 +142,7 @@ src/
 │   ├── crypto/        # Crypto services (crypto)
 │   ├── mutualFunds/   # Mutual Fund services (mutualFunds)
 │   ├── portfolio.ts   # Portfolio metrics calculation
+│   ├── investmentHistory.ts  # Investment history chart data
 │   └── data.ts        # Data export/import
 ├── lib/supabase/       # Supabase client configuration
 │   └── client.ts

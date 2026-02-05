@@ -38,8 +38,7 @@ export function FundForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg bg-white p-6 shadow-md">
-      <h2 className="mb-4 text-xl font-semibold">Add New Mutual Fund</h2>
+    <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="symbol" className="block text-sm font-medium text-gray-700">

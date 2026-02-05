@@ -266,7 +266,7 @@ export interface FundMetrics {
   gainLossPercent: number;
 }
 
-export async function getFundMetrics(fundId: number): Promise<FundMetrics | null> {
+async function getFundMetrics(fundId: number): Promise<FundMetrics | null> {
   try {
     const { data: fund, error: fundError } = await supabase
       .from('mutual_funds')

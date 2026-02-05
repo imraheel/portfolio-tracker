@@ -25,7 +25,7 @@ pnpm lint                  # Run ESLint with max 0 warnings
 **Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase + Electron
 
 **Key Directories:**
-- `src/components/` - Reusable UI components (organized by investment type: stocks/, crypto/, mutualFunds/)
+- `src/components/` - Reusable UI components (organized by investment type: stocks/, crypto/, mutualFunds/, dashboard/)
 - `src/pages/` - Route components (organized by investment type: stocks/, crypto/, mutualFunds/)
 - `src/hooks/` - Custom React hooks (organized by investment type: stocks/, crypto/, mutualFunds/)
 - `src/services/` - Business logic and API calls (organized by investment type: stocks/, crypto/, mutualFunds/)
@@ -120,3 +120,4 @@ No test framework is currently configured. When adding tests:
 - **Wallet Balance:** Total Deposits - Total Buy Costs + Total Sell Proceeds + Total Dividends
 - **Validation:** Buy requires sufficient wallet balance; Sell requires sufficient stock quantity
 - **Manual Price Updates:** Stock prices are updated manually, not fetched from API
+- **Investment History:** Cumulative investment tracking by asset type (Stocks, Mutual Funds, Crypto)
