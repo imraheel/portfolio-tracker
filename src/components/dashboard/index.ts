@@ -1,5 +1,5 @@
-export { PortfolioChart } from './PortfolioChart';
-export type { PortfolioChartProps } from './PortfolioChart';
+export { NetInvestmentChart } from './NetInvestmentChart';
+export type { NetInvestmentChartProps } from './NetInvestmentChart';
 
 export { AssetAllocationChart } from './AssetAllocationChart';
 export type { AssetAllocationChartProps } from './AssetAllocationChart';

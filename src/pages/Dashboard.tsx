@@ -5,13 +5,15 @@ import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { PortfolioChart, AssetAllocationChart, RecentActivity, QuickActions } from '@/components/dashboard';
+import { NetInvestmentChart, AssetAllocationChart, RecentActivity, QuickActions } from '@/components/dashboard';
 import { usePortfolio } from '@/hooks/usePortfolio';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
+import { getInvestmentHistory } from '@/services/investmentHistory';
 import type { Transaction } from '@/components/dashboard/RecentActivity';
+import { useState, useEffect } from 'react';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -103,32 +105,30 @@ function useRecentActivityTransactions(
   return transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-function usePortfolioHistory(
-  metrics: ReturnType<typeof usePortfolio>['metrics'],
-  fundMetrics: ReturnType<typeof useMutualFunds>['metrics'],
-  cryptoMetrics: ReturnType<typeof useCrypto>['metrics']
-): { date: string; value: number }[] {
-  const totalValue =
-    metrics.reduce((sum, m) => sum + m.currentValue, 0) +
-    fundMetrics.reduce((sum, m) => sum + m.currentMarketValue, 0) +
-    cryptoMetrics.reduce((sum, m) => sum + m.currentTotalValue, 0);
+function useInvestmentHistory() {
+  const [history, setHistory] = useState<{
+    date: string;
+    stocksInvestment: number;
+    mutualFundsInvestment: number;
+    cryptoInvestment: number;
+  }[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const today = new Date();
-  const history: { date: string; value: number }[] = [];
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const data = await getInvestmentHistory(365);
+        setHistory(data);
+      } catch (error) {
+        console.error('Failed to fetch investment history:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, []);
 
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const randomVariation = totalValue * (0.9 + Math.random() * 0.2);
-    history.push({
-      date: date.toISOString().split('T')[0],
-      value: Math.round(randomVariation),
-    });
-  }
-
-  history[history.length - 1].value = totalValue;
-
-  return history;
+  return { history, loading };
 }
 
 function calculateGainLossPercentage(invested: number, current: number): number {
@@ -165,9 +165,11 @@ export default function Dashboard() {
     dividends
   );
 
-  const portfolioHistory = usePortfolioHistory(stockMetrics, fundMetrics, cryptoMetrics);
+  const { history: investmentHistory, loading: historyLoading } = useInvestmentHistory();
 
-  if (loading) {
+  const chartLoading = loading || historyLoading;
+
+  if (chartLoading) {
     return (
       <div className="max-w-7xl mx-auto">
         <PageHeader
@@ -226,7 +228,7 @@ export default function Dashboard() {
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <PortfolioChart data={portfolioHistory} loading={loading} />
+        <NetInvestmentChart data={investmentHistory} loading={historyLoading} />
         <AssetAllocationChart
           stocks={stocksValue}
           mutualFunds={fundsValue}
