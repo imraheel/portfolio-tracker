@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
 import type { Cryptocurrency } from '@/services/crypto/crypto';
+import { ArrowUpRight } from 'lucide-react';
 
 interface WithdrawalFormProps {
   cryptocurrencies: Cryptocurrency[];
@@ -46,10 +47,16 @@ export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} >
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-center gap-2 mb-4">
+        <ArrowUpRight className="h-5 w-5 text-[var(--accent-gold)]" />
+        <h3 className="text-[var(--accent-gold)] text-sm uppercase tracking-wider font-semibold">
+          Record Withdrawal
+        </h3>
+      </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="cryptoId" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="cryptoId" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
             Cryptocurrency
           </label>
           <select
@@ -58,23 +65,23 @@ export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
             required
             value={cryptoId}
             onChange={(e) => setCryptoId(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
           >
-            <option value="">Select a cryptocurrency</option>
+            <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-secondary)]">Select a cryptocurrency</option>
             {cryptocurrencies.map((crypto) => (
-              <option key={crypto.id} value={crypto.id}>
+              <option key={crypto.id} value={crypto.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
                 {crypto.symbol} - {crypto.name}
               </option>
             ))}
           </select>
-          {errors.cryptoId && <p className="mt-1 text-xs text-red-600">{errors.cryptoId[0]}</p>}
+          {errors.cryptoId && <p className="mt-1 text-xs text-red-500">{errors.cryptoId[0]}</p>}
         </div>
         <div>
-          <label htmlFor="amountPkr" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="amountPkr" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
             Amount (PKR)
           </label>
-          <div className="mt-1 flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Rs.</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-[var(--text-muted)]">Rs.</span>
             <input
               type="number"
               id="amountPkr"
@@ -84,13 +91,13 @@ export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
               step="0.01"
               value={amountPkr}
               onChange={(e) => setAmountPkr(e.target.value)}
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
             />
           </div>
-          {errors.amountPkr && <p className="mt-1 text-xs text-red-600">{errors.amountPkr[0]}</p>}
+          {errors.amountPkr && <p className="mt-1 text-xs text-red-500">{errors.amountPkr[0]}</p>}
         </div>
         <div>
-          <label htmlFor="withdrawalDate" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="withdrawalDate" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
             Withdrawal Date
           </label>
           <input
@@ -100,11 +107,11 @@ export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
             required
             value={withdrawalDate}
             onChange={(e) => setWithdrawalDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
           />
         </div>
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="notes" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
             Notes
           </label>
           <input
@@ -113,11 +120,11 @@ export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
             name="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
           />
         </div>
       </div>
-      <div className="mt-4">
+      <div className="pt-2">
         <FormButton label="Record Withdrawal" disabled={submitting} />
       </div>
     </form>

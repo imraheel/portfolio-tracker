@@ -10,6 +10,7 @@ import {
   Legend,
 } from 'recharts';
 import { motion } from 'framer-motion';
+import { TrendingUp } from 'lucide-react';
 
 export interface NetInvestmentChartProps {
   data: {
@@ -40,9 +41,9 @@ const formatDate = (dateStr: string): string => {
 };
 
 const formatYAxis = (value: number): string => {
-  if (value >= 1000000) return `Rs. ${(value / 1000000).toFixed(1)}M`;
-  if (value >= 1000) return `Rs. ${(value / 1000).toFixed(0)}K`;
-  return `Rs. ${value}`;
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+  return `${value}`;
 };
 
 interface CustomTooltipProps {
@@ -54,18 +55,20 @@ interface CustomTooltipProps {
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length && label) {
     return (
-      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
-        <p className="text-sm text-gray-500 mb-2">{formatDate(label)}</p>
+      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--border-subtle)] shadow-elevated">
+        <p className="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">
+          {formatDate(label)}
+        </p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 mb-1">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-2 h-2 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-sm text-gray-600 capitalize">
+            <span className="text-xs text-[var(--text-secondary)] capitalize">
               {entry.dataKey.replace(/([A-Z])/g, ' $1').trim()}:
             </span>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-mono font-medium text-[var(--text-primary)]">
               {formatPKR(entry.value)}
             </span>
           </div>
@@ -89,9 +92,9 @@ const getDaysForRange = (range: TimeRange): number => {
 };
 
 const COLORS = {
-  stocksInvestment: '#0d9488',
-  mutualFundsInvestment: '#7c3aed',
-  cryptoInvestment: '#f59e0b',
+  stocksInvestment: 'var(--accent-gold)',
+  mutualFundsInvestment: 'var(--accent-sage)',
+  cryptoInvestment: '#8b5cf6',
 };
 
 export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
@@ -107,9 +110,9 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-soft">
-        <div className="h-4 w-48 bg-gray-100 rounded mb-6 animate-pulse" />
-        <div className="h-64 bg-gray-50 rounded-lg animate-pulse" />
+      <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
+        <div className="h-4 w-48 bg-[var(--bg-elevated)] rounded mb-6 animate-pulse" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -119,22 +122,31 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-xl p-6 shadow-soft"
+      className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]"
     >
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Investment History</h3>
-          <p className="text-sm text-gray-500 mt-1">Track your investments over time</p>
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingUp className="w-4 h-4 text-[var(--accent-gold)]" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+              Timeline
+            </span>
+          </div>
+          <h3 className="font-display text-xl text-[var(--text-primary)]">Investment History</h3>
+          <p className="text-sm text-[var(--text-muted)] mt-1">Track your investments over time</p>
         </div>
-        <div className="flex gap-1 bg-gray-50 p-1 rounded-lg">
+
+        {/* Time Range Selector */}
+        <div className="flex gap-1 bg-[var(--bg-tertiary)] p-1 rounded-lg">
           {timeRanges.map((range) => (
             <button
               key={range}
               onClick={() => setSelectedRange(range)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
                 selectedRange === range
-                  ? 'bg-white text-primary-600 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-[var(--bg-elevated)] text-[var(--accent-gold)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
               }`}
             >
               {range}
@@ -143,30 +155,35 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
         </div>
       </div>
 
+      {/* Chart */}
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              vertical={false} 
+              stroke="var(--border-subtle)" 
+            />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
-              tick={{ fontSize: 12, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}
               axisLine={false}
               tickLine={false}
               dy={10}
             />
             <YAxis
               tickFormatter={formatYAxis}
-              tick={{ fontSize: 12, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}
               axisLine={false}
               tickLine={false}
               dx={-10}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
-              wrapperStyle={{ paddingTop: 10 }}
+              wrapperStyle={{ paddingTop: 20 }}
               formatter={(value) => (
-                <span className="text-sm text-gray-600 capitalize">
+                <span className="text-xs text-[var(--text-secondary)] capitalize">
                   {value.replace(/([A-Z])/g, ' $1').trim()}
                 </span>
               )}

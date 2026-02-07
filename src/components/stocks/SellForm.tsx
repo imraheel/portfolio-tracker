@@ -53,31 +53,34 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-       <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
-          <h2 className="text-xl font-bold text-gray-900">Record Sell Transaction</h2>
-          <div className="text-sm font-medium text-gray-500">
-              Available Shares: <span className="font-bold text-orange-600">{availableQty.toLocaleString()}</span>
+    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-sm">
+       <div className="mb-6 flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--accent-gold)]">●</span>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Record Sell Transaction</h2>
+          </div>
+          <div className="text-sm font-medium text-[var(--text-secondary)]">
+              Available Shares: <span className="font-bold text-[var(--accent-gold)]">{availableQty.toLocaleString()}</span>
           </div>
        </div>
 
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label htmlFor="stockId" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Stock Symbol</label>
+          <label htmlFor="stockId" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Stock Symbol</label>
           <select 
               id="stockId" 
               name="stockId" 
               required 
               value={stockId}
               onChange={(e) => setStockId(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm"
           >
-              <option value="">Select a stock</option>
-              {stocks.map((stock) => (<option key={stock.id} value={stock.id}>{stock.symbol}</option>))}
+              <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Select a stock</option>
+              {stocks.map((stock) => (<option key={stock.id} value={stock.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
           </select>
         </div>
         <div>
-          <label htmlFor="quantity" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Sell Quantity</label>
+          <label htmlFor="quantity" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Sell Quantity</label>
           <input 
               type="number" 
               id="quantity" 
@@ -86,14 +89,14 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
               min="1"
               value={qty || ''}
               onChange={(e) => setQty(Number(e.target.value))}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+              className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
           {errors.quantity && (
-            <p className="mt-1 text-xs text-red-600">{errors.quantity[0]}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.quantity[0]}</p>
           )}
         </div>
         <div>
-          <label htmlFor="sellRate" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Sell Rate (PKR)</label>
+          <label htmlFor="sellRate" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Sell Rate (PKR)</label>
           <input 
               type="number" 
               id="sellRate" 
@@ -103,14 +106,14 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
               min="0.01"
               value={rate || ''}
               onChange={(e) => setRate(Number(e.target.value))}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+              className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
           {errors.sellRate && (
-            <p className="mt-1 text-xs text-red-600">{errors.sellRate[0]}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.sellRate[0]}</p>
           )}
         </div>
         <div>
-          <label htmlFor="sellDate" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Sell Date</label>
+          <label htmlFor="sellDate" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Sell Date</label>
           <input 
             type="date" 
             id="sellDate" 
@@ -118,41 +121,41 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
             required 
             value={sellDate}
             onChange={(e) => setSellDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
         </div>
       </div>
 
       <div className="mt-6 flex flex-col space-y-4 sm:flex-row sm:items-end sm:justify-between sm:space-y-0">
         <div className="flex-1 max-w-md">
-          <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Notes (Optional)</label>
+          <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Notes (Optional)</label>
           <textarea 
             id="notes" 
             name="notes" 
             rows={1}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
         </div>
         
         <div className="flex items-center space-x-6">
           <div className="text-right">
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Total Proceeds</p>
-            <p className="text-xl font-black text-gray-900">
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Total Proceeds</p>
+            <p className="text-xl font-black text-[var(--text-primary)]">
               Rs. {(qty * rate).toLocaleString('en-PK', { minimumFractionDigits: 2 })}
             </p>
           </div>
           <FormButton 
               label="Record Sell" 
               disabled={isExceeded || submitting}
-              className={clsx(isExceeded && "opacity-50 cursor-not-allowed")}
+              className={clsx("btn-primary", isExceeded && "opacity-50 cursor-not-allowed")}
           />
         </div>
       </div>
 
       {isExceeded && (
-        <p className="mt-2 text-right text-xs font-bold text-red-600 italic">
+        <p className="mt-2 text-right text-xs font-bold text-red-400 italic">
           Error: Sell quantity exceeds available shares.
         </p>
       )}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
+import { PlusCircle } from 'lucide-react';
 
 export function CryptoForm() {
   const { addCryptocurrency } = useCrypto();
@@ -35,10 +36,16 @@ export function CryptoForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-center gap-2 mb-4">
+        <PlusCircle className="h-5 w-5 text-[var(--accent-gold)]" />
+        <h3 className="text-[var(--accent-gold)] text-sm uppercase tracking-wider font-semibold">
+          Add New Cryptocurrency
+        </h3>
+      </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="symbol" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="symbol" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
             Symbol
           </label>
           <input
@@ -49,12 +56,12 @@ export function CryptoForm() {
             maxLength={20}
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
           />
-          {errors.symbol && <p className="mt-1 text-xs text-red-600">{errors.symbol[0]}</p>}
+          {errors.symbol && <p className="mt-1 text-xs text-red-500">{errors.symbol[0]}</p>}
         </div>
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
             Name
           </label>
           <input
@@ -65,12 +72,12 @@ export function CryptoForm() {
             maxLength={255}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
           />
-          {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name[0]}</p>}
+          {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name[0]}</p>}
         </div>
       </div>
-      <div className="mt-4">
+      <div className="pt-2">
         <FormButton label="Add Cryptocurrency" disabled={submitting} />
       </div>
     </form>

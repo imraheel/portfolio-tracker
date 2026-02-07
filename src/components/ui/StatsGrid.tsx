@@ -18,7 +18,7 @@ export function StatsGrid({
   };
 
   return (
-    <div className={clsx('grid gap-5', gridCols[columns], className)}>
+    <div className={clsx('grid gap-4', gridCols[columns], className)}>
       {children}
     </div>
   );

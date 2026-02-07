@@ -7,6 +7,7 @@ import {
   CreditCard,
   Wallet,
   TrendingUp,
+  Activity,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -36,17 +37,47 @@ const formatPKR = (value: number): string => {
 const getTransactionIcon = (type: Transaction['type']) => {
   switch (type) {
     case 'buy':
-      return { icon: ArrowDownCircle, color: 'text-green-500', bg: 'bg-green-50' };
+      return { 
+        icon: ArrowDownCircle, 
+        color: 'text-[var(--accent-sage)]', 
+        bg: 'bg-[var(--accent-sage)]/10',
+        border: 'border-[var(--accent-sage)]/20'
+      };
     case 'sell':
-      return { icon: ArrowUpCircle, color: 'text-red-500', bg: 'bg-red-50' };
+      return { 
+        icon: ArrowUpCircle, 
+        color: 'text-[var(--accent-coral)]', 
+        bg: 'bg-[var(--accent-coral)]/10',
+        border: 'border-[var(--accent-coral)]/20'
+      };
     case 'dividend':
-      return { icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-50' };
+      return { 
+        icon: TrendingUp, 
+        color: 'text-[var(--accent-gold)]', 
+        bg: 'bg-[var(--accent-gold)]/10',
+        border: 'border-[var(--accent-gold)]/20'
+      };
     case 'deposit':
-      return { icon: DollarSign, color: 'text-blue-500', bg: 'bg-blue-50' };
+      return { 
+        icon: DollarSign, 
+        color: 'text-[var(--accent-sage)]', 
+        bg: 'bg-[var(--accent-sage)]/10',
+        border: 'border-[var(--accent-sage)]/20'
+      };
     case 'withdrawal':
-      return { icon: CreditCard, color: 'text-orange-500', bg: 'bg-orange-50' };
+      return { 
+        icon: CreditCard, 
+        color: 'text-[var(--accent-coral)]', 
+        bg: 'bg-[var(--accent-coral)]/10',
+        border: 'border-[var(--accent-coral)]/20'
+      };
     default:
-      return { icon: Wallet, color: 'text-gray-500', bg: 'bg-gray-50' };
+      return { 
+        icon: Wallet, 
+        color: 'text-[var(--text-muted)]', 
+        bg: 'bg-[var(--bg-elevated)]',
+        border: 'border-[var(--border-subtle)]'
+      };
   }
 };
 
@@ -90,18 +121,25 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="bg-white rounded-xl shadow-soft overflow-hidden"
+      className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden"
     >
-      <div className="p-6 border-b border-gray-100">
+      {/* Header */}
+      <div className="p-6 border-b border-[var(--border-subtle)]">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-            <p className="text-sm text-gray-500 mt-1">Your latest transactions</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Activity className="w-4 h-4 text-[var(--accent-gold)]" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                Activity
+              </span>
+            </div>
+            <h3 className="font-display text-xl text-[var(--text-primary)]">Recent Activity</h3>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Your latest transactions</p>
           </div>
           {onViewAll && (
             <button
               onClick={onViewAll}
-              className="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors"
+              className="text-xs font-medium text-[var(--accent-gold)] hover:text-[var(--accent-gold-light)] transition-colors"
             >
               View All
             </button>
@@ -109,14 +147,16 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
         </div>
       </div>
 
-      <div className="divide-y divide-gray-50">
+      {/* Transactions List */}
+      <div className="divide-y divide-[var(--border-subtle)]">
         <motion.ul
           variants={containerVariants}
           initial="hidden"
           animate="visible"
+          className="max-h-[400px] overflow-y-auto scrollbar-hide"
         >
           {displayTransactions.map((transaction) => {
-            const { icon: Icon, color, bg } = getTransactionIcon(transaction.type);
+            const { icon: Icon, color, bg, border } = getTransactionIcon(transaction.type);
             const isPositive = ['buy', 'dividend', 'deposit'].includes(transaction.type);
 
             return (
@@ -124,23 +164,23 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
                 key={transaction.id}
                 variants={itemVariants}
                 transition={{ duration: 0.3 }}
-                className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="flex items-center gap-4 p-4 hover:bg-[var(--bg-elevated)]/30 transition-colors cursor-pointer"
               >
-                <div className={clsx('p-2 rounded-full', bg)}>
-                  <Icon className={clsx('w-5 h-5', color)} />
+                <div className={clsx('p-2 rounded-lg border', bg, border)}>
+                  <Icon className={clsx('w-4 h-4', color)} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-medium text-[var(--text-primary)] truncate">
                     {getTransactionLabel(transaction)}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-[var(--text-muted)]">
                     {format(new Date(transaction.date), 'MMM d, yyyy • h:mm a')}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className={clsx(
-                    'text-sm font-semibold',
-                    isPositive ? 'text-green-600' : 'text-red-600'
+                    'text-sm font-mono font-medium',
+                    isPositive ? 'text-[var(--accent-sage)]' : 'text-[var(--accent-coral)]'
                   )}>
                     {isPositive ? '+' : '-'}{formatPKR(transaction.amount)}
                   </p>
@@ -152,7 +192,7 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
 
         {transactions.length === 0 && (
           <div className="p-8 text-center">
-            <p className="text-sm text-gray-400">No recent transactions</p>
+            <p className="text-sm text-[var(--text-muted)]">No recent transactions</p>
           </div>
         )}
       </div>

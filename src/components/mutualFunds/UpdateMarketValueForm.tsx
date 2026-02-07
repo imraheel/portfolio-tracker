@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
 import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import { TrendingUp, X } from 'lucide-react';
 
 interface UpdateMarketValueFormProps {
   fundId: number;
@@ -47,12 +48,12 @@ export function UpdateMarketValueForm({ fundId, currentValue }: UpdateMarketValu
   if (!isEditing) {
     return (
       <div className="flex items-center justify-end space-x-2">
-        <span className="text-sm font-medium text-gray-900">
+        <span className="text-sm font-medium text-[var(--text-primary)]">
           {formatCurrency(parseFloat(currentValue) || 0)}
         </span>
         <button
           onClick={() => setIsEditing(true)}
-          className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200"
+          className="rounded-md bg-[var(--bg-tertiary)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-gold)]"
         >
           Update
         </button>
@@ -62,15 +63,19 @@ export function UpdateMarketValueForm({ fundId, currentValue }: UpdateMarketValu
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center justify-end space-x-2">
+      <div className="mb-2 flex items-center gap-2 text-[var(--accent-gold)]">
+        <TrendingUp className="h-4 w-4" />
+        <h4 className="text-xs font-medium uppercase tracking-wider">Update Market Value</h4>
+      </div>
       <div className="flex items-center space-x-1">
-        <span className="text-sm text-gray-500">Rs.</span>
+        <span className="text-sm text-[var(--text-secondary)]">Rs.</span>
         <input
           type="number"
           step="0.01"
           min="0"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-32 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-1 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           placeholder="0.00"
         />
       </div>
@@ -81,9 +86,9 @@ export function UpdateMarketValueForm({ fundId, currentValue }: UpdateMarketValu
           setIsEditing(false);
           setValue(currentValue);
         }}
-        className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200"
+        className="rounded-md bg-[var(--bg-tertiary)] px-2 py-1 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-red)]"
       >
-        Cancel
+        <X className="h-4 w-4" />
       </button>
     </form>
   );

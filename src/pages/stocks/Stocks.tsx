@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { useStocks } from '@/hooks/stocks/useStocks';
 import { StockForm } from '@/components/stocks/StockForm';
 import { UpdatePriceForm } from '@/components/stocks/UpdatePriceForm';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { BarChart3 } from 'lucide-react';
 
 const pageVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -33,7 +35,7 @@ function StocksTable() {
     return (
       <section className="mt-8">
         <div className="animate-pulse">
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-64 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]"></div>
         </div>
       </section>
     );
@@ -41,28 +43,41 @@ function StocksTable() {
 
   return (
     <section className="mt-8">
-      <motion.h2 
-        variants={itemVariants}
-        className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400"
-      >
-        Monitoring List
-      </motion.h2>
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+        className="overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]"
       >
+        {/* Table Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-[var(--accent-gold)]" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+              Watchlist
+            </span>
+          </div>
+          <span className="text-xs text-[var(--text-muted)]">
+            {stocks.length} stocks
+          </span>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">Symbol</th>
-                <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">Company / Sector</th>
-                <th className="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500 w-64">Current Price (PKR)</th>
+          <table className="min-w-full">
+            <thead>
+              <tr className="border-b border-[var(--border-subtle)]">
+                <th className="px-6 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                  Symbol
+                </th>
+                <th className="px-6 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                  Company / Sector
+                </th>
+                <th className="px-6 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium w-64">
+                  Current Price (PKR)
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-[var(--border-subtle)]">
               {stocks.map((stock, i) => (
                 <motion.tr 
                   key={stock.id}
@@ -70,15 +85,14 @@ function StocksTable() {
                   variants={tableRowVariants}
                   initial="hidden"
                   animate="visible"
-                  whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-                  className="hover:bg-gray-50"
+                  className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
                 >
                   <td className="whitespace-nowrap px-6 py-4">
-                    <span className="font-bold text-gray-900">{stock.symbol}</span>
+                    <span className="font-mono font-semibold text-[var(--text-primary)]">{stock.symbol}</span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm text-gray-900">{stock.company_name || '-'}</div>
-                    <div className="text-xs text-gray-500">{stock.sector || '-'}</div>
+                    <div className="text-sm text-[var(--text-primary)]">{stock.company_name || '-'}</div>
+                    <div className="text-xs text-[var(--text-muted)]">{stock.sector || '-'}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right">
                     <UpdatePriceForm 
@@ -90,7 +104,7 @@ function StocksTable() {
               ))}
               {stocks.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={3} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
                     No stocks defined in your monitoring list.
                   </td>
                 </tr>
@@ -111,20 +125,11 @@ export default function Stocks() {
       animate="visible"
       className="max-w-4xl mx-auto"
     >
-      <header className="mb-8">
-        <motion.h1 
-          variants={itemVariants}
-          className="text-3xl font-extrabold text-gray-900"
-        >
-          Stock Prices
-        </motion.h1>
-        <motion.p 
-          variants={itemVariants}
-          className="mt-1 text-sm text-gray-500"
-        >
-          Manage symbols and update latest market prices.
-        </motion.p>
-      </header>
+      <PageHeader
+        title="Stock Prices"
+        description="Manage symbols and update latest market prices."
+        breadcrumbs={[{ label: 'Stocks' }, { label: 'Prices' }]}
+      />
       
       <motion.div variants={itemVariants} className="mb-10">
         <StockForm />

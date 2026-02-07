@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, DollarSign, PieChart, Wallet, Coins } from 'lucide-react';
+import { TrendingUp, DollarSign, PieChart, Wallet, Coins, Bitcoin } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
@@ -45,93 +45,97 @@ function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
   if (loading) {
     return (
       <Card className="animate-pulse">
-        <div className="h-64 bg-gray-200 rounded" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
   }
 
   return (
     <Card hover={false}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Cryptocurrencies List</h3>
-          <p className="text-sm text-gray-500">Your cryptocurrency holdings</p>
+          <div className="flex items-center gap-2 mb-1">
+            <Coins className="w-4 h-4 text-[var(--accent-gold)]" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+              Assets
+            </span>
+          </div>
+          <h3 className="font-display text-xl text-[var(--text-primary)]">Cryptocurrencies List</h3>
+          <p className="text-sm text-[var(--text-muted)] mt-1">Your cryptocurrency holdings</p>
         </div>
-        <Badge variant="warning">{cryptocurrencies.length} assets</Badge>
+        <Badge variant="gold">{cryptocurrencies.length} assets</Badge>
       </div>
-      <div className="overflow-hidden rounded-lg border border-gray-100">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-100">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Symbol</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Name</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Total Value</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Net Investment</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Gain/Loss</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {cryptocurrencies.map((crypto) => {
-                const cryptoMetrics = getMetricsForCrypto(crypto.id);
-                return (
-                  <motion.tr
-                    key={crypto.id}
-                    className="hover:bg-gray-50 transition-colors"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <Coins className="w-4 h-4 text-amber-500" />
-                        <span className="font-bold text-gray-900">{crypto.symbol}</span>
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-900">{crypto.name}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right">
-                      <UpdateTotalValueForm
-                        cryptoId={crypto.id}
-                        currentValue={crypto.current_total_value?.toString() ?? '0'}
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-900">
-                      {formatCurrency(cryptoMetrics?.netInvestment || 0)}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right">
-                      {cryptoMetrics && (
-                        <div>
-                          <span
-                            className={`text-sm font-medium ${
-                              cryptoMetrics.gainLoss >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}
-                          >
-                            {cryptoMetrics.gainLoss >= 0 ? '+' : ''}
-                            {formatCurrency(cryptoMetrics.gainLoss)}
-                          </span>
-                          <span
-                            className={`ml-2 text-xs ${
-                              cryptoMetrics.gainLossPercent >= 0 ? 'text-green-600' : 'text-red-600'
-                            }`}
-                          >
-                            ({cryptoMetrics.gainLossPercent >= 0 ? '+' : ''}
-                            {cryptoMetrics.gainLossPercent.toFixed(2)}%)
-                          </span>
-                        </div>
-                      )}
-                    </td>
-                  </motion.tr>
-                );
-              })}
-              {cryptocurrencies.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-500">
-                    No cryptocurrencies defined. Add your first cryptocurrency above.
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-[var(--border-subtle)]">
+              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Symbol</th>
+              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Name</th>
+              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Total Value</th>
+              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Net Investment</th>
+              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Gain/Loss</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--border-subtle)]">
+            {cryptocurrencies.map((crypto) => {
+              const cryptoMetrics = getMetricsForCrypto(crypto.id);
+              return (
+                <motion.tr
+                  key={crypto.id}
+                  className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Bitcoin className="w-4 h-4 text-[var(--accent-gold)]" />
+                      <span className="font-mono font-semibold text-[var(--text-primary)]">{crypto.symbol}</span>
+                    </div>
                   </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-primary)]">{crypto.name}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <UpdateTotalValueForm
+                      cryptoId={crypto.id}
+                      currentValue={crypto.current_total_value?.toString() ?? '0'}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-[var(--text-secondary)] font-mono">
+                    {formatCurrency(cryptoMetrics?.netInvestment || 0)}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-right">
+                    {cryptoMetrics && (
+                      <div>
+                        <span
+                          className={`text-sm font-mono font-medium ${
+                            cryptoMetrics.gainLoss >= 0 ? 'text-[var(--accent-sage)]' : 'text-[var(--accent-coral)]'
+                          }`}
+                        >
+                          {cryptoMetrics.gainLoss >= 0 ? '+' : ''}
+                          {formatCurrency(cryptoMetrics.gainLoss)}
+                        </span>
+                        <span
+                          className={`ml-2 text-xs ${
+                            cryptoMetrics.gainLossPercent >= 0 ? 'text-[var(--accent-sage)]' : 'text-[var(--accent-coral)]'
+                          }`}
+                        >
+                          ({cryptoMetrics.gainLossPercent >= 0 ? '+' : ''}
+                          {cryptoMetrics.gainLossPercent.toFixed(2)}%)
+                        </span>
+                      </div>
+                    )}
+                  </td>
+                </motion.tr>
+              );
+            })}
+            {cryptocurrencies.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
+                  No cryptocurrencies defined. Add your first cryptocurrency above.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </Card>
   );
@@ -150,7 +154,7 @@ export default function CryptoList() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-7xl mx-auto space-y-6"
+      className="max-w-7xl mx-auto space-y-8"
     >
       <PageHeader
         title="Cryptocurrencies"
@@ -165,15 +169,15 @@ export default function CryptoList() {
             value={formatPkr(totalValue)}
             trend={{ value: totalGainLossPercent, label: 'vs invested' }}
             icon={<TrendingUp className="w-5 h-5" />}
-            color="orange"
-            loading={loading}
+            variant="gold"
+            delay={0}
           />
           <MetricCard
             title="Total Invested"
             value={formatPkr(totalInvested)}
             icon={<DollarSign className="w-5 h-5" />}
-            color="blue"
-            loading={loading}
+            variant="default"
+            delay={0.1}
           />
           <MetricCard
             title="Gain/Loss"
@@ -183,15 +187,15 @@ export default function CryptoList() {
               label: `${totalGainLoss >= 0 ? '+' : ''}${totalGainLossPercent.toFixed(1)}%`,
             }}
             icon={<PieChart className="w-5 h-5" />}
-            color={totalGainLoss >= 0 ? 'green' : 'red'}
-            loading={loading}
+            variant={totalGainLoss >= 0 ? 'sage' : 'coral'}
+            delay={0.2}
           />
           <MetricCard
             title="Total Assets"
             value={cryptocurrencies.length.toString()}
             icon={<Wallet className="w-5 h-5" />}
-            color="purple"
-            loading={loading}
+            variant="default"
+            delay={0.3}
           />
         </StatsGrid>
       </motion.div>
@@ -199,8 +203,14 @@ export default function CryptoList() {
       <motion.div variants={itemVariants}>
         <Card hover={false}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Add New Cryptocurrency</h3>
-            <p className="text-sm text-gray-500">Register a new cryptocurrency to track</p>
+            <div className="flex items-center gap-2 mb-1">
+              <Coins className="w-4 h-4 text-[var(--accent-gold)]" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                New Asset
+              </span>
+            </div>
+            <h3 className="font-display text-xl text-[var(--text-primary)]">Add New Cryptocurrency</h3>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Register a new cryptocurrency to track</p>
           </div>
           <CryptoForm />
         </Card>

@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
-import { ShoppingCart, ArrowDownCircle, TrendingUp, DollarSign } from 'lucide-react';
+import { ShoppingCart, ArrowDownCircle, TrendingUp, DollarSign, ArrowRightLeft } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
@@ -30,13 +30,13 @@ function formatPkr(amount: number): string {
 
 function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right' }[] }) {
   return (
-    <thead className="bg-gray-50">
-      <tr>
+    <thead>
+      <tr className="border-b border-[var(--border-subtle)]">
         {cols.map((col, i) => (
           <th
             key={i}
             className={clsx(
-              "px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500",
+              "px-4 py-3 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium",
               col.align === 'right' ? "text-right" : "text-left"
             )}
           >
@@ -63,60 +63,64 @@ function PurchasesTable() {
   if (loading) {
     return (
       <Card className="animate-pulse">
-        <div className="h-64 bg-gray-200 rounded" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
   }
 
   return (
     <Card hover={false}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Purchase History</h3>
-          <p className="text-sm text-gray-500">All your mutual fund purchases</p>
+          <div className="flex items-center gap-2 mb-1">
+            <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+              Buy History
+            </span>
+          </div>
+          <h3 className="font-display text-xl text-[var(--text-primary)]">Purchase History</h3>
+          <p className="text-sm text-[var(--text-muted)] mt-1">All your mutual fund purchases</p>
         </div>
-        <Badge variant="info">{purchases.length} purchases</Badge>
+        <Badge variant="gold">{purchases.length} purchases</Badge>
       </div>
-      <div className="overflow-hidden rounded-lg border border-gray-100">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-100">
-            <TableHeader cols={[
-              { label: 'Date' },
-              { label: 'Fund' },
-              { label: 'Amount', align: 'right' },
-              { label: 'Notes' },
-            ]} />
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {purchases.map((purchase) => (
-                <motion.tr
-                  key={purchase.id}
-                  className="hover:bg-gray-50 transition-colors"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
-                    {formatDate(purchase.purchase_date)}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <span className="font-medium text-gray-900">{purchase.fund?.symbol}</span>
-                    <span className="ml-2 text-sm text-gray-500">{purchase.fund?.name}</span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-900">
-                    {formatCurrency(purchase.amount)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{purchase.notes || '-'}</td>
-                </motion.tr>
-              ))}
-              {purchases.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">
-                    No purchases recorded yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <TableHeader cols={[
+            { label: 'Date' },
+            { label: 'Fund' },
+            { label: 'Amount', align: 'right' },
+            { label: 'Notes' },
+          ]} />
+          <tbody className="divide-y divide-[var(--border-subtle)]">
+            {purchases.map((purchase) => (
+              <motion.tr
+                key={purchase.id}
+                className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-secondary)]">
+                  {formatDate(purchase.purchase_date)}
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <span className="font-mono font-medium text-[var(--text-primary)]">{purchase.fund?.symbol}</span>
+                  <span className="ml-2 text-sm text-[var(--text-muted)]">{purchase.fund?.name}</span>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-mono font-medium text-[var(--accent-coral)]">
+                  {formatCurrency(purchase.amount)}
+                </td>
+                <td className="px-4 py-3 text-sm text-[var(--text-muted)]">{purchase.notes || '-'}</td>
+              </motion.tr>
+            ))}
+            {purchases.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
+                  No purchases recorded yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </Card>
   );
@@ -137,60 +141,64 @@ function WithdrawalsTable() {
   if (loading) {
     return (
       <Card className="animate-pulse">
-        <div className="h-64 bg-gray-200 rounded" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
   }
 
   return (
     <Card hover={false}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Withdrawal History</h3>
-          <p className="text-sm text-gray-500">All your mutual fund withdrawals</p>
+          <div className="flex items-center gap-2 mb-1">
+            <ArrowDownCircle className="w-4 h-4 text-[var(--accent-gold)]" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+              Sell History
+            </span>
+          </div>
+          <h3 className="font-display text-xl text-[var(--text-primary)]">Withdrawal History</h3>
+          <p className="text-sm text-[var(--text-muted)] mt-1">All your mutual fund withdrawals</p>
         </div>
-        <Badge variant="info">{withdrawals.length} withdrawals</Badge>
+        <Badge variant="coral">{withdrawals.length} withdrawals</Badge>
       </div>
-      <div className="overflow-hidden rounded-lg border border-gray-100">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-100">
-            <TableHeader cols={[
-              { label: 'Date' },
-              { label: 'Fund' },
-              { label: 'Amount', align: 'right' },
-              { label: 'Notes' },
-            ]} />
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {withdrawals.map((withdrawal) => (
-                <motion.tr
-                  key={withdrawal.id}
-                  className="hover:bg-gray-50 transition-colors"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
-                    {formatDate(withdrawal.withdrawal_date)}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <span className="font-medium text-gray-900">{withdrawal.fund?.symbol}</span>
-                    <span className="ml-2 text-sm text-gray-500">{withdrawal.fund?.name}</span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-900">
-                    {formatCurrency(withdrawal.amount)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{withdrawal.notes || '-'}</td>
-                </motion.tr>
-              ))}
-              {withdrawals.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">
-                    No withdrawals recorded yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <TableHeader cols={[
+            { label: 'Date' },
+            { label: 'Fund' },
+            { label: 'Amount', align: 'right' },
+            { label: 'Notes' },
+          ]} />
+          <tbody className="divide-y divide-[var(--border-subtle)]">
+            {withdrawals.map((withdrawal) => (
+              <motion.tr
+                key={withdrawal.id}
+                className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-secondary)]">
+                  {formatDate(withdrawal.withdrawal_date)}
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <span className="font-mono font-medium text-[var(--text-primary)]">{withdrawal.fund?.symbol}</span>
+                  <span className="ml-2 text-sm text-[var(--text-muted)]">{withdrawal.fund?.name}</span>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-mono font-medium text-[var(--accent-sage)]">
+                  {formatCurrency(withdrawal.amount)}
+                </td>
+                <td className="px-4 py-3 text-sm text-[var(--text-muted)]">{withdrawal.notes || '-'}</td>
+              </motion.tr>
+            ))}
+            {withdrawals.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
+                  No withdrawals recorded yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </Card>
   );
@@ -200,7 +208,7 @@ export default function Transactions() {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentView = searchParams.get('view') === 'withdrawals' ? 'withdrawals' : 'invest';
 
-  const { purchases, withdrawals, funds, loading } = useMutualFunds();
+  const { purchases, withdrawals, funds } = useMutualFunds();
 
   const totalInvested = purchases.reduce((sum, p) => sum + p.amount, 0);
   const totalWithdrawn = withdrawals.reduce((sum, w) => sum + w.amount, 0);
@@ -214,7 +222,7 @@ export default function Transactions() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-7xl mx-auto space-y-6"
+      className="max-w-7xl mx-auto space-y-8"
     >
       <PageHeader
         title="Mutual Fund Transactions"
@@ -228,51 +236,57 @@ export default function Transactions() {
             title="Total Invested"
             value={formatPkr(totalInvested)}
             icon={<ShoppingCart className="w-5 h-5" />}
-            color="green"
-            loading={loading}
+            variant="default"
+            delay={0}
           />
           <MetricCard
             title="Total Withdrawn"
             value={formatPkr(totalWithdrawn)}
             icon={<ArrowDownCircle className="w-5 h-5" />}
-            color="red"
-            loading={loading}
+            variant="sage"
+            delay={0.1}
           />
           <MetricCard
             title="Active Funds"
             value={funds.length.toString()}
             icon={<TrendingUp className="w-5 h-5" />}
-            color="blue"
-            loading={loading}
+            variant="default"
+            delay={0.2}
           />
           <MetricCard
             title="Available Funds"
             value={funds.length.toString()}
             icon={<DollarSign className="w-5 h-5" />}
-            color="purple"
-            loading={loading}
+            variant="gold"
+            delay={0.3}
           />
         </StatsGrid>
       </motion.div>
 
-      <div className="border-b border-gray-200">
+      <div className="border-b border-[var(--border-subtle)]">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => handleTabChange('invest')}
             className={clsx(
-              "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors",
-              currentView === 'invest' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors",
+              currentView === 'invest' 
+                ? 'border-[var(--accent-gold)] text-[var(--accent-gold)]' 
+                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
             )}
           >
+            <ArrowRightLeft className="w-4 h-4" />
             Invest
           </button>
           <button
             onClick={() => handleTabChange('withdrawals')}
             className={clsx(
-              "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-bold tracking-wide transition-colors",
-              currentView === 'withdrawals' ? 'border-red-500 text-red-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors",
+              currentView === 'withdrawals' 
+                ? 'border-[var(--accent-coral)] text-[var(--accent-coral)]' 
+                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
             )}
           >
+            <ArrowDownCircle className="w-4 h-4" />
             Withdrawals
           </button>
         </nav>
@@ -283,8 +297,14 @@ export default function Transactions() {
           <motion.div variants={itemVariants}>
             <Card hover={false}>
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Invest in Fund</h3>
-                <p className="text-sm text-gray-500">Add a new mutual fund purchase</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                    Buy
+                  </span>
+                </div>
+                <h3 className="font-display text-xl text-[var(--text-primary)]">Invest in Fund</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-1">Add a new mutual fund purchase</p>
               </div>
               <PurchaseForm funds={funds} />
             </Card>
@@ -294,8 +314,14 @@ export default function Transactions() {
           <motion.div variants={itemVariants}>
             <Card hover={false}>
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Withdraw from Fund</h3>
-                <p className="text-sm text-gray-500">Add a new mutual fund withdrawal</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <ArrowDownCircle className="w-4 h-4 text-[var(--accent-coral)]" />
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-coral)]">
+                    Sell
+                  </span>
+                </div>
+                <h3 className="font-display text-xl text-[var(--text-primary)]">Withdraw from Fund</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-1">Add a new mutual fund withdrawal</p>
               </div>
               <WithdrawalForm funds={funds} />
             </Card>

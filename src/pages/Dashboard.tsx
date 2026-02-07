@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, DollarSign, PieChart, Wallet } from 'lucide-react';
+import { TrendingUp, DollarSign, PieChart, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
@@ -14,6 +14,7 @@ import { useTransactions } from '@/hooks/stocks/useTransactions';
 import { getInvestmentHistory } from '@/services/investmentHistory';
 import type { Transaction } from '@/components/dashboard/RecentActivity';
 import { useState, useEffect } from 'react';
+import { clsx } from 'clsx';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -39,19 +40,23 @@ function formatPkr(amount: number): string {
 
 function LoadingSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-xl bg-white p-5 shadow-soft">
-            <div className="h-4 w-24 rounded bg-gray-200 mb-4" />
-            <div className="h-8 w-32 rounded bg-gray-200 mb-2" />
-            <div className="h-3 w-20 rounded bg-gray-200" />
+          <div key={i} className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)]">
+            <div className="animate-pulse space-y-4">
+              <div className="h-10 w-10 rounded-lg bg-[var(--bg-elevated)]" />
+              <div className="space-y-2">
+                <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
+                <div className="h-8 w-32 rounded bg-[var(--bg-elevated)]" />
+              </div>
+            </div>
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="h-72 bg-white rounded-xl shadow-soft" />
-        <div className="h-72 bg-white rounded-xl shadow-soft" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]" />
+        <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]" />
       </div>
     </div>
   );
@@ -186,13 +191,14 @@ export default function Dashboard() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-7xl mx-auto space-y-6"
+      className="max-w-7xl mx-auto space-y-8"
     >
       <PageHeader
         title="Dashboard"
         description="Performance overview of your investments"
       />
 
+      {/* Metrics Grid */}
       <motion.div variants={itemVariants}>
         <StatsGrid columns={4}>
           <MetricCard
@@ -200,34 +206,39 @@ export default function Dashboard() {
             value={formatPkr(totalValue)}
             trend={{ value: totalGainLossPercentage, label: 'vs invested' }}
             icon={<TrendingUp className="w-5 h-5" />}
-            color="blue"
+            variant="gold"
+            delay={0}
           />
           <MetricCard
             title="Total Invested"
             value={formatPkr(totalInvested)}
             icon={<DollarSign className="w-5 h-5" />}
-            color="purple"
+            variant="default"
+            delay={0.1}
           />
           <MetricCard
             title="Total Gain/Loss"
-            value={formatPkr(totalGainLoss)}
+            value={formatPkr(Math.abs(totalGainLoss))}
             trend={{
               value: totalGainLossPercentage,
               label: `${totalGainLoss >= 0 ? '+' : ''}${totalGainLossPercentage.toFixed(1)}%`,
             }}
             icon={<PieChart className="w-5 h-5" />}
-            color={totalGainLoss >= 0 ? 'green' : 'red'}
+            variant={totalGainLoss >= 0 ? 'sage' : 'coral'}
+            delay={0.2}
           />
           <MetricCard
             title="Wallet Balance"
             value={formatPkr(balance)}
             icon={<Wallet className="w-5 h-5" />}
-            color="orange"
+            variant="default"
+            delay={0.3}
           />
         </StatsGrid>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {/* Charts */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <NetInvestmentChart data={investmentHistory} loading={historyLoading} />
         <AssetAllocationChart
           stocks={stocksValue}
@@ -237,90 +248,103 @@ export default function Dashboard() {
         />
       </motion.div>
 
+      {/* Top Holdings Table */}
       <motion.div variants={itemVariants}>
-        <Card hover={false}>
-          <div className="flex items-center justify-between mb-4">
+        <Card>
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Top Holdings</h3>
-              <p className="text-sm text-gray-500">Your largest investments by value</p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="h-px w-6 bg-[var(--accent-gold)]" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                  Holdings
+                </span>
+              </div>
+              <h3 className="font-display text-xl text-[var(--text-primary)]">Top Holdings</h3>
+              <p className="text-sm text-[var(--text-muted)] mt-1">Your largest investments by value</p>
             </div>
-            <Badge variant="info">{stockMetrics.length} holdings</Badge>
+            <Badge variant="gold">{stockMetrics.length} holdings</Badge>
           </div>
-          <div className="overflow-hidden rounded-lg border border-gray-100">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Symbol
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Quantity
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Avg. Cost
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Current
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Value
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Gain/Loss
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
-                  {stockMetrics.slice(0, 10).map((m) => (
-                    <motion.tr
-                      key={m.stockId}
-                      className="hover:bg-gray-50 transition-colors"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-bold text-gray-900">
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[var(--border-subtle)]">
+                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                    Symbol
+                  </th>
+                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                    Quantity
+                  </th>
+                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                    Avg. Cost
+                  </th>
+                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                    Current
+                  </th>
+                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                    Value
+                  </th>
+                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                    Gain/Loss
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border-subtle)]">
+                {stockMetrics.slice(0, 10).map((m, index) => (
+                  <motion.tr
+                    key={m.stockId}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
+                  >
+                    <td className="py-4 px-4">
+                      <span className="font-mono font-semibold text-[var(--text-primary)]">
                         {m.symbol}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-600">
-                        {m.remainingQty.toLocaleString()}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-600">
-                        {formatPkr(m.avgBuyPrice)}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-gray-600">
-                        {formatPkr(m.currentPrice)}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-semibold text-gray-900">
-                        {formatPkr(m.currentValue)}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-semibold">
-                        <span
-                          className={
-                            m.unrealizedGainLoss >= 0 ? 'text-green-600' : 'text-red-600'
-                          }
-                        >
-                          {m.unrealizedGainLoss < 0 ? '' : '+'}
-                          {formatPkr(Math.abs(m.unrealizedGainLoss))}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))}
-                  {stockMetrics.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-500">
-                        No stock holdings yet
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                      </span>
+                    </td>
+                    <td className="py-4 px-4 text-right font-mono text-[var(--text-secondary)]">
+                      {m.remainingQty.toLocaleString()}
+                    </td>
+                    <td className="py-4 px-4 text-right font-mono text-[var(--text-secondary)]">
+                      {formatPkr(m.avgBuyPrice)}
+                    </td>
+                    <td className="py-4 px-4 text-right font-mono text-[var(--text-secondary)]">
+                      {formatPkr(m.currentPrice)}
+                    </td>
+                    <td className="py-4 px-4 text-right font-mono font-medium text-[var(--text-primary)]">
+                      {formatPkr(m.currentValue)}
+                    </td>
+                    <td className="py-4 px-4 text-right">
+                      <span className={clsx(
+                        'font-mono font-medium flex items-center justify-end gap-1',
+                        m.unrealizedGainLoss >= 0 ? 'text-[var(--accent-sage)]' : 'text-[var(--accent-coral)]'
+                      )}>
+                        {m.unrealizedGainLoss >= 0 ? (
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        ) : (
+                          <ArrowDownRight className="w-3.5 h-3.5" />
+                        )}
+                        {formatPkr(Math.abs(m.unrealizedGainLoss))}
+                      </span>
+                    </td>
+                  </motion.tr>
+                ))}
+                {stockMetrics.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-sm text-[var(--text-muted)]">
+                      No stock holdings yet
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </Card>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {/* Recent Activity & Quick Actions */}
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RecentActivity
           transactions={recentTransactions}
           onViewAll={() => window.location.hash = '#/stocks/transactions'}

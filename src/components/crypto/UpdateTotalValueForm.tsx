@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
+import { Edit3 } from 'lucide-react';
 
 interface UpdateTotalValueFormProps {
   cryptoId: number;
@@ -47,13 +48,14 @@ export function UpdateTotalValueForm({ cryptoId, currentValue }: UpdateTotalValu
   if (!isEditing) {
     return (
       <div className="flex items-center justify-end space-x-2">
-        <span className="text-sm font-medium text-gray-900">
+        <span className="text-sm font-medium text-[var(--text-primary)]">
           {formatCurrency(parseFloat(currentValue) || 0)}
         </span>
         <button
           onClick={() => setIsEditing(true)}
-          className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200"
+          className="btn-secondary text-xs py-1 px-2 flex items-center gap-1"
         >
+          <Edit3 className="h-3 w-3" />
           Update
         </button>
       </div>
@@ -63,14 +65,14 @@ export function UpdateTotalValueForm({ cryptoId, currentValue }: UpdateTotalValu
   return (
     <form onSubmit={handleSubmit} className="flex items-center justify-end space-x-2">
       <div className="flex items-center space-x-1">
-        <span className="text-sm text-gray-500">Rs.</span>
+        <span className="text-sm text-[var(--text-muted)]">Rs.</span>
         <input
           type="number"
           step="0.01"
           min="0"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="w-32 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-1 text-sm text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)]"
           placeholder="0.00"
         />
       </div>
@@ -81,7 +83,7 @@ export function UpdateTotalValueForm({ cryptoId, currentValue }: UpdateTotalValu
           setIsEditing(false);
           setValue(currentValue);
         }}
-        className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200"
+        className="btn-secondary text-xs py-1 px-2"
       >
         Cancel
       </button>

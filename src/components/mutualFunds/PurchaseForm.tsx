@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
 import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
 import type { MutualFund } from '@/services/mutualFunds/mutualFunds';
+import { ArrowRight } from 'lucide-react';
 
 interface PurchaseFormProps {
   funds: MutualFund[];
@@ -47,9 +48,17 @@ export function PurchaseForm({ funds }: PurchaseFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
+      <div className="mb-4 flex items-center gap-2 text-[var(--accent-gold)]">
+        <ArrowRight className="h-4 w-4" />
+        <h4 className="text-sm font-medium uppercase tracking-wider">Record Purchase</h4>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="fundId" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="fundId"
+            className="block text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]"
+          >
             Fund
           </label>
           <select
@@ -58,23 +67,30 @@ export function PurchaseForm({ funds }: PurchaseFormProps) {
             required
             value={fundId}
             onChange={(e) => setFundId(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           >
-            <option value="">Select a fund</option>
+            <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-muted)]">
+              Select a fund
+            </option>
             {funds.map((fund) => (
-              <option key={fund.id} value={fund.id}>
+              <option key={fund.id} value={fund.id} className="bg-[var(--bg-secondary)]">
                 {fund.symbol} - {fund.name}
               </option>
             ))}
           </select>
-          {errors.fundId && <p className="mt-1 text-xs text-red-600">{errors.fundId[0]}</p>}
+          {errors.fundId && (
+            <p className="mt-1 text-xs text-[var(--accent-red)]">{errors.fundId[0]}</p>
+          )}
         </div>
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="amount"
+            className="block text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]"
+          >
             Amount (PKR)
           </label>
           <div className="mt-1 flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Rs.</span>
+            <span className="text-sm text-[var(--text-secondary)]">Rs.</span>
             <input
               type="number"
               id="amount"
@@ -84,13 +100,18 @@ export function PurchaseForm({ funds }: PurchaseFormProps) {
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
             />
           </div>
-          {errors.amount && <p className="mt-1 text-xs text-red-600">{errors.amount[0]}</p>}
+          {errors.amount && (
+            <p className="mt-1 text-xs text-[var(--accent-red)]">{errors.amount[0]}</p>
+          )}
         </div>
         <div>
-          <label htmlFor="purchaseDate" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="purchaseDate"
+            className="block text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]"
+          >
             Purchase Date
           </label>
           <input
@@ -100,11 +121,14 @@ export function PurchaseForm({ funds }: PurchaseFormProps) {
             required
             value={purchaseDate}
             onChange={(e) => setPurchaseDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           />
         </div>
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="notes"
+            className="block text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]"
+          >
             Notes
           </label>
           <input
@@ -113,7 +137,7 @@ export function PurchaseForm({ funds }: PurchaseFormProps) {
             name="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           />
         </div>
       </div>

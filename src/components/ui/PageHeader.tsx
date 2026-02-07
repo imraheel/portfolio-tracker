@@ -29,39 +29,74 @@ export function PageHeader({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-6"
+      transition={{ duration: 0.4 }}
+      className="mb-8"
     >
+      {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="mb-3 flex items-center gap-2 text-sm text-gray-500">
-          <HomeIcon className="h-4 w-4" />
+        <motion.nav
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="mb-4 flex items-center gap-2 text-xs"
+        >
+          <HomeIcon className="h-3.5 w-3.5 text-[var(--text-muted)]" />
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center gap-2">
-              <ChevronRightIcon className="h-4 w-4 text-gray-400" />
+              <ChevronRightIcon className="h-3 w-3 text-[var(--border-default)]" />
               {crumb.href ? (
                 <a
                   href={crumb.href}
-                  className="transition-colors hover:text-gray-700"
+                  className="text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors"
                 >
                   {crumb.label}
                 </a>
               ) : (
-                <span className="text-gray-700">{crumb.label}</span>
+                <span className="text-[var(--text-secondary)]">{crumb.label}</span>
               )}
             </div>
           ))}
-        </nav>
+        </motion.nav>
       )}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
+
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          {/* Accent line and label */}
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex items-center gap-3 mb-3"
+          >
+            <span className="h-px w-8 bg-gradient-to-r from-[var(--accent-gold)] to-transparent" />
+            <span className="text-[10px] uppercase tracking-[0.25em] text-[var(--accent-gold)]">
+              Portfolio Overview
+            </span>
+          </motion.div>
+
+          {/* Title */}
+          <h1 className="font-display text-3xl md:text-4xl text-[var(--text-primary)] tracking-tight">
+            {title}
+          </h1>
+
+          {/* Description */}
           {description && (
-            <p className="mt-1 text-sm text-gray-500">{description}</p>
+            <p className="mt-3 text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+              {description}
+            </p>
           )}
         </div>
+
+        {/* Actions */}
         {actions && (
-          <div className="flex items-center gap-3">{actions}</div>
+          <div className="flex items-center gap-3">
+            {actions}
+          </div>
         )}
       </div>
+
+      {/* Decorative line */}
+      <div className="mt-6 h-px bg-gradient-to-r from-[var(--border-default)] via-[var(--border-subtle)] to-transparent" />
     </motion.div>
   );
 }

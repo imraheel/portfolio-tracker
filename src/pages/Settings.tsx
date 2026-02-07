@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Download, Upload, AlertTriangle, FileJson } from 'lucide-react';
+import { Download, AlertTriangle, FileJson, Database, RotateCcw } from 'lucide-react';
 import { useDataExport } from '@/hooks/useDataExport';
 import { Card } from '@/components/ui/Card';
+import { PageHeader } from '@/components/ui/PageHeader';
 
 const pageVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -54,7 +55,7 @@ function ExportButton() {
       variants={buttonVariants}
       whileHover="hover"
       whileTap="tap"
-      className="inline-flex items-center space-x-2 rounded-md bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-50"
+      className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Download className="h-4 w-4" />
       <span>{exporting ? 'Generating Backup...' : 'Download Master Backup (.txt)'}</span>
@@ -96,18 +97,18 @@ function ImportForm() {
 
     return (
         <form onSubmit={handleImport} className="space-y-4">
-            <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
-                <label htmlFor="import-file" className="block text-xs font-bold uppercase tracking-wider text-gray-500">
+            <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] p-4">
+                <label htmlFor="import-file" className="block text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
                     Select Master Backup File
                 </label>
-                <div className="mt-2 flex items-center space-x-3">
-                  <FileJson className="h-8 w-8 text-blue-500" />
+                <div className="mt-3 flex items-center gap-3">
+                  <FileJson className="h-8 w-8 text-[var(--accent-gold)]" />
                   <input 
                       type="file" 
                       id="import-file"
                       accept=".txt,.json"
                       onChange={(e) => setFile(e.target.files?.[0] || null)}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:py-2 file:px-4 file:text-sm file:font-bold file:text-white hover:file:bg-blue-700 shadow-sm"
+                      className="block w-full text-sm text-[var(--text-secondary)] file:mr-4 file:rounded-md file:border-0 file:bg-[var(--accent-gold)] file:py-2 file:px-4 file:text-sm file:font-medium file:text-[var(--bg-primary)] hover:file:bg-[var(--accent-gold-light)] cursor-pointer"
                   />
                 </div>
             </div>
@@ -118,9 +119,9 @@ function ImportForm() {
                 variants={buttonVariants}
                 whileHover="hover"
                 whileTap="tap"
-                className="inline-flex items-center space-x-2 rounded-md bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-md bg-[var(--accent-coral)] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[var(--accent-coral-light)] disabled:opacity-50"
             >
-                <Upload className="h-4 w-4" />
+                <RotateCcw className="h-4 w-4" />
                 <span>{importing ? 'Restoring Data...' : 'Restore from Backup'}</span>
             </motion.button>
         </form>
@@ -136,29 +137,24 @@ export default function Settings() {
       animate="visible"
       className="max-w-4xl mx-auto"
     >
-      <header className="mb-8">
-        <motion.h1 
-          variants={itemVariants}
-          className="text-3xl font-extrabold text-gray-900"
-        >
-          Backup & Recovery
-        </motion.h1>
-        <motion.p 
-          variants={itemVariants}
-          className="mt-1 text-sm text-gray-500"
-        >
-          Manage your data portability with a single master backup file.
-        </motion.p>
-      </header>
+      <PageHeader
+        title="Backup & Recovery"
+        description="Manage your data portability with a single master backup file."
+        breadcrumbs={[{ label: 'Settings' }]}
+      />
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-6">
         <motion.section variants={itemVariants}>
           <Card hover>
-            <div className="border-b border-gray-100 bg-gray-50 px-6 py-4">
-                <h2 className="text-sm font-bold uppercase tracking-widest text-gray-700">Export Master Data</h2>
+            <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-6 py-4">
+              <Database className="h-4 w-4 text-[var(--accent-gold)]" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                Export
+              </span>
             </div>
             <div className="p-6">
-                <p className="mb-6 text-sm leading-relaxed text-gray-600">
+                <h2 className="font-display text-lg text-[var(--text-primary)] mb-2">Export Master Data</h2>
+                <p className="mb-6 text-sm leading-relaxed text-[var(--text-secondary)]">
                     Download all your data (Stocks, Deposits, Transactions, Dividends) into a single master backup file. 
                     This file can be used to restore your entire portfolio on any instance of PSIT.
                 </p>
@@ -169,14 +165,24 @@ export default function Settings() {
 
         <motion.section variants={itemVariants}>
           <Card hover>
-            <div className="flex items-center space-x-2 border-b border-red-100 bg-red-50 px-6 py-4 text-red-700">
-                <AlertTriangle className="h-5 w-5" />
-                <h2 className="text-sm font-bold uppercase tracking-widest">Restore Master Data</h2>
+            <div className="flex items-center gap-2 border-b border-[var(--accent-coral)]/20 bg-[var(--accent-coral)]/10 px-6 py-4">
+                <AlertTriangle className="h-4 w-4 text-[var(--accent-coral)]" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-coral)]">
+                  Import
+                </span>
             </div>
             <div className="p-6">
-                <div className="mb-6 rounded-md bg-red-50 p-4 text-sm text-red-800 border border-red-100">
-                    <p className="font-bold mb-1 underline italic">Warning: Destructive Action</p>
-                    Restoring data will permanently erase your current database. This process cannot be undone. 
+                <h2 className="font-display text-lg text-[var(--text-primary)] mb-2">Restore Master Data</h2>
+                <div className="mb-6 rounded-lg border border-[var(--accent-coral)]/20 bg-[var(--accent-coral)]/5 p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-[var(--accent-coral)] flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-[var(--accent-coral)] mb-1">Warning: Destructive Action</p>
+                        <p className="text-sm text-[var(--text-secondary)]">
+                          Restoring data will permanently erase your current database. This process cannot be undone.
+                        </p>
+                      </div>
+                    </div>
                 </div>
                 <ImportForm />
             </div>

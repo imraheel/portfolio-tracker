@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, ShoppingCart, Calendar, Coins } from 'lucide-react';
+import { TrendingUp, ShoppingCart, Calendar, Coins, Bitcoin } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
@@ -40,72 +40,76 @@ function PurchasesTable() {
   if (loading) {
     return (
       <Card className="animate-pulse">
-        <div className="h-64 bg-gray-200 rounded" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
   }
 
   return (
     <Card hover={false}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Purchase History</h3>
-          <p className="text-sm text-gray-500">All your cryptocurrency purchases</p>
+          <div className="flex items-center gap-2 mb-1">
+            <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+              History
+            </span>
+          </div>
+          <h3 className="font-display text-xl text-[var(--text-primary)]">Purchase History</h3>
+          <p className="text-sm text-[var(--text-muted)] mt-1">All your cryptocurrency purchases</p>
         </div>
-        <Badge variant="warning">{purchases.length} purchases</Badge>
+        <Badge variant="gold">{purchases.length} purchases</Badge>
       </div>
-      <div className="overflow-hidden rounded-lg border border-gray-100">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-100">
-            <thead className="bg-gray-50">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-[var(--border-subtle)]">
+              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Date</th>
+              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Cryptocurrency</th>
+              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Amount</th>
+              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">Notes</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[var(--border-subtle)]">
+            {purchases.map((purchase) => (
+              <motion.tr
+                key={purchase.id}
+                className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-secondary)]">
+                  {formatDate(purchase.purchase_date)}
+                </td>
+                <td className="whitespace-nowrap px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <Bitcoin className="w-4 h-4 text-[var(--accent-gold)]" />
+                    <span className="font-mono font-medium text-[var(--text-primary)]">{purchase.cryptocurrency?.symbol}</span>
+                    <span className="text-sm text-[var(--text-muted)]">{purchase.cryptocurrency?.name}</span>
+                  </div>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-mono font-medium text-[var(--accent-coral)]">
+                  {formatCurrency(purchase.amount_pkr)}
+                </td>
+                <td className="px-4 py-3 text-sm text-[var(--text-muted)]">{purchase.notes || '-'}</td>
+              </motion.tr>
+            ))}
+            {purchases.length === 0 && (
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Cryptocurrency</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</th>
+                <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
+                  No purchases recorded yet.
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 bg-white">
-              {purchases.map((purchase) => (
-                <motion.tr
-                  key={purchase.id}
-                  className="hover:bg-gray-50 transition-colors"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-900">
-                    {formatDate(purchase.purchase_date)}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Coins className="w-4 h-4 text-amber-500" />
-                      <span className="font-medium text-gray-900">{purchase.cryptocurrency?.symbol}</span>
-                      <span className="text-sm text-gray-500">{purchase.cryptocurrency?.name}</span>
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-gray-900">
-                    {formatCurrency(purchase.amount_pkr)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-500">{purchase.notes || '-'}</td>
-                </motion.tr>
-              ))}
-              {purchases.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">
-                    No purchases recorded yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            )}
+          </tbody>
+        </table>
       </div>
     </Card>
   );
 }
 
 export default function Purchases() {
-  const { purchases, cryptocurrencies, loading } = useCrypto();
+  const { purchases, cryptocurrencies } = useCrypto();
 
   const totalPurchases = purchases.reduce((sum, p) => sum + p.amount_pkr, 0);
   const totalCount = purchases.length;
@@ -115,7 +119,7 @@ export default function Purchases() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-7xl mx-auto space-y-6"
+      className="max-w-7xl mx-auto space-y-8"
     >
       <PageHeader
         title="Crypto Purchases"
@@ -129,29 +133,29 @@ export default function Purchases() {
             title="Total Purchases"
             value={formatPkr(totalPurchases)}
             icon={<ShoppingCart className="w-5 h-5" />}
-            color="orange"
-            loading={loading}
+            variant="default"
+            delay={0}
           />
           <MetricCard
             title="Number of Purchases"
             value={totalCount.toString()}
             icon={<Calendar className="w-5 h-5" />}
-            color="blue"
-            loading={loading}
+            variant="default"
+            delay={0.1}
           />
           <MetricCard
             title="Assets Purchased"
             value={new Set(purchases.map((p) => p.crypto_id)).size.toString()}
             icon={<TrendingUp className="w-5 h-5" />}
-            color="green"
-            loading={loading}
+            variant="sage"
+            delay={0.2}
           />
           <MetricCard
             title="Available Assets"
             value={cryptocurrencies.length.toString()}
             icon={<Coins className="w-5 h-5" />}
-            color="purple"
-            loading={loading}
+            variant="gold"
+            delay={0.3}
           />
         </StatsGrid>
       </motion.div>
@@ -159,8 +163,14 @@ export default function Purchases() {
       <motion.div variants={itemVariants}>
         <Card hover={false}>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Record Purchase</h3>
-            <p className="text-sm text-gray-500">Add a new cryptocurrency purchase</p>
+            <div className="flex items-center gap-2 mb-1">
+              <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                New Purchase
+              </span>
+            </div>
+            <h3 className="font-display text-xl text-[var(--text-primary)]">Record Purchase</h3>
+            <p className="text-sm text-[var(--text-muted)] mt-1">Add a new cryptocurrency purchase</p>
           </div>
           <PurchaseForm cryptocurrencies={cryptocurrencies} />
         </Card>

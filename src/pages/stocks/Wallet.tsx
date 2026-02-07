@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { useWallet } from '@/hooks/stocks/useWallet';
-import { DepositForm } from '@/components/stocks//DepositForm';
-import { DeleteDepositButton } from '@/components/stocks//DeleteDepositButton';
+import { DepositForm } from '@/components/stocks/DepositForm';
+import { DeleteDepositButton } from '@/components/stocks/DeleteDepositButton';
 import { Card } from '@/components/ui/Card';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { Wallet as WalletIcon, PiggyBank, ArrowDownToLine } from 'lucide-react';
 
 const pageVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -41,7 +43,7 @@ function DepositsTable() {
     return (
       <section className="mt-10">
         <div className="animate-pulse">
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-64 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]"></div>
         </div>
       </section>
     );
@@ -49,24 +51,44 @@ function DepositsTable() {
 
   return (
     <section className="mt-10">
-      <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400">Transaction Log</h2>
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
+        className="overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]"
       >
+        {/* Table Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center gap-2">
+            <ArrowDownToLine className="w-4 h-4 text-[var(--accent-gold)]" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+              History
+            </span>
+          </div>
+          <span className="text-xs text-[var(--text-muted)]">
+            {deposits.length} transactions
+          </span>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-500">Note</th>
-                <th className="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500">Amount</th>
-                <th className="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500">Action</th>
+          <table className="min-w-full">
+            <thead>
+              <tr className="border-b border-[var(--border-subtle)]">
+                <th className="px-6 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                  Note
+                </th>
+                <th className="px-6 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                  Amount
+                </th>
+                <th className="px-6 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
+                  Action
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-[var(--border-subtle)]">
               {deposits.map((deposit, i) => (
                 <motion.tr 
                   key={deposit.id}
@@ -74,15 +96,14 @@ function DepositsTable() {
                   variants={tableRowVariants}
                   initial="hidden"
                   animate="visible"
-                  whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-                  className="hover:bg-gray-50"
+                  className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
                 >
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-[var(--text-secondary)]">
                     {deposit.deposit_date ? new Intl.DateTimeFormat('en-PK').format(new Date(deposit.deposit_date)) : '-'}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 italic">{deposit.note || '-'}</td>
-                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-bold text-gray-900">
-                    Rs. {formatPkr(deposit.amount)}
+                  <td className="px-6 py-4 text-sm text-[var(--text-muted)] italic">{deposit.note || '-'}</td>
+                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-mono font-medium text-[var(--accent-sage)]">
+                    +Rs. {formatPkr(deposit.amount)}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right">
                     <DeleteDepositButton id={deposit.id} />
@@ -91,7 +112,9 @@ function DepositsTable() {
               ))}
               {deposits.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">No deposit records found.</td>
+                  <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
+                    No deposit records found.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -112,36 +135,55 @@ export default function Wallet() {
       animate="visible"
       className="max-w-4xl mx-auto"
     >
-      <header className="mb-8">
-        <motion.h1 
-          variants={itemVariants}
-          className="text-3xl font-extrabold text-gray-900"
-        >
-          Deposits & Wallet
-        </motion.h1>
-        <motion.p 
-          variants={itemVariants}
-          className="mt-1 text-sm text-gray-500"
-        >
-          Manage your investment capital and available funds.
-        </motion.p>
-      </header>
+      <PageHeader
+        title="Deposits & Wallet"
+        description="Manage your investment capital and available funds."
+        breadcrumbs={[{ label: 'Stocks' }, { label: 'Wallet' }]}
+      />
 
+      {/* Balance Cards */}
       <motion.div 
         variants={itemVariants}
-        className="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2"
+        className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2"
       >
-        <Card hover>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Available Balance</h3>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {loading ? '...' : `Rs. ${formatPkr(balance)}`}
-          </p>
+        <Card hover variant="default">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <WalletIcon className="w-4 h-4 text-[var(--accent-gold)]" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                  Available
+                </span>
+              </div>
+              <h3 className="text-xs text-[var(--text-muted)] mb-1">Available Balance</h3>
+              <p className="text-2xl font-mono font-semibold text-[var(--text-primary)]">
+                {loading ? '...' : `Rs. ${formatPkr(balance)}`}
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-[var(--accent-gold)]/10 flex items-center justify-center">
+              <WalletIcon className="w-5 h-5 text-[var(--accent-gold)]" />
+            </div>
+          </div>
         </Card>
-        <Card hover>
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Capital</h3>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {loading ? '...' : `Rs. ${formatPkr(totalDeposited)}`}
-          </p>
+
+        <Card hover variant="default">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <PiggyBank className="w-4 h-4 text-[var(--accent-sage)]" />
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-sage)]">
+                  Total
+                </span>
+              </div>
+              <h3 className="text-xs text-[var(--text-muted)] mb-1">Total Capital</h3>
+              <p className="text-2xl font-mono font-semibold text-[var(--text-primary)]">
+                {loading ? '...' : `Rs. ${formatPkr(totalDeposited)}`}
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-[var(--accent-sage)]/10 flex items-center justify-center">
+              <PiggyBank className="w-5 h-5 text-[var(--accent-sage)]" />
+            </div>
+          </div>
         </Card>
       </motion.div>
 

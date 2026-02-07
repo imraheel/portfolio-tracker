@@ -35,9 +35,9 @@ export function UpdatePriceForm({ stockId, currentPrice }: { stockId: number, cu
         value={price}
         onChange={(e) => setPrice(e.target.value)}
         required
-        className="w-32 rounded-md border border-gray-300 px-3 py-1.5 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        className="w-32 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1.5 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm"
       />
-      <FormButton label="Update" loadingLabel="..." className="px-3 py-1.5" disabled={submitting} />
+      <FormButton label="Update" loadingLabel="..." className="btn-secondary px-3 py-1.5" disabled={submitting} />
     </form>
   );
 }

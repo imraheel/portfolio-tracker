@@ -4,8 +4,10 @@ interface FormButtonProps {
   label: string;
   loadingLabel?: string;
   className?: string;
-  variant?: 'primary' | 'danger';
+  variant?: 'primary' | 'secondary' | 'danger';
   disabled?: boolean;
+  type?: 'submit' | 'button' | 'reset';
+  onClick?: () => void;
 }
 
 export function FormButton({
@@ -13,18 +15,46 @@ export function FormButton({
   loadingLabel = 'Processing...',
   className,
   variant = 'primary',
-  disabled = false
+  disabled = false,
+  type = 'submit',
+  onClick,
 }: FormButtonProps) {
+  const baseStyles = 'relative px-6 py-3 rounded-md font-medium transition-all duration-300 inline-flex justify-center items-center';
+  
+  const variantStyles = {
+    primary: clsx(
+      'bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-gold-dark)]',
+      'text-[var(--bg-primary)] border-none',
+      'hover:translate-y-[-1px] hover:shadow-[var(--shadow-gold)]',
+      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)]',
+      'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none'
+    ),
+    secondary: clsx(
+      'bg-[var(--bg-elevated)]',
+      'text-[var(--text-primary)]',
+      'border border-[var(--border-default)]',
+      'hover:border-[var(--accent-gold)] hover:text-[var(--accent-gold)]',
+      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)]',
+      'disabled:opacity-50 disabled:cursor-not-allowed'
+    ),
+    danger: clsx(
+      'bg-[var(--accent-coral)]/10',
+      'text-[var(--accent-coral)]',
+      'border border-[var(--accent-coral)]/30',
+      'hover:bg-[var(--accent-coral)]/20 hover:border-[var(--accent-coral)]',
+      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-coral)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)]',
+      'disabled:opacity-50 disabled:cursor-not-allowed'
+    ),
+  };
+
   return (
     <button
-      type="submit"
+      type={type}
       disabled={disabled}
+      onClick={onClick}
       className={clsx(
-        "inline-flex justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50",
-        {
-          "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500": variant === 'primary',
-          "bg-red-600 hover:bg-red-700 focus:ring-red-500": variant === 'danger',
-        },
+        baseStyles,
+        variantStyles[variant],
         className
       )}
     >

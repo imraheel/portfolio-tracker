@@ -4,24 +4,22 @@ import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
-  Wallet,
   TrendingUp,
-  ArrowUpCircle,
-  Settings,
   PieChart,
   Bitcoin,
   ChevronDown,
   ChevronLeft,
-  Menu,
-  X,
+  Wallet,
+  ArrowUpCircle,
   BarChart3,
+  Settings,
+  X,
 } from 'lucide-react';
 
 interface NavItem {
   name: string;
   href: string;
   icon: typeof LayoutDashboard;
-  badge?: number;
 }
 
 interface NavSection {
@@ -63,12 +61,15 @@ const standaloneLinks: NavItem[] = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
 ];
 
-const navItemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0 },
-};
-
-function NavSection({ section, pathname, isCollapsed }: { section: NavSection; pathname: string; isCollapsed: boolean }) {
+function NavSection({ 
+  section, 
+  pathname, 
+  isCollapsed 
+}: { 
+  section: NavSection; 
+  pathname: string; 
+  isCollapsed: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(() => {
     return section.items.some((item) => pathname === item.href || pathname.startsWith(item.href));
   });
@@ -83,25 +84,25 @@ function NavSection({ section, pathname, isCollapsed }: { section: NavSection; p
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
-          'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          'flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm transition-all duration-200',
           {
-            'bg-blue-50 text-blue-700': isActive,
-            'text-gray-300 hover:bg-white/10 hover:text-white': !isActive,
+            'text-[var(--accent-gold)] bg-[var(--accent-gold)]/5': isActive,
+            'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]': !isActive,
           }
         )}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ x: 2 }}
         whileTap={{ scale: 0.98 }}
       >
-        <div className="flex items-center space-x-3">
-          <Icon className="h-5 w-5" />
-          {!isCollapsed && <span>{section.name}</span>}
+        <div className="flex items-center gap-3">
+          <Icon className="h-4 w-4" />
+          {!isCollapsed && <span className="font-medium">{section.name}</span>}
         </div>
         {!isCollapsed && (
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-3.5 w-3.5 opacity-50" />
           </motion.div>
         )}
       </motion.button>
@@ -113,38 +114,36 @@ function NavSection({ section, pathname, isCollapsed }: { section: NavSection; p
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="ml-4 space-y-1 border-l-2 border-white/20 pl-4"
+            className="ml-4 space-y-0.5 border-l border-[var(--border-subtle)] pl-3"
           >
-            {section.items.map((item) => {
+            {section.items.map((item, index) => {
               const ItemIcon = item.icon;
               const itemIsActive = pathname === item.href;
 
               return (
                 <motion.div
                   key={item.name}
-                  variants={navItemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
                 >
                   <Link
                     to={item.href}
                     className={clsx(
-                      'group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      'group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200',
                       {
-                        'bg-blue-50 text-blue-700': itemIsActive,
-                        'text-gray-400 hover:bg-white/10 hover:text-white': !itemIsActive,
+                        'text-[var(--accent-gold)]': itemIsActive,
+                        'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]/50': !itemIsActive,
                       }
                     )}
                   >
-                    <div className="flex items-center space-x-3">
-                      <ItemIcon className="h-4 w-4" />
-                      <span>{item.name}</span>
-                    </div>
-                    {item.badge && item.badge > 0 && (
-                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 px-1.5 text-xs font-medium text-white">
-                        {item.badge}
-                      </span>
+                    <ItemIcon className="h-3.5 w-3.5" />
+                    <span>{item.name}</span>
+                    {itemIsActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--accent-gold)]"
+                      />
                     )}
                   </Link>
                 </motion.div>
@@ -169,40 +168,47 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile Overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
             onClick={onClose}
           />
         )}
       </AnimatePresence>
 
-      <button
-        onClick={onClose}
-        className="fixed left-4 top-20 z-50 rounded-lg bg-slate-800 p-2 text-white lg:hidden"
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
-
+      {/* Sidebar */}
       <motion.aside
         initial={{ x: -280 }}
         animate={{ x: 0 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         className={clsx(
-          'fixed left-0 top-0 z-40 flex h-screen flex-col bg-gradient-to-b from-slate-800 to-slate-900 text-white transition-all duration-300',
+          'fixed left-0 top-0 z-50 flex h-screen flex-col',
+          'bg-[var(--bg-secondary)]',
+          'border-r border-[var(--border-subtle)]',
+          'transition-all duration-300 ease-out',
           isCollapsed ? 'w-20' : 'w-64',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
-          <div className="flex items-center space-x-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-              <TrendingUp className="h-6 w-6" />
+        {/* Top Accent Line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--accent-gold)] to-transparent opacity-50" />
+
+        {/* Header */}
+        <div className="flex h-20 items-center justify-between px-5 border-b border-[var(--border-subtle)]">
+          <div className="flex items-center gap-3">
+            {/* Logo Icon */}
+            <div className="relative w-10 h-10 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-gold-dark)] opacity-20" />
+              <div className="relative w-8 h-8 rounded-md bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-gold-dark)] flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-[var(--bg-primary)]" />
+              </div>
             </div>
+            
             {!isCollapsed && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -210,75 +216,112 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 exit={{ opacity: 0 }}
                 className="flex flex-col"
               >
-                <span className="text-sm font-bold">Investment Tracker</span>
-                <span className="text-xs text-gray-400">Portfolio Manager</span>
+                <span className="font-display text-lg leading-tight text-[var(--text-primary)]">
+                  Portfolio
+                </span>
+                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                  Tracker
+                </span>
               </motion.div>
             )}
           </div>
+
+          {/* Collapse Toggle */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden rounded-lg p-1.5 text-gray-400 hover:bg-white/10 hover:text-white lg:block"
+            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
           >
-            <ChevronLeft className={clsx('h-5 w-5 transition-transform', isCollapsed && 'rotate-180')} />
+            <ChevronLeft className={clsx('h-4 w-4 transition-transform duration-300', isCollapsed && 'rotate-180')} />
+          </button>
+
+          {/* Mobile Close */}
+          <button
+            onClick={onClose}
+            className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <div className="space-y-1">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 py-6 scrollbar-hide">
+          {/* Dashboard Link */}
+          <div className="space-y-1 mb-6">
             {standaloneLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
 
               return (
-                <motion.div key={link.name} variants={navItemVariants} initial="hidden" animate="visible">
+                <motion.div key={link.name}>
                   <Link
                     to={link.href}
                     onClick={() => window.innerWidth < 1024 && onClose()}
                     className={clsx(
-                      'flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+                      'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all duration-200',
                       {
-                        'bg-blue-600 text-white shadow-lg shadow-blue-600/30': isActive,
-                        'text-gray-300 hover:bg-white/10 hover:text-white': !isActive,
+                        'nav-active': isActive,
+                        'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]': !isActive,
                       }
                     )}
                   >
-                    <div className="flex items-center space-x-3">
-                      <Icon className={clsx('h-5 w-5', isActive ? 'text-white' : 'text-gray-400')} />
-                      {!isCollapsed && <span>{link.name}</span>}
-                    </div>
+                    <Icon className="h-4 w-4" />
+                    {!isCollapsed && <span className="font-medium">{link.name}</span>}
                   </Link>
                 </motion.div>
               );
             })}
           </div>
 
-          {!isCollapsed && <div className="my-4 border-t border-white/10" />}
-
+          {/* Section Label */}
           {!isCollapsed && (
-            <div className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-              Investments
+            <div className="mb-3 px-3">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                Investments
+              </span>
             </div>
           )}
 
-          {sections.map((section) => (
-            <NavSection key={section.name} section={section} pathname={pathname} isCollapsed={isCollapsed} />
-          ))}
+          {/* Investment Sections */}
+          <div className="space-y-1">
+            {sections.map((section) => (
+              <NavSection 
+                key={section.name} 
+                section={section} 
+                pathname={pathname} 
+                isCollapsed={isCollapsed}
+              />
+            ))}
+          </div>
         </nav>
 
-        <div className="border-t border-white/10 p-3">
+        {/* Footer */}
+        <div className="border-t border-[var(--border-subtle)] p-3">
           <Link
             to="/settings"
             onClick={() => window.innerWidth < 1024 && onClose()}
             className={clsx(
-              'flex items-center space-x-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+              'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-all duration-200',
               pathname === '/settings'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                ? 'nav-active'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
             )}
           >
-            <Settings className={clsx('h-5 w-5', pathname === '/settings' ? 'text-white' : 'text-gray-400')} />
-            {!isCollapsed && <span>Settings</span>}
+            <Settings className="h-4 w-4" />
+            {!isCollapsed && <span className="font-medium">Settings</span>}
           </Link>
+
+          {/* Version Info */}
+          {!isCollapsed && (
+            <div className="mt-4 px-3 pt-4 border-t border-[var(--border-subtle)]">
+              <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
+                <span>v1.0.0</span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-sage)]" />
+                  Online
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </motion.aside>
     </>

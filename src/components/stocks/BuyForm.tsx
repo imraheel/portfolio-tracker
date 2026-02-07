@@ -56,31 +56,34 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-       <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
-         <h2 className="text-xl font-bold text-gray-900">Record Buy Transaction</h2>
-         <div className="text-sm font-medium text-gray-500">
-           Available Balance: <span className="font-bold text-blue-600">Rs. {balance.toLocaleString('en-PK')}</span>
+    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-sm">
+       <div className="mb-6 flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+         <div className="flex items-center gap-2">
+           <span className="text-[var(--accent-gold)]">●</span>
+           <h2 className="text-xl font-bold text-[var(--text-primary)]">Record Buy Transaction</h2>
+         </div>
+         <div className="text-sm font-medium text-[var(--text-secondary)]">
+           Available Balance: <span className="font-bold text-[var(--accent-gold)]">Rs. {balance.toLocaleString('en-PK')}</span>
          </div>
        </div>
 
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label htmlFor="stockId" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Stock Symbol</label>
+          <label htmlFor="stockId" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Stock Symbol</label>
           <select 
             id="stockId" 
             name="stockId" 
             required 
             value={stockId}
             onChange={(e) => setStockId(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm"
           >
-            <option value="">Select a stock</option>
-            {stocks.map((stock) => (<option key={stock.id} value={stock.id}>{stock.symbol}</option>))}
+            <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Select a stock</option>
+            {stocks.map((stock) => (<option key={stock.id} value={stock.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
           </select>
         </div>
         <div>
-          <label htmlFor="quantity" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Quantity</label>
+          <label htmlFor="quantity" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Quantity</label>
           <input 
             type="number" 
             id="quantity" 
@@ -89,14 +92,14 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             min="1"
             value={qty || ''}
             onChange={(e) => setQty(Number(e.target.value))}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
           {errors.quantity && (
-            <p className="mt-1 text-xs text-red-600">{errors.quantity[0]}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.quantity[0]}</p>
           )}
         </div>
         <div>
-          <label htmlFor="buyRate" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Buy Rate (PKR)</label>
+          <label htmlFor="buyRate" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Buy Rate (PKR)</label>
           <input 
             type="number" 
             id="buyRate" 
@@ -106,14 +109,14 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             min="0.01"
             value={rate || ''}
             onChange={(e) => setRate(Number(e.target.value))}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
           {errors.buyRate && (
-            <p className="mt-1 text-xs text-red-600">{errors.buyRate[0]}</p>
+            <p className="mt-1 text-xs text-red-400">{errors.buyRate[0]}</p>
           )}
         </div>
         <div>
-          <label htmlFor="buyDate" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Buy Date</label>
+          <label htmlFor="buyDate" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Buy Date</label>
           <input 
             type="date" 
             id="buyDate" 
@@ -121,41 +124,41 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             required 
             value={buyDate}
             onChange={(e) => setBuyDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
         </div>
       </div>
       
       <div className="mt-6 flex flex-col space-y-4 sm:flex-row sm:items-end sm:justify-between sm:space-y-0">
         <div className="flex-1 max-w-md">
-          <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-gray-500">Notes (Optional)</label>
+          <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Notes (Optional)</label>
           <textarea 
             id="notes" 
             name="notes" 
             rows={1}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
           />
         </div>
         
         <div className="flex items-center space-x-6">
           <div className="text-right">
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Total Cost</p>
-            <p className={clsx("text-xl font-black", isInsufficient ? "text-red-600" : "text-gray-900")}>
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Total Cost</p>
+            <p className={clsx("text-xl font-black", isInsufficient ? "text-red-400" : "text-[var(--text-primary)]")}>
               Rs. {totalCost.toLocaleString('en-PK', { minimumFractionDigits: 2 })}
             </p>
           </div>
           <FormButton 
             label="Record Buy" 
             disabled={isInsufficient || submitting}
-            className={clsx(isInsufficient && "opacity-50 cursor-not-allowed")}
+            className={clsx("btn-primary", isInsufficient && "opacity-50 cursor-not-allowed")}
           />
         </div>
       </div>
       
       {isInsufficient && (
-        <p className="mt-2 text-right text-xs font-bold text-red-600 italic">
+        <p className="mt-2 text-right text-xs font-bold text-red-400 italic">
           Error: Total cost exceeds available wallet balance.
         </p>
       )}

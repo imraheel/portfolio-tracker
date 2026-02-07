@@ -1,5 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { motion } from 'framer-motion';
+import { PieChartIcon } from 'lucide-react';
 
 export interface AssetAllocationChartProps {
   stocks: number;
@@ -16,9 +17,9 @@ const formatPKR = (value: number): string => {
 };
 
 const COLORS = {
-  stocks: '#3b82f6',
-  mutualFunds: '#0d9488',
-  crypto: '#7c3aed',
+  stocks: 'var(--accent-gold)',
+  mutualFunds: 'var(--accent-sage)',
+  crypto: '#8b5cf6',
 };
 
 const RADIAN = Math.PI / 180;
@@ -37,11 +38,12 @@ const renderCustomizedLabel = (props: { cx: number; cy: number; midAngle?: numbe
     <text
       x={x}
       y={y}
-      fill="white"
+      fill="var(--bg-primary)"
       textAnchor="middle"
       dominantBaseline="central"
-      fontSize={14}
+      fontSize={12}
       fontWeight={600}
+      fontFamily="JetBrains Mono"
     >
       {`${(safePercent * 100).toFixed(0)}%`}
     </text>
@@ -52,9 +54,13 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { payl
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
-        <p className="text-sm text-gray-500">{data.name}</p>
-        <p className="font-semibold text-gray-900">{formatPKR(data.value)}</p>
+      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--border-subtle)] shadow-elevated">
+        <p className="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">
+          {data.name}
+        </p>
+        <p className="font-mono font-medium text-[var(--text-primary)]">
+          {formatPKR(data.value)}
+        </p>
       </div>
     );
   }
@@ -74,9 +80,9 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl p-6 shadow-soft">
-        <div className="h-4 w-40 bg-gray-100 rounded mb-6 animate-pulse" />
-        <div className="h-64 bg-gray-50 rounded-lg animate-pulse" />
+      <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
+        <div className="h-4 w-40 bg-[var(--bg-elevated)] rounded mb-6 animate-pulse" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -86,8 +92,8 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
     if (!item || item.value === undefined) return null;
     const percent = total > 0 ? (item.value / total) * 100 : 0;
     return (
-      <span className="text-sm text-gray-600">
-        {item.name} <span className="text-gray-400 ml-1">({percent.toFixed(0)}%)</span>
+      <span className="text-xs text-[var(--text-secondary)]">
+        {item.name} <span className="text-[var(--text-muted)] ml-1">({percent.toFixed(0)}%)</span>
       </span>
     );
   };
@@ -97,50 +103,53 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1 }}
-      className="bg-white rounded-xl p-6 shadow-soft"
+      className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]"
     >
+      {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Asset Allocation</h3>
-        <p className="text-sm text-gray-500 mt-1">Portfolio breakdown by asset type</p>
+        <div className="flex items-center gap-2 mb-1">
+          <PieChartIcon className="w-4 h-4 text-[var(--accent-gold)]" />
+          <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+            Distribution
+          </span>
+        </div>
+        <h3 className="font-display text-xl text-[var(--text-primary)]">Asset Allocation</h3>
+        <p className="text-sm text-[var(--text-muted)] mt-1">Portfolio breakdown by asset type</p>
       </div>
 
-      <div>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={renderCustomizedLabel}
-                outerRadius={120}
-                innerRadius={50}
-                dataKey="value"
-                animationDuration={1500}
-                paddingAngle={1}
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.color}
-                    stroke="none"
-                    style={{
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                      transition: 'all 0.3s ease',
-                    }}
-                  />
-                ))}
-              </Pie>
-              <Tooltip animationDuration={200} content={<CustomTooltip />} />
-              <Legend
-                verticalAlign="bottom"
-                height={36}
-                formatter={formatLegend}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      {/* Chart */}
+      <div className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={renderCustomizedLabel}
+              outerRadius={110}
+              innerRadius={55}
+              dataKey="value"
+              animationDuration={1500}
+              paddingAngle={2}
+            >
+              {data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.color}
+                  stroke="var(--bg-secondary)"
+                  strokeWidth={2}
+                />
+              ))}
+            </Pie>
+            <Tooltip animationDuration={200} content={<CustomTooltip />} />
+            <Legend
+              verticalAlign="bottom"
+              height={36}
+              formatter={formatLegend}
+            />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     </motion.div>
   );
