@@ -7,14 +7,14 @@ export interface InvestmentHistoryPoint {
   cryptoInvestment: number;
 }
 
-interface BuyTransaction {
-  total_cost: number | string;
-  buy_date: string;
+interface Deposit {
+  amount: number | string;
+  deposit_date: string;
 }
 
-interface SellTransaction {
-  total_proceeds: number | string;
-  sell_date: string;
+interface Withdrawal {
+  amount: number | string;
+  withdrawal_date: string;
 }
 
 interface MutualFundPurchase {
@@ -39,29 +39,29 @@ interface CryptoWithdrawal {
 
 async function fetchAllData() {
   const [
-    { data: buyTransactions, error: buyError },
-    { data: sellTransactions, error: sellError },
+    { data: deposits, error: depositsError },
+    { data: withdrawals, error: withdrawalsError },
     { data: fundPurchases, error: fundPurchasesError },
     { data: fundWithdrawals, error: fundWithdrawalsError },
     { data: cryptoPurchases, error: cryptoPurchasesError },
     { data: cryptoWithdrawals, error: cryptoWithdrawalsError },
   ] = await Promise.all([
-    supabase.from('stock_buy_transactions').select('total_cost, buy_date').order('buy_date'),
-    supabase.from('stock_sell_transactions').select('total_proceeds, sell_date').order('sell_date'),
+    supabase.from('deposits').select('amount, deposit_date').order('deposit_date'),
+    supabase.from('withdrawals').select('amount, withdrawal_date').order('withdrawal_date'),
     supabase.from('mutual_fund_purchases').select('amount, purchase_date').order('purchase_date'),
     supabase.from('mutual_fund_withdrawals').select('amount, withdrawal_date').order('withdrawal_date'),
     supabase.from('crypto_purchases').select('amount_pkr, purchase_date').order('purchase_date'),
     supabase.from('crypto_withdrawals').select('amount_pkr, withdrawal_date').order('withdrawal_date'),
   ]);
 
-  if (buyError || sellError || fundPurchasesError || fundWithdrawalsError ||
+  if (depositsError || withdrawalsError || fundPurchasesError || fundWithdrawalsError ||
       cryptoPurchasesError || cryptoWithdrawalsError) {
     throw new Error('Failed to fetch investment history data');
   }
 
   return {
-    buyTransactions: buyTransactions || [],
-    sellTransactions: sellTransactions || [],
+    deposits: deposits || [],
+    withdrawals: withdrawals || [],
     fundPurchases: fundPurchases || [],
     fundWithdrawals: fundWithdrawals || [],
     cryptoPurchases: cryptoPurchases || [],
@@ -83,19 +83,21 @@ export async function getInvestmentHistory(days: number = 365): Promise<Investme
     crypto: number;
   }[] = [];
 
-  data.buyTransactions.forEach((tx: BuyTransaction) => {
+  // Stocks: Deposits increase investment
+  data.deposits.forEach((d: Deposit) => {
     events.push({
-      date: getDateKey(tx.buy_date),
-      stocks: Number(tx.total_cost),
+      date: getDateKey(d.deposit_date),
+      stocks: Number(d.amount),
       mutualFunds: 0,
       crypto: 0,
     });
   });
 
-  data.sellTransactions.forEach((tx: SellTransaction) => {
+  // Stocks: Withdrawals decrease investment
+  data.withdrawals.forEach((w: Withdrawal) => {
     events.push({
-      date: getDateKey(tx.sell_date),
-      stocks: -Number(tx.total_proceeds),
+      date: getDateKey(w.withdrawal_date),
+      stocks: -Number(w.amount),
       mutualFunds: 0,
       crypto: 0,
     });

@@ -54,6 +54,12 @@ interface CustomTooltipProps {
 
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length && label) {
+    const labelMap: Record<string, string> = {
+      stocksInvestment: 'Stock Wallet',
+      mutualFundsInvestment: 'Mutual Funds',
+      cryptoInvestment: 'Crypto',
+    };
+    
     return (
       <div className="bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--border-subtle)] shadow-elevated">
         <p className="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">
@@ -65,8 +71,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
               className="w-2 h-2 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-xs text-[var(--text-secondary)] capitalize">
-              {entry.dataKey.replace(/([A-Z])/g, ' $1').trim()}:
+            <span className="text-xs text-[var(--text-secondary)]">
+              {labelMap[entry.dataKey] || entry.dataKey.replace(/([A-Z])/g, ' $1').trim()}:
             </span>
             <span className="text-sm font-mono font-medium text-[var(--text-primary)]">
               {formatPKR(entry.value)}
@@ -134,7 +140,9 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
             </span>
           </div>
           <h3 className="font-display text-xl text-[var(--text-primary)]">Investment History</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-1">Track your investments over time</p>
+          <p className="text-sm text-[var(--text-muted)] mt-1">
+            Stock wallet shows deposits minus withdrawals. Mutual funds and crypto show net investments.
+          </p>
         </div>
 
         {/* Time Range Selector */}
@@ -182,11 +190,18 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
             <Tooltip content={<CustomTooltip />} />
             <Legend
               wrapperStyle={{ paddingTop: 20 }}
-              formatter={(value) => (
-                <span className="text-xs text-[var(--text-secondary)] capitalize">
-                  {value.replace(/([A-Z])/g, ' $1').trim()}
-                </span>
-              )}
+              formatter={(value) => {
+                const labelMap: Record<string, string> = {
+                  stocksInvestment: 'Stock Wallet (Deposits - Withdrawals)',
+                  mutualFundsInvestment: 'Mutual Funds',
+                  cryptoInvestment: 'Crypto',
+                };
+                return (
+                  <span className="text-xs text-[var(--text-secondary)]">
+                    {labelMap[value] || value.replace(/([A-Z])/g, ' $1').trim()}
+                  </span>
+                );
+              }}
             />
             <Line
               type="monotone"

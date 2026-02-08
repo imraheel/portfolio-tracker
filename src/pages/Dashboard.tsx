@@ -13,7 +13,7 @@ import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
 import { getInvestmentHistory } from '@/services/investmentHistory';
 import type { Transaction } from '@/components/dashboard/RecentActivity';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 
 const containerVariants = {
@@ -110,7 +110,7 @@ function useRecentActivityTransactions(
   return transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-function useInvestmentHistory() {
+function useInvestmentHistory(refreshTrigger?: number) {
   const [history, setHistory] = useState<{
     date: string;
     stocksInvestment: number;
@@ -119,21 +119,23 @@ function useInvestmentHistory() {
   }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const data = await getInvestmentHistory(365);
-        setHistory(data);
-      } catch (error) {
-        console.error('Failed to fetch investment history:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchHistory();
+  const fetchHistory = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getInvestmentHistory(365);
+      setHistory(data);
+    } catch (error) {
+      console.error('Failed to fetch investment history:', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { history, loading };
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory, refreshTrigger]);
+
+  return { history, loading, refresh: fetchHistory };
 }
 
 function calculateGainLossPercentage(invested: number, current: number): number {
@@ -170,7 +172,7 @@ export default function Dashboard() {
     dividends
   );
 
-  const { history: investmentHistory, loading: historyLoading } = useInvestmentHistory();
+  const { history: investmentHistory, loading: historyLoading } = useInvestmentHistory(balance);
 
   const chartLoading = loading || historyLoading;
 
