@@ -47,11 +47,7 @@ export function WithdrawalForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg bg-[var(--bg-secondary)] p-6 shadow-md border border-[var(--border-subtle)] shadow-sm">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="text-[var(--accent-coral)]">●</span>
-        <h2 className="text-xl font-bold text-[var(--text-primary)]">Withdraw Funds</h2>
-      </div>
+    <form onSubmit={handleSubmit}>
       <div className="mb-4 p-3 bg-[var(--bg-tertiary)] rounded-md">
         <p className="text-xs text-[var(--text-muted)]">
           Available Balance: <span className="font-mono font-medium text-[var(--text-primary)]">Rs. {balance.toLocaleString('en-PK')}</span>
@@ -69,7 +65,7 @@ export function WithdrawalForm() {
             max={balance}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-coral)] focus:ring-[var(--accent-coral)] sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           />
           {errors.amount && (
             <p className="mt-1 text-xs text-red-400 font-bold">{errors.amount[0]}</p>
@@ -84,7 +80,7 @@ export function WithdrawalForm() {
             required
             value={withdrawalDate}
             onChange={(e) => setWithdrawalDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-coral)] focus:ring-[var(--accent-coral)] sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           />
         </div>
       </div>
@@ -96,7 +92,7 @@ export function WithdrawalForm() {
           rows={2}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-coral)] focus:ring-[var(--accent-coral)] sm:text-sm"
+          className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
         />
       </div>
       <div className="mt-6">

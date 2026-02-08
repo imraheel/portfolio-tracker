@@ -5,6 +5,7 @@ import { TrendingUp, DollarSign, ShoppingCart, ArrowDownCircle } from 'lucide-re
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
+import { Card } from '@/components/ui/Card';
 import { useStocks } from '@/hooks/stocks/useStocks';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { usePortfolio } from '@/hooks/usePortfolio';
@@ -58,16 +59,22 @@ function BuyTransactionsTable() {
 
   if (loading) {
     return (
-      <div className="mt-8 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-        <div className="animate-pulse h-48 bg-[var(--bg-tertiary)]"></div>
-      </div>
+      <Card className="animate-pulse">
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
+      </Card>
     );
   }
 
   return (
-    <div className="mt-8 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+    <Card hover={false}>
+      <div className="flex items-center gap-2 mb-4">
+        <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
+        <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+          Buy History
+        </span>
+      </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full">
+        <table className="w-full">
           <TableHeader cols={[
               { label: 'Date' },
               { label: 'Stock' },
@@ -95,7 +102,7 @@ function BuyTransactionsTable() {
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -104,16 +111,22 @@ function SellTransactionsTable() {
 
     if (loading) {
       return (
-        <div className="mt-8 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-          <div className="animate-pulse h-48 bg-[var(--bg-tertiary)]"></div>
-        </div>
+        <Card className="animate-pulse">
+          <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
+        </Card>
       );
     }
 
     return (
-      <div className="mt-8 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+      <Card hover={false}>
+        <div className="flex items-center gap-2 mb-4">
+          <ArrowDownCircle className="w-4 h-4 text-[var(--accent-sage)]" />
+          <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-sage)]">
+            Sell History
+          </span>
+        </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full">
+          <table className="w-full">
             <TableHeader cols={[
                 { label: 'Date' },
                 { label: 'Stock' },
@@ -148,7 +161,7 @@ function SellTransactionsTable() {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     );
 }
 
@@ -157,16 +170,22 @@ function DividendsTable() {
 
     if (loading) {
       return (
-        <div className="mt-8 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
-          <div className="animate-pulse h-48 bg-[var(--bg-tertiary)]"></div>
-        </div>
+        <Card className="animate-pulse">
+          <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
+        </Card>
       );
     }
 
     return (
-        <div className="mt-8 overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
+        <Card hover={false}>
+            <div className="flex items-center gap-2 mb-4">
+              <DollarSign className="w-4 h-4 text-[var(--accent-gold)]" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                Dividend History
+              </span>
+            </div>
             <div className="overflow-x-auto">
-                <table className="min-w-full">
+                <table className="w-full">
                     <TableHeader cols={[
                         { label: 'Date' },
                         { label: 'Stock' },
@@ -192,7 +211,7 @@ function DividendsTable() {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
 }
 
@@ -219,7 +238,7 @@ export default function Transactions() {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="max-w-7xl mx-auto space-y-6"
+      className="max-w-7xl mx-auto space-y-8"
     >
       <PageHeader
         title="Trading Desk"
@@ -260,50 +279,108 @@ export default function Transactions() {
         </StatsGrid>
       </motion.div>
 
-      <motion.div variants={itemVariants}>
-        <div className="border-b border-[var(--border-subtle)]">
-          <nav className="-mb-px flex space-x-8">
-            <button 
-              onClick={() => handleTabChange('buy')}
-              className={clsx(
-                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors", 
-                  currentView === 'buy' 
-                    ? 'border-[var(--accent-gold)] text-[var(--accent-gold)]' 
-                    : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              )}
-            >
-              Buy Stocks
-            </button>
-            <button 
-              onClick={() => handleTabChange('sell')}
-              className={clsx(
-                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors", 
-                  currentView === 'sell' 
-                    ? 'border-[var(--accent-gold)] text-[var(--accent-gold)]' 
-                    : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              )}
-            >
-              Sell Stocks
-            </button>
-            <button 
-              onClick={() => handleTabChange('dividends')}
-              className={clsx(
-                  "whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors", 
-                  currentView === 'dividends' 
-                    ? 'border-[var(--accent-gold)] text-[var(--accent-gold)]' 
-                    : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-              )}
-            >
-              Dividends
-            </button>
-          </nav>
-        </div>
-      </motion.div>
+      <div className="border-b border-[var(--border-subtle)]">
+        <nav className="-mb-px flex space-x-8">
+          <button 
+            onClick={() => handleTabChange('buy')}
+            className={clsx(
+                "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors", 
+                currentView === 'buy' 
+                  ? 'border-[var(--accent-gold)] text-[var(--accent-gold)]' 
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            )}
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Buy Stocks
+          </button>
+          <button 
+            onClick={() => handleTabChange('sell')}
+            className={clsx(
+                "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors", 
+                currentView === 'sell' 
+                  ? 'border-[var(--accent-sage)] text-[var(--accent-sage)]' 
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            )}
+          >
+            <ArrowDownCircle className="w-4 h-4" />
+            Sell Stocks
+          </button>
+          <button 
+            onClick={() => handleTabChange('dividends')}
+            className={clsx(
+                "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors", 
+                currentView === 'dividends' 
+                  ? 'border-[var(--accent-gold)] text-[var(--accent-gold)]' 
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
+            )}
+          >
+            <DollarSign className="w-4 h-4" />
+            Dividends
+          </button>
+        </nav>
+      </div>
 
       <div className="space-y-6">
-        {currentView === 'buy' && (<div><BuyForm stocks={stocks} balance={balance} /><BuyTransactionsTable /></div>)}
-        {currentView === 'sell' && (<div><SellForm stocks={stocks} holdings={holdingsMap} /><SellTransactionsTable /></div>)}
-        {currentView === 'dividends' && (<div><DividendForm stocks={stocks} /><DividendsTable /></div>)}
+        {currentView === 'buy' && (
+          <motion.div variants={itemVariants}>
+            <Card hover={false}>
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                    Buy
+                  </span>
+                </div>
+                <h3 className="font-display text-xl text-[var(--text-primary)]">Buy Stocks</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-1">Purchase stocks using your available balance</p>
+              </div>
+              <BuyForm stocks={stocks} balance={balance} />
+            </Card>
+            <div className="mt-6">
+              <BuyTransactionsTable />
+            </div>
+          </motion.div>
+        )}
+        {currentView === 'sell' && (
+          <motion.div variants={itemVariants}>
+            <Card hover={false}>
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <ArrowDownCircle className="w-4 h-4 text-[var(--accent-sage)]" />
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-sage)]">
+                    Sell
+                  </span>
+                </div>
+                <h3 className="font-display text-xl text-[var(--text-primary)]">Sell Stocks</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-1">Sell your stock holdings</p>
+              </div>
+              <SellForm stocks={stocks} holdings={holdingsMap} />
+            </Card>
+            <div className="mt-6">
+              <SellTransactionsTable />
+            </div>
+          </motion.div>
+        )}
+        {currentView === 'dividends' && (
+          <motion.div variants={itemVariants}>
+            <Card hover={false}>
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign className="w-4 h-4 text-[var(--accent-gold)]" />
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
+                    Dividends
+                  </span>
+                </div>
+                <h3 className="font-display text-xl text-[var(--text-primary)]">Record Dividends</h3>
+                <p className="text-sm text-[var(--text-muted)] mt-1">Record dividend payments from your stocks</p>
+              </div>
+              <DividendForm stocks={stocks} />
+            </Card>
+            <div className="mt-6">
+              <DividendsTable />
+            </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

@@ -38,11 +38,7 @@ export function StockForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg bg-[var(--bg-secondary)] p-6 shadow-md border border-[var(--border-subtle)]">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="text-[var(--accent-gold)]">●</span>
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">Add New Stock</h2>
-      </div>
+    <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="symbol" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Symbol</label>
@@ -54,7 +50,7 @@ export function StockForm() {
             maxLength={10}
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
           {errors.symbol && (
             <p className="mt-1 text-xs text-red-400">{errors.symbol[0]}</p>
@@ -68,7 +64,7 @@ export function StockForm() {
             name="companyName"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
         </div>
         <div>
@@ -79,7 +75,7 @@ export function StockForm() {
             name="sector"
             value={sector}
             onChange={(e) => setSector(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
         </div>
       </div>

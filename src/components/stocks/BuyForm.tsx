@@ -56,14 +56,11 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-sm">
+    <form onSubmit={handleSubmit}>
        <div className="mb-6 flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
-         <div className="flex items-center gap-2">
-           <span className="text-[var(--accent-gold)]">●</span>
-           <h2 className="text-xl font-bold text-[var(--text-primary)]">Record Buy Transaction</h2>
-         </div>
+         <div className="flex items-center gap-2"></div>
          <div className="text-sm font-medium text-[var(--text-secondary)]">
-           Available Balance: <span className="font-bold text-[var(--accent-gold)]">Rs. {balance.toLocaleString('en-PK')}</span>
+           Available Balance: <span className="font-mono font-bold text-[var(--accent-gold)]">Rs. {balance.toLocaleString('en-PK')}</span>
          </div>
        </div>
 
@@ -76,7 +73,7 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             required 
             value={stockId}
             onChange={(e) => setStockId(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           >
             <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Select a stock</option>
             {stocks.map((stock) => (<option key={stock.id} value={stock.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
@@ -92,7 +89,7 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             min="1"
             value={qty || ''}
             onChange={(e) => setQty(Number(e.target.value))}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
           {errors.quantity && (
             <p className="mt-1 text-xs text-red-400">{errors.quantity[0]}</p>
@@ -109,7 +106,7 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             min="0.01"
             value={rate || ''}
             onChange={(e) => setRate(Number(e.target.value))}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
           {errors.buyRate && (
             <p className="mt-1 text-xs text-red-400">{errors.buyRate[0]}</p>
@@ -124,7 +121,7 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             required 
             value={buyDate}
             onChange={(e) => setBuyDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
         </div>
       </div>
@@ -138,7 +135,7 @@ export function BuyForm({ stocks, balance }: { stocks: Stock[], balance: number 
             rows={1}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
         </div>
         

@@ -41,13 +41,9 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-sm">
+    <form onSubmit={handleSubmit}>
        <div className="mb-6 border-b border-[var(--border-subtle)] pb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--accent-gold)]">●</span>
-            <h2 className="text-xl font-bold text-[var(--text-primary)]">Record Dividend</h2>
-          </div>
-          <p className="text-xs text-[var(--text-secondary)] italic mt-1">Dividend income will be automatically added to your available wallet balance.</p>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">Dividend income will be automatically added to your available wallet balance.</p>
        </div>
 
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -59,7 +55,7 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
             required 
             value={stockId}
             onChange={(e) => setStockId(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm"
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           >
               <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Select a stock</option>
               {stocks.map((stock) => (<option key={stock.id} value={stock.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
@@ -76,7 +72,7 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
             min="0.01"
             value={dividendAmount}
             onChange={(e) => setDividendAmount(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
           {errors.dividendAmount && (
             <p className="mt-1 text-xs text-red-400">{errors.dividendAmount[0]}</p>
@@ -91,7 +87,7 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
             required 
             value={dividendDate}
             onChange={(e) => setDividendDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
         </div>
       </div>
@@ -105,7 +101,7 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
             rows={1}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] shadow-sm focus:border-[var(--accent-gold)] focus:ring-[var(--accent-gold)] sm:text-sm" 
+            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
           />
         </div>
         <FormButton label="Record Dividend" disabled={submitting} className="btn-primary" />
