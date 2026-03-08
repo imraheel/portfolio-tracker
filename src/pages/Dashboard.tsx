@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { TrendingUp, DollarSign, PieChart, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -16,21 +15,6 @@ import type { Transaction } from '@/components/dashboard/RecentActivity';
 import { useState, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
-
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', {
     maximumFractionDigits: 2,
@@ -44,7 +28,7 @@ function LoadingSkeleton() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)]">
-            <div className="animate-pulse space-y-4">
+            <div className="bg-[var(--bg-tertiary)] space-y-4">
               <div className="h-10 w-10 rounded-lg bg-[var(--bg-elevated)]" />
               <div className="space-y-2">
                 <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
@@ -189,19 +173,13 @@ export default function Dashboard() {
   }
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         title="Dashboard"
         description="Performance overview of your investments"
       />
 
-      {/* Metrics Grid */}
-      <motion.div variants={itemVariants}>
+      <div>
         <StatsGrid columns={4}>
           <MetricCard
             title="Total Portfolio Value"
@@ -209,14 +187,14 @@ export default function Dashboard() {
             trend={{ value: totalGainLossPercentage, label: 'vs invested' }}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="gold"
-            delay={0}
+           
           />
           <MetricCard
             title="Total Invested"
             value={formatPkr(totalInvested)}
             icon={<DollarSign className="w-5 h-5" />}
             variant="default"
-            delay={0.1}
+           
           />
           <MetricCard
             title="Total Gain/Loss"
@@ -227,20 +205,19 @@ export default function Dashboard() {
             }}
             icon={<PieChart className="w-5 h-5" />}
             variant={totalGainLoss >= 0 ? 'sage' : 'coral'}
-            delay={0.2}
+           
           />
           <MetricCard
             title="Wallet Balance"
             value={formatPkr(balance)}
             icon={<Wallet className="w-5 h-5" />}
             variant="default"
-            delay={0.3}
+           
           />
         </StatsGrid>
-      </motion.div>
+      </div>
 
-      {/* Charts */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <NetInvestmentChart data={investmentHistory} loading={historyLoading} />
         <AssetAllocationChart
           stocks={stocksValue}
@@ -248,10 +225,9 @@ export default function Dashboard() {
           crypto={cryptoValue}
           loading={loading}
         />
-      </motion.div>
+      </div>
 
-      {/* Top Holdings Table */}
-      <motion.div variants={itemVariants}>
+      <div>
         <Card>
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -292,12 +268,9 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-subtle)]">
-                {stockMetrics.slice(0, 10).map((m, index) => (
-                  <motion.tr
+                {stockMetrics.slice(0, 10).map((m) => (
+                  <tr
                     key={m.stockId}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
                     className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
                   >
                     <td className="py-4 px-4">
@@ -330,7 +303,7 @@ export default function Dashboard() {
                         {formatPkr(Math.abs(m.unrealizedGainLoss))}
                       </span>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))}
                 {stockMetrics.length === 0 && (
                   <tr>
@@ -343,10 +316,9 @@ export default function Dashboard() {
             </table>
           </div>
         </Card>
-      </motion.div>
+      </div>
 
-      {/* Recent Activity & Quick Actions */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RecentActivity
           transactions={recentTransactions}
           onViewAll={() => window.location.hash = '#/stocks/transactions'}
@@ -357,7 +329,7 @@ export default function Dashboard() {
           onViewReports={() => window.location.hash = '#/stocks/reports'}
           onViewWallet={() => window.location.hash = '#/stocks/wallet'}
         />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

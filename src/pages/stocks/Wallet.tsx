@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { DepositForm } from '@/components/stocks/DepositForm';
 import { WithdrawalForm } from '@/components/stocks/WithdrawalForm';
@@ -10,28 +9,6 @@ import { Badge } from '@/components/ui/Badge';
 import { Wallet as WalletIcon, PiggyBank, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
-
-const tableRowVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: { delay: i * 0.05, duration: 0.3 }
-  })
-};
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', {
@@ -45,8 +22,8 @@ function DepositsTable() {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
+      <Card className="bg-[var(--bg-tertiary)]">
+        <div className="h-64 bg-[var(--bg-elevated)] rounded" />
       </Card>
     );
   }
@@ -86,26 +63,22 @@ function DepositsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
-            {deposits.map((deposit, i) => (
-              <motion.tr 
+            {deposits.map((deposit) => (
+              <tr 
                 key={deposit.id}
-                custom={i}
-                variants={tableRowVariants}
-                initial="hidden"
-                animate="visible"
                 className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
               >
                 <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
                   {deposit.deposit_date ? new Intl.DateTimeFormat('en-PK').format(new Date(deposit.deposit_date)) : '-'}
                 </td>
                 <td className="px-4 py-4 text-sm text-[var(--text-muted)] italic">{deposit.note || '-'}</td>
-                <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-mono font-medium text-[var(--accent-sage)]">
+                <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--accent-sage)]">
                   +Rs. {formatPkr(deposit.amount)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-4 text-right">
                   <DeleteDepositButton id={deposit.id} />
                 </td>
-              </motion.tr>
+              </tr>
             ))}
             {deposits.length === 0 && (
               <tr>
@@ -126,8 +99,8 @@ function WithdrawalsTable() {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
+      <Card className="bg-[var(--bg-tertiary)]">
+        <div className="h-64 bg-[var(--bg-elevated)] rounded" />
       </Card>
     );
   }
@@ -167,26 +140,22 @@ function WithdrawalsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
-            {withdrawals.map((withdrawal, i) => (
-              <motion.tr 
+            {withdrawals.map((withdrawal) => (
+              <tr 
                 key={withdrawal.id}
-                custom={i}
-                variants={tableRowVariants}
-                initial="hidden"
-                animate="visible"
                 className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
               >
                 <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
                   {withdrawal.withdrawal_date ? new Intl.DateTimeFormat('en-PK').format(new Date(withdrawal.withdrawal_date)) : '-'}
                 </td>
                 <td className="px-4 py-4 text-sm text-[var(--text-muted)] italic">{withdrawal.note || '-'}</td>
-                <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-mono font-medium text-[var(--accent-coral)]">
+                <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--accent-coral)]">
                   -Rs. {formatPkr(withdrawal.amount)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-4 text-right">
                   <DeleteWithdrawalButton id={withdrawal.id} />
                 </td>
-              </motion.tr>
+              </tr>
             ))}
             {withdrawals.length === 0 && (
               <tr>
@@ -206,46 +175,41 @@ export default function Wallet() {
   const { balance, totalDeposited, totalWithdrawn, loading } = useWallet();
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         title="Deposits & Wallet"
         description="Manage your investment capital and available funds."
         breadcrumbs={[{ label: 'Stocks' }, { label: 'Wallet' }]}
       />
 
-      <motion.div variants={itemVariants}>
+      <div>
         <StatsGrid columns={3}>
           <MetricCard
             title="Available Balance"
             value={loading ? '...' : `Rs. ${formatPkr(balance)}`}
             icon={<WalletIcon className="w-5 h-5" />}
             variant="gold"
-            delay={0}
+           
           />
           <MetricCard
             title="Total Deposited"
             value={loading ? '...' : `Rs. ${formatPkr(totalDeposited)}`}
             icon={<PiggyBank className="w-5 h-5" />}
             variant="sage"
-            delay={0.1}
+           
           />
           <MetricCard
             title="Total Withdrawn"
             value={loading ? '...' : `Rs. ${formatPkr(totalWithdrawn)}`}
             icon={<ArrowUpFromLine className="w-5 h-5" />}
             variant="coral"
-            delay={0.2}
+           
           />
         </StatsGrid>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div variants={itemVariants}>
+        <div>
           <Card hover={false}>
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-1">
@@ -259,9 +223,9 @@ export default function Wallet() {
             </div>
             <DepositForm />
           </Card>
-        </motion.div>
+        </div>
 
-        <motion.div variants={itemVariants}>
+        <div>
           <Card hover={false}>
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-1">
@@ -275,16 +239,16 @@ export default function Wallet() {
             </div>
             <WithdrawalForm />
           </Card>
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <DepositsTable />
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <WithdrawalsTable />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

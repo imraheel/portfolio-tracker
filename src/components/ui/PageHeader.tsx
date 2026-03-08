@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 interface PageHeaderProps {
   title: string;
   description?: string;
@@ -26,20 +24,9 @@ export function PageHeader({
   actions,
 }: PageHeaderProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="mb-8"
-    >
-      {/* Breadcrumbs */}
+    <div className="mb-8">
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <motion.nav
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="mb-4 flex items-center gap-2 text-xs"
-        >
+        <nav className="mb-4 flex items-center gap-2 text-xs">
           <HomeIcon className="h-3.5 w-3.5 text-[var(--text-muted)]" />
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center gap-2">
@@ -56,30 +43,22 @@ export function PageHeader({
               )}
             </div>
           ))}
-        </motion.nav>
+        </nav>
       )}
 
       <div className="flex items-end justify-between gap-4">
         <div>
-          {/* Accent line and label */}
-          <motion.div
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex items-center gap-3 mb-3"
-          >
+          <div className="flex items-center gap-3 mb-3">
             <span className="h-px w-8 bg-gradient-to-r from-[var(--accent-gold)] to-transparent" />
             <span className="text-[10px] uppercase tracking-[0.25em] text-[var(--accent-gold)]">
               Portfolio Overview
             </span>
-          </motion.div>
+          </div>
 
-          {/* Title */}
           <h1 className="font-display text-3xl md:text-4xl text-[var(--text-primary)] tracking-tight">
             {title}
           </h1>
 
-          {/* Description */}
           {description && (
             <p className="mt-3 text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
               {description}
@@ -87,7 +66,6 @@ export function PageHeader({
           )}
         </div>
 
-        {/* Actions */}
         {actions && (
           <div className="flex items-center gap-3">
             {actions}
@@ -95,8 +73,7 @@ export function PageHeader({
         )}
       </div>
 
-      {/* Decorative line */}
       <div className="mt-6 h-px bg-gradient-to-r from-[var(--border-default)] via-[var(--border-subtle)] to-transparent" />
-    </motion.div>
+    </div>
   );
 }

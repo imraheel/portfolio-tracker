@@ -1,5 +1,4 @@
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface MetricCardProps {
@@ -12,7 +11,6 @@ interface MetricCardProps {
   icon?: React.ReactNode;
   variant?: 'default' | 'gold' | 'sage' | 'coral';
   loading?: boolean;
-  delay?: number;
 }
 
 const variantStyles = {
@@ -41,39 +39,27 @@ export function MetricCard({
   icon,
   variant = 'default',
   loading = false,
-  delay = 0,
 }: MetricCardProps) {
   const styles = variantStyles[variant];
 
   if (loading) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay }}
-        className="relative overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5"
-      >
-        <div className="animate-pulse space-y-4">
+      <div className="relative overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5">
+        <div className="bg-[var(--bg-tertiary)] space-y-4">
           <div className="h-10 w-10 rounded-lg bg-[var(--bg-elevated)]" />
           <div className="space-y-2">
             <div className="h-3 w-20 rounded bg-[var(--bg-elevated)]" />
             <div className="h-8 w-32 rounded bg-[var(--bg-elevated)]" />
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   const isPositive = trend ? trend.value >= 0 : true;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay, ease: [0.4, 0, 0.2, 1] }}
-      whileHover={{ y: -2 }}
-      className="group relative overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 card-hover"
-    >
+    <div className="group relative overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 card-hover">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-gold)]/20 to-transparent" />
 
       <div className="relative z-10">
@@ -120,6 +106,6 @@ export function MetricCard({
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-gold)]/5 to-transparent" />
       </div>
-    </motion.div>
+    </div>
   );
 }

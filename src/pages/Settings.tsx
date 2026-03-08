@@ -1,29 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
 import { Download, AlertTriangle, FileJson, Database, RotateCcw } from 'lucide-react';
 import { useDataExport } from '@/hooks/useDataExport';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
-
-const pageVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.4, staggerChildren: 0.15 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
-
-const buttonVariants = {
-  hover: { scale: 1.02 },
-  tap: { scale: 0.98 }
-};
 
 function ExportButton() {
   const { exportData, exporting } = useDataExport();
@@ -49,17 +29,14 @@ function ExportButton() {
   };
 
   return (
-    <motion.button
+    <button
       onClick={handleExport}
       disabled={exporting}
-      variants={buttonVariants}
-      whileHover="hover"
-      whileTap="tap"
       className="btn-primary inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Download className="h-4 w-4" />
       <span>{exporting ? 'Generating Backup...' : 'Download Master Backup (.txt)'}</span>
-    </motion.button>
+    </button>
   );
 }
 
@@ -113,17 +90,14 @@ function ImportForm() {
                 </div>
             </div>
             
-            <motion.button 
+            <button 
                 type="submit" 
                 disabled={importing}
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap="tap"
                 className="inline-flex items-center gap-2 rounded-md bg-[var(--accent-coral)] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[var(--accent-coral-light)] disabled:opacity-50"
             >
                 <RotateCcw className="h-4 w-4" />
                 <span>{importing ? 'Restoring Data...' : 'Restore from Backup'}</span>
-            </motion.button>
+            </button>
         </form>
     )
 }
@@ -131,12 +105,7 @@ function ImportForm() {
 
 export default function Settings() {
   return (
-    <motion.div
-      variants={pageVariants}
-      initial="hidden"
-      animate="visible"
-      className="max-w-4xl mx-auto"
-    >
+    <div className="max-w-4xl mx-auto">
       <PageHeader
         title="Backup & Recovery"
         description="Manage your data portability with a single master backup file."
@@ -144,7 +113,7 @@ export default function Settings() {
       />
 
       <div className="grid grid-cols-1 gap-6">
-        <motion.section variants={itemVariants}>
+        <section>
           <Card hover>
             <div className="flex items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-6 py-4">
               <Database className="h-4 w-4 text-[var(--accent-gold)]" />
@@ -161,9 +130,9 @@ export default function Settings() {
                 <ExportButton />
             </div>
           </Card>
-        </motion.section>
+        </section>
 
-        <motion.section variants={itemVariants}>
+        <section>
           <Card hover>
             <div className="flex items-center gap-2 border-b border-[var(--accent-coral)]/20 bg-[var(--accent-coral)]/10 px-6 py-4">
                 <AlertTriangle className="h-4 w-4 text-[var(--accent-coral)]" />
@@ -187,8 +156,8 @@ export default function Settings() {
                 <ImportForm />
             </div>
           </Card>
-        </motion.section>
+        </section>
       </div>
-    </motion.div>
+    </div>
   );
 }

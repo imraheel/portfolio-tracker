@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import {
   ArrowUpCircle,
@@ -98,32 +97,11 @@ const getTransactionLabel = (transaction: Transaction): string => {
   }
 };
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0 },
-};
-
 export function RecentActivity({ transactions, onViewAll }: RecentActivityProps) {
   const displayTransactions = transactions.slice(0, 10);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden"
-    >
-      {/* Header */}
+    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
       <div className="p-6 border-b border-[var(--border-subtle)]">
         <div className="flex justify-between items-center">
           <div>
@@ -147,23 +125,15 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
         </div>
       </div>
 
-      {/* Transactions List */}
       <div className="divide-y divide-[var(--border-subtle)]">
-        <motion.ul
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="max-h-[400px] overflow-y-auto scrollbar-hide"
-        >
+        <ul className="max-h-[400px] overflow-y-auto scrollbar-hide">
           {displayTransactions.map((transaction) => {
             const { icon: Icon, color, bg, border } = getTransactionIcon(transaction.type);
             const isPositive = ['buy', 'dividend', 'deposit'].includes(transaction.type);
 
             return (
-              <motion.li
+              <li
                 key={transaction.id}
-                variants={itemVariants}
-                transition={{ duration: 0.3 }}
                 className="flex items-center gap-4 p-4 hover:bg-[var(--bg-elevated)]/30 transition-colors cursor-pointer"
               >
                 <div className={clsx('p-2 rounded-lg border', bg, border)}>
@@ -185,10 +155,10 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
                     {isPositive ? '+' : '-'}{formatPKR(transaction.amount)}
                   </p>
                 </div>
-              </motion.li>
+              </li>
             );
           })}
-        </motion.ul>
+        </ul>
 
         {transactions.length === 0 && (
           <div className="p-8 text-center">
@@ -196,6 +166,6 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

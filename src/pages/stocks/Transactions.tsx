@@ -1,6 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
 import { TrendingUp, DollarSign, ShoppingCart, ArrowDownCircle } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -13,19 +12,6 @@ import { useTransactions } from '@/hooks/stocks/useTransactions';
 import { BuyForm } from '@/components/stocks/BuyForm';
 import { SellForm } from '@/components/stocks/SellForm';
 import { DividendForm } from '@/components/stocks/DividendForm';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
 
 function formatPkr(amount: number) {
   return `Rs. ${Number(amount).toLocaleString('en-PK', {
@@ -59,7 +45,7 @@ function BuyTransactionsTable() {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="bg-[var(--bg-tertiary)]">
         <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
@@ -111,7 +97,7 @@ function SellTransactionsTable() {
 
     if (loading) {
       return (
-        <Card className="animate-pulse">
+        <Card className="bg-[var(--bg-tertiary)]">
           <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
         </Card>
       );
@@ -170,7 +156,7 @@ function DividendsTable() {
 
     if (loading) {
       return (
-        <Card className="animate-pulse">
+        <Card className="bg-[var(--bg-tertiary)]">
           <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
         </Card>
       );
@@ -234,50 +220,45 @@ export default function Transactions() {
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         title="Trading Desk"
         description="Record and track your stock market activities."
         breadcrumbs={[{ label: 'Stocks' }, { label: 'Transactions' }]}
       />
 
-      <motion.div variants={itemVariants}>
+      <div>
         <StatsGrid columns={4}>
           <MetricCard
             title="Total Invested"
             value={formatPkr(totalInvested)}
             icon={<ShoppingCart className="w-5 h-5" />}
             variant="default"
-            delay={0}
+           
           />
           <MetricCard
             title="Total Sold"
             value={formatPkr(totalSold)}
             icon={<ArrowDownCircle className="w-5 h-5" />}
             variant="sage"
-            delay={0.1}
+           
           />
           <MetricCard
             title="Total Dividends"
             value={formatPkr(totalDividends)}
             icon={<DollarSign className="w-5 h-5" />}
             variant="gold"
-            delay={0.2}
+           
           />
           <MetricCard
             title="Net Invested"
             value={formatPkr(netInvested)}
             icon={<TrendingUp className="w-5 h-5" />}
             variant={netInvested >= 0 ? 'sage' : 'coral'}
-            delay={0.3}
+           
           />
         </StatsGrid>
-      </motion.div>
+      </div>
 
       <div className="border-b border-[var(--border-subtle)]">
         <nav className="-mb-px flex space-x-8">
@@ -322,7 +303,7 @@ export default function Transactions() {
 
       <div className="space-y-6">
         {currentView === 'buy' && (
-          <motion.div variants={itemVariants}>
+          <div>
             <Card hover={false}>
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -339,10 +320,10 @@ export default function Transactions() {
             <div className="mt-6">
               <BuyTransactionsTable />
             </div>
-          </motion.div>
+          </div>
         )}
         {currentView === 'sell' && (
-          <motion.div variants={itemVariants}>
+          <div>
             <Card hover={false}>
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -359,10 +340,10 @@ export default function Transactions() {
             <div className="mt-6">
               <SellTransactionsTable />
             </div>
-          </motion.div>
+          </div>
         )}
         {currentView === 'dividends' && (
-          <motion.div variants={itemVariants}>
+          <div>
             <Card hover={false}>
               <div className="mb-4">
                 <div className="flex items-center gap-2 mb-1">
@@ -379,9 +360,9 @@ export default function Transactions() {
             <div className="mt-6">
               <DividendsTable />
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

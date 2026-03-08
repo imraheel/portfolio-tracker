@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   TrendingUp,
@@ -81,7 +80,7 @@ function NavSection({
 
   return (
     <div className="space-y-1">
-      <motion.button
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
           'flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm transition-all duration-200',
@@ -90,68 +89,47 @@ function NavSection({
             'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]': !isActive,
           }
         )}
-        whileHover={{ x: 2 }}
-        whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center gap-3">
           <Icon className="h-4 w-4" />
           {!isCollapsed && <span className="font-medium">{section.name}</span>}
         </div>
         {!isCollapsed && (
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
+          <div className={clsx('transition-transform duration-200', isOpen && 'rotate-180')}>
             <ChevronDown className="h-3.5 w-3.5 opacity-50" />
-          </motion.div>
+          </div>
         )}
-      </motion.button>
+      </button>
 
-      <AnimatePresence>
-        {isOpen && !isCollapsed && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="ml-4 space-y-0.5 border-l border-[var(--border-subtle)] pl-3"
-          >
-            {section.items.map((item, index) => {
-              const ItemIcon = item.icon;
-              const itemIsActive = pathname === item.href;
+      {isOpen && !isCollapsed && (
+        <div className="ml-4 space-y-0.5 border-l border-[var(--border-subtle)] pl-3">
+          {section.items.map((item) => {
+            const ItemIcon = item.icon;
+            const itemIsActive = pathname === item.href;
 
-              return (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
+            return (
+              <div key={item.name}>
+                <Link
+                  to={item.href}
+                  className={clsx(
+                    'group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200',
+                    {
+                      'text-[var(--accent-gold)]': itemIsActive,
+                      'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]/50': !itemIsActive,
+                    }
+                  )}
                 >
-                  <Link
-                    to={item.href}
-                    className={clsx(
-                      'group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200',
-                      {
-                        'text-[var(--accent-gold)]': itemIsActive,
-                        'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]/50': !itemIsActive,
-                      }
-                    )}
-                  >
-                    <ItemIcon className="h-3.5 w-3.5" />
-                    <span>{item.name}</span>
-                    {itemIsActive && (
-                      <motion.div
-                        layoutId="activeIndicator"
-                        className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--accent-gold)]"
-                      />
-                    )}
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  <ItemIcon className="h-3.5 w-3.5" />
+                  <span>{item.name}</span>
+                  {itemIsActive && (
+                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[var(--accent-gold)]" />
+                  )}
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -168,24 +146,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Overlay */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-            onClick={onClose}
-          />
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Sidebar */}
-      <motion.aside
-        initial={{ x: -280 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      <aside
         className={clsx(
           'fixed left-0 top-0 z-50 flex h-screen flex-col',
           'bg-[var(--bg-secondary)]',
@@ -195,13 +163,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        {/* Top Accent Line */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--accent-gold)] to-transparent opacity-50" />
 
-        {/* Header */}
         <div className="flex h-20 items-center justify-between px-5 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
-            {/* Logo Icon */}
             <div className="relative w-10 h-10 flex items-center justify-center">
               <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-gold-dark)] opacity-20" />
               <div className="relative w-8 h-8 rounded-md bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-gold-dark)] flex items-center justify-center">
@@ -210,23 +175,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
             
             {!isCollapsed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col"
-              >
+              <div className="flex flex-col">
                 <span className="font-display text-lg leading-tight text-[var(--text-primary)]">
                   Portfolio
                 </span>
                 <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
                   Tracker
                 </span>
-              </motion.div>
+              </div>
             )}
           </div>
 
-          {/* Collapse Toggle */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="hidden lg:flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
@@ -234,7 +193,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <ChevronLeft className={clsx('h-4 w-4 transition-transform duration-300', isCollapsed && 'rotate-180')} />
           </button>
 
-          {/* Mobile Close */}
           <button
             onClick={onClose}
             className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
@@ -243,16 +201,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-6 scrollbar-hide">
-          {/* Dashboard Link */}
           <div className="space-y-1 mb-6">
             {standaloneLinks.map((link) => {
               const Icon = link.icon;
               const isActive = pathname === link.href;
 
               return (
-                <motion.div key={link.name}>
+                <div key={link.name}>
                   <Link
                     to={link.href}
                     onClick={() => window.innerWidth < 1024 && onClose()}
@@ -267,12 +223,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <Icon className="h-4 w-4" />
                     {!isCollapsed && <span className="font-medium">{link.name}</span>}
                   </Link>
-                </motion.div>
+                </div>
               );
             })}
           </div>
 
-          {/* Section Label */}
           {!isCollapsed && (
             <div className="mb-3 px-3">
               <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
@@ -281,7 +236,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
           )}
 
-          {/* Investment Sections */}
           <div className="space-y-1">
             {sections.map((section) => (
               <NavSection 
@@ -294,7 +248,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </nav>
 
-        {/* Footer */}
         <div className="border-t border-[var(--border-subtle)] p-3">
           <Link
             to="/settings"
@@ -310,7 +263,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             {!isCollapsed && <span className="font-medium">Settings</span>}
           </Link>
 
-          {/* Version Info */}
           {!isCollapsed && (
             <div className="mt-4 px-3 pt-4 border-t border-[var(--border-subtle)]">
               <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)]">
@@ -323,7 +275,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
           )}
         </div>
-      </motion.aside>
+      </aside>
     </>
   );
 }

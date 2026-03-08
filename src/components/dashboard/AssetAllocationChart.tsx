@@ -1,5 +1,4 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { motion } from 'framer-motion';
 import { PieChartIcon } from 'lucide-react';
 
 export interface AssetAllocationChartProps {
@@ -81,8 +80,8 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
   if (loading) {
     return (
       <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
-        <div className="h-4 w-40 bg-[var(--bg-elevated)] rounded mb-6 animate-pulse" />
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
+        <div className="h-4 w-40 bg-[var(--bg-tertiary)] rounded mb-6" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg" />
       </div>
     );
   }
@@ -99,13 +98,7 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.1 }}
-      className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]"
-    >
-      {/* Header */}
+    <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <PieChartIcon className="w-4 h-4 text-[var(--accent-gold)]" />
@@ -117,7 +110,6 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
         <p className="text-sm text-[var(--text-muted)] mt-1">Portfolio breakdown by asset type</p>
       </div>
 
-      {/* Chart */}
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -151,6 +143,6 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
           </PieChart>
         </ResponsiveContainer>
       </div>
-    </motion.div>
+    </div>
   );
 }

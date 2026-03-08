@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { motion } from 'framer-motion';
 
 export default function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] noise-overlay">
-      {/* Ambient Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        {/* Top Right Glow */}
         <div 
           className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-20"
           style={{
@@ -18,7 +15,6 @@ export default function Layout() {
             filter: 'blur(60px)',
           }}
         />
-        {/* Bottom Left Glow */}
         <div 
           className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full opacity-10"
           style={{
@@ -26,7 +22,6 @@ export default function Layout() {
             filter: 'blur(60px)',
           }}
         />
-        {/* Grid Pattern Overlay */}
         <div 
           className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -40,17 +35,11 @@ export default function Layout() {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <main className="relative z-10 pl-64">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          className="p-6 lg:p-8 xl:p-10 min-h-screen"
-        >
+        <div className="p-6 lg:p-8 xl:p-10 min-h-screen">
           <Outlet />
-        </motion.div>
+        </div>
       </main>
 
-      {/* Mobile Menu Toggle */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="fixed bottom-6 right-6 z-50 lg:hidden w-14 h-14 rounded-full bg-gradient-gold flex items-center justify-center shadow-elevated"

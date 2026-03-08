@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
 
 export interface NetInvestmentChartProps {
@@ -117,20 +116,14 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
   if (loading) {
     return (
       <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
-        <div className="h-4 w-48 bg-[var(--bg-elevated)] rounded mb-6 animate-pulse" />
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
+        <div className="h-4 w-48 bg-[var(--bg-tertiary)] rounded mb-6" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg" />
       </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]"
-    >
-      {/* Header */}
+    <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -145,7 +138,6 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
           </p>
         </div>
 
-        {/* Time Range Selector */}
         <div className="flex gap-1 bg-[var(--bg-tertiary)] p-1 rounded-lg">
           {timeRanges.map((range) => (
             <button
@@ -163,7 +155,6 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
         </div>
       </div>
 
-      {/* Chart */}
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -233,6 +224,6 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </motion.div>
+    </div>
   );
 }

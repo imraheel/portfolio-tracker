@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useStocks } from '@/hooks/stocks/useStocks';
 import { StockForm } from '@/components/stocks/StockForm';
 import { UpdatePriceForm } from '@/components/stocks/UpdatePriceForm';
@@ -9,28 +8,6 @@ import { BarChart3, TrendingUp, DollarSign } from 'lucide-react';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
-
-const tableRowVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: { delay: i * 0.05, duration: 0.3 }
-  })
-};
-
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
@@ -40,7 +17,7 @@ function StocksTable() {
   
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="bg-[var(--bg-tertiary)]">
         <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
@@ -78,13 +55,9 @@ function StocksTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
-            {stocks.map((stock, i) => (
-              <motion.tr 
+            {stocks.map((stock) => (
+              <tr 
                 key={stock.id}
-                custom={i}
-                variants={tableRowVariants}
-                initial="hidden"
-                animate="visible"
                 className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
               >
                 <td className="whitespace-nowrap px-4 py-4">
@@ -100,7 +73,7 @@ function StocksTable() {
                     currentPrice={priceMap.get(stock.id)?.toString() ?? '0'} 
                   />
                 </td>
-              </motion.tr>
+              </tr>
             ))}
             {stocks.length === 0 && (
               <tr>
@@ -127,45 +100,40 @@ export default function Stocks() {
   const avgPrice = totalStocks > 0 ? totalValue / totalStocks : 0;
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         title="Stock Prices"
         description="Manage symbols and update latest market prices."
         breadcrumbs={[{ label: 'Stocks' }, { label: 'Prices' }]}
       />
 
-      <motion.div variants={itemVariants}>
+      <div>
         <StatsGrid columns={3}>
           <MetricCard
             title="Total Stocks"
             value={totalStocks.toString()}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="default"
-            delay={0}
+           
           />
           <MetricCard
             title="Average Price"
             value={formatPkr(avgPrice)}
             icon={<DollarSign className="w-5 h-5" />}
             variant="gold"
-            delay={0.1}
+           
           />
           <MetricCard
             title="Tracked Symbols"
             value={totalStocks.toString()}
             icon={<BarChart3 className="w-5 h-5" />}
             variant="sage"
-            delay={0.2}
+           
           />
         </StatsGrid>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <Card hover={false}>
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-1">
@@ -179,11 +147,11 @@ export default function Stocks() {
           </div>
           <StockForm />
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <StocksTable />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

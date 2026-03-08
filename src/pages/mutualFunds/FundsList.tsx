@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { TrendingUp, DollarSign, PieChart, Wallet, Landmark } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -9,19 +8,6 @@ import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
 import type { FundMetrics, MutualFund } from '@/services/mutualFunds/mutualFunds';
 import { FundForm } from '@/components/mutualFunds/FundForm';
 import { UpdateMarketValueForm } from '@/components/mutualFunds/UpdateMarketValueForm';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
 
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -44,7 +30,7 @@ function FundsTable({ funds, metrics, loading }: FundsTableProps) {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="bg-[var(--bg-tertiary)]">
         <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
@@ -80,11 +66,9 @@ function FundsTable({ funds, metrics, loading }: FundsTableProps) {
             {funds.map((fund) => {
               const fundMetrics = getMetricsForFund(fund.id);
               return (
-                <motion.tr
+                <tr
                   key={fund.id}
                   className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
                 >
                   <td className="whitespace-nowrap px-4 py-3">
                     <span className="font-mono font-semibold text-[var(--text-primary)]">{fund.symbol}</span>
@@ -124,7 +108,7 @@ function FundsTable({ funds, metrics, loading }: FundsTableProps) {
                       </div>
                     )}
                   </td>
-                </motion.tr>
+                </tr>
               );
             })}
             {funds.length === 0 && (
@@ -150,19 +134,14 @@ export default function FundsList() {
   const totalGainLossPercent = totalInvested > 0 ? (totalGainLoss / totalInvested) * 100 : 0;
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         title="Mutual Funds"
         description="Manage your mutual fund investments and track performance."
         breadcrumbs={[{ label: 'Mutual Funds' }]}
       />
 
-      <motion.div variants={itemVariants}>
+      <div>
         <StatsGrid columns={4}>
           <MetricCard
             title="Total Value"
@@ -170,14 +149,14 @@ export default function FundsList() {
             trend={{ value: totalGainLossPercent, label: 'vs invested' }}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="gold"
-            delay={0}
+           
           />
           <MetricCard
             title="Total Invested"
             value={formatPkr(totalInvested)}
             icon={<DollarSign className="w-5 h-5" />}
             variant="default"
-            delay={0.1}
+           
           />
           <MetricCard
             title="Gain/Loss"
@@ -188,19 +167,19 @@ export default function FundsList() {
             }}
             icon={<PieChart className="w-5 h-5" />}
             variant={totalGainLoss >= 0 ? 'sage' : 'coral'}
-            delay={0.2}
+           
           />
           <MetricCard
             title="Total Funds"
             value={funds.length.toString()}
             icon={<Wallet className="w-5 h-5" />}
             variant="default"
-            delay={0.3}
+           
           />
         </StatsGrid>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <Card hover={false}>
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-1">
@@ -214,11 +193,11 @@ export default function FundsList() {
           </div>
           <FundForm />
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <FundsTable funds={funds} metrics={metrics} loading={loading} />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

@@ -1,33 +1,9 @@
 import { useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
 import { FileText, ArrowDownToLine, ArrowUpCircle, DollarSign, TrendingUp } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
-
-const pageVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.4, staggerChildren: 0.1 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
-
-const tableRowVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: { delay: i * 0.05, duration: 0.3 }
-  })
-};
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', {
@@ -61,7 +37,7 @@ function DepositsHistory() {
 
   if (loading) {
     return (
-      <div className="animate-pulse h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
+      <div className="h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
     );
   }
 
@@ -73,13 +49,9 @@ function DepositsHistory() {
         { label: 'Amount', align: 'right' },
       ]} />
       <tbody className="divide-y divide-[var(--border-subtle)]">
-        {deposits.map((row, i) => (
-          <motion.tr 
+        {deposits.map((row) => (
+          <tr 
             key={row.id}
-            custom={i}
-            variants={tableRowVariants}
-            initial="hidden"
-            animate="visible"
             className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
           >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
@@ -89,7 +61,7 @@ function DepositsHistory() {
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-mono font-medium text-[var(--accent-sage)]">
               +Rs. {formatPkr(row.amount)}
             </td>
-          </motion.tr>
+          </tr>
         ))}
       </tbody>
     </table>
@@ -101,7 +73,7 @@ function BuyHistory() {
 
   if (loading) {
     return (
-      <div className="animate-pulse h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
+      <div className="h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
     );
   }
 
@@ -115,13 +87,9 @@ function BuyHistory() {
         { label: 'Total', align: 'right' },
       ]} />
       <tbody className="divide-y divide-[var(--border-subtle)]">
-        {buyTransactions.map((row, i) => (
-          <motion.tr 
+        {buyTransactions.map((row) => (
+          <tr 
             key={row.id}
-            custom={i}
-            variants={tableRowVariants}
-            initial="hidden"
-            animate="visible"
             className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
           >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
@@ -131,7 +99,7 @@ function BuyHistory() {
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-[var(--text-secondary)]">{row.quantity}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm text-[var(--text-secondary)]">Rs. {formatPkr(row.buy_rate)}</td>
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-mono font-medium text-[var(--accent-coral)]">Rs. {formatPkr(row.total_cost)}</td>
-          </motion.tr>
+          </tr>
         ))}
       </tbody>
     </table>
@@ -143,7 +111,7 @@ function SellHistory() {
 
   if (loading) {
     return (
-      <div className="animate-pulse h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
+      <div className="h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
     );
   }
 
@@ -158,13 +126,9 @@ function SellHistory() {
         { label: 'P/L', align: 'right' },
       ]} />
       <tbody className="divide-y divide-[var(--border-subtle)]">
-        {sellTransactions.map((row, i) => (
-          <motion.tr 
+        {sellTransactions.map((row) => (
+          <tr 
             key={row.id}
-            custom={i}
-            variants={tableRowVariants}
-            initial="hidden"
-            animate="visible"
             className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
           >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
@@ -180,7 +144,7 @@ function SellHistory() {
             )}>
               {Number(row.realized_gain_loss) >= 0 ? '+' : ''}Rs. {formatPkr(row.realized_gain_loss)}
             </td>
-          </motion.tr>
+          </tr>
         ))}
       </tbody>
     </table>
@@ -192,7 +156,7 @@ function DividendHistory() {
 
   if (loading) {
     return (
-      <div className="animate-pulse h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
+      <div className="h-48 bg-[var(--bg-tertiary)] rounded-lg border border-[var(--border-subtle)]"></div>
     );
   }
 
@@ -204,13 +168,9 @@ function DividendHistory() {
         { label: 'Amount', align: 'right' },
       ]} />
       <tbody className="divide-y divide-[var(--border-subtle)]">
-        {dividends.map((row, i) => (
-          <motion.tr 
+        {dividends.map((row) => (
+          <tr 
             key={row.id}
-            custom={i}
-            variants={tableRowVariants}
-            initial="hidden"
-            animate="visible"
             className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
           >
             <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
@@ -220,7 +180,7 @@ function DividendHistory() {
             <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-mono font-medium text-[var(--accent-gold)]">
               +Rs. {formatPkr(row.dividend_amount)}
             </td>
-          </motion.tr>
+          </tr>
         ))}
       </tbody>
     </table>
@@ -243,28 +203,21 @@ export default function Reports() {
   };
 
   return (
-    <motion.div
-      variants={pageVariants}
-      initial="hidden"
-      animate="visible"
-      className="max-w-5xl mx-auto"
-    >
+    <div className="max-w-5xl mx-auto">
       <PageHeader
         title="Reports & History"
         description="Detailed record of all financial activities."
         breadcrumbs={[{ label: 'Reports' }]}
       />
 
-      <motion.div variants={itemVariants} className="mb-6 border-b border-[var(--border-subtle)]">
+      <div className="mb-6 border-b border-[var(--border-subtle)]">
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
-              <motion.button
+              <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 className={clsx(
                   "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors",
                   currentTab === tab.id
@@ -274,20 +227,13 @@ export default function Reports() {
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
-              </motion.button>
+              </button>
             );
           })}
         </nav>
-      </motion.div>
+      </div>
 
-      <motion.div
-        key={currentTab}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-        className="overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]"
-      >
-        {/* Table Header */}
+      <div className="overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
         <div className="flex items-center gap-2 px-6 py-4 border-b border-[var(--border-subtle)]">
           <FileText className="w-4 h-4 text-[var(--accent-gold)]" />
           <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
@@ -301,7 +247,7 @@ export default function Reports() {
           {currentTab === 'sells' && <SellHistory />}
           {currentTab === 'dividends' && <DividendHistory />}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

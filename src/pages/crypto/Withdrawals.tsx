@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { TrendingUp, ArrowDownCircle, Calendar, Coins, Bitcoin } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -7,19 +6,6 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { WithdrawalForm } from '@/components/crypto/WithdrawalForm';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
 
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -39,7 +25,7 @@ function WithdrawalsTable() {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="bg-[var(--bg-tertiary)]">
         <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
@@ -72,11 +58,9 @@ function WithdrawalsTable() {
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
             {withdrawals.map((withdrawal) => (
-              <motion.tr
+              <tr
                 key={withdrawal.id}
                 className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
               >
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-secondary)]">
                   {formatDate(withdrawal.withdrawal_date)}
@@ -92,7 +76,7 @@ function WithdrawalsTable() {
                   {formatCurrency(withdrawal.amount_pkr)}
                 </td>
                 <td className="px-4 py-3 text-sm text-[var(--text-muted)]">{withdrawal.notes || '-'}</td>
-              </motion.tr>
+              </tr>
             ))}
             {withdrawals.length === 0 && (
               <tr>
@@ -115,52 +99,47 @@ export default function Withdrawals() {
   const totalCount = withdrawals.length;
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         title="Crypto Withdrawals"
         description="Record and view your cryptocurrency withdrawals."
         breadcrumbs={[{ label: 'Crypto' }, { label: 'Withdrawals' }]}
       />
 
-      <motion.div variants={itemVariants}>
+      <div>
         <StatsGrid columns={4}>
           <MetricCard
             title="Total Withdrawals"
             value={formatPkr(totalWithdrawals)}
             icon={<ArrowDownCircle className="w-5 h-5" />}
             variant="sage"
-            delay={0}
+           
           />
           <MetricCard
             title="Number of Withdrawals"
             value={totalCount.toString()}
             icon={<Calendar className="w-5 h-5" />}
             variant="default"
-            delay={0.1}
+           
           />
           <MetricCard
             title="Assets Withdrawn"
             value={new Set(withdrawals.map((w) => w.crypto_id)).size.toString()}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="sage"
-            delay={0.2}
+           
           />
           <MetricCard
             title="Available Assets"
             value={cryptocurrencies.length.toString()}
             icon={<Coins className="w-5 h-5" />}
             variant="gold"
-            delay={0.3}
+           
           />
         </StatsGrid>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <Card hover={false}>
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-1">
@@ -174,11 +153,11 @@ export default function Withdrawals() {
           </div>
           <WithdrawalForm cryptocurrencies={cryptocurrencies} />
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <WithdrawalsTable />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

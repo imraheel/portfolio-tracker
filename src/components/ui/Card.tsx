@@ -1,5 +1,4 @@
 import { clsx } from 'clsx';
-import { motion } from 'framer-motion';
 
 interface CardProps {
   children: React.ReactNode;
@@ -33,10 +32,7 @@ export function Card({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+    <div
       className={clsx(
         baseStyles,
         variantStyles[variant],
@@ -48,6 +44,6 @@ export function Card({
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-gold)]/20 to-transparent" />
       
       <div className="relative z-10">{children}</div>
-    </motion.div>
+    </div>
   );
 }

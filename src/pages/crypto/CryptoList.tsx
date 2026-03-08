@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { TrendingUp, DollarSign, PieChart, Wallet, Coins, Bitcoin } from 'lucide-react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -9,19 +8,6 @@ import { useCrypto } from '@/hooks/crypto/useCrypto';
 import type { CryptoMetrics, Cryptocurrency } from '@/services/crypto/crypto';
 import { CryptoForm } from '@/components/crypto/CryptoForm';
 import { UpdateTotalValueForm } from '@/components/crypto/UpdateTotalValueForm';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
 
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -44,7 +30,7 @@ function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
 
   if (loading) {
     return (
-      <Card className="animate-pulse">
+      <Card className="bg-[var(--bg-tertiary)]">
         <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
       </Card>
     );
@@ -80,11 +66,9 @@ function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
             {cryptocurrencies.map((crypto) => {
               const cryptoMetrics = getMetricsForCrypto(crypto.id);
               return (
-                <motion.tr
+                <tr
                   key={crypto.id}
                   className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
                 >
                   <td className="whitespace-nowrap px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -124,7 +108,7 @@ function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
                       </div>
                     )}
                   </td>
-                </motion.tr>
+                </tr>
               );
             })}
             {cryptocurrencies.length === 0 && (
@@ -150,19 +134,14 @@ export default function CryptoList() {
   const totalGainLossPercent = totalInvested > 0 ? (totalGainLoss / totalInvested) * 100 : 0;
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto space-y-8"
-    >
+    <div className="max-w-7xl mx-auto space-y-8">
       <PageHeader
         title="Cryptocurrencies"
         description="Manage your cryptocurrency investments and track performance."
         breadcrumbs={[{ label: 'Crypto' }]}
       />
 
-      <motion.div variants={itemVariants}>
+      <div>
         <StatsGrid columns={4}>
           <MetricCard
             title="Total Value"
@@ -170,14 +149,14 @@ export default function CryptoList() {
             trend={{ value: totalGainLossPercent, label: 'vs invested' }}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="gold"
-            delay={0}
+           
           />
           <MetricCard
             title="Total Invested"
             value={formatPkr(totalInvested)}
             icon={<DollarSign className="w-5 h-5" />}
             variant="default"
-            delay={0.1}
+           
           />
           <MetricCard
             title="Gain/Loss"
@@ -188,19 +167,19 @@ export default function CryptoList() {
             }}
             icon={<PieChart className="w-5 h-5" />}
             variant={totalGainLoss >= 0 ? 'sage' : 'coral'}
-            delay={0.2}
+           
           />
           <MetricCard
             title="Total Assets"
             value={cryptocurrencies.length.toString()}
             icon={<Wallet className="w-5 h-5" />}
             variant="default"
-            delay={0.3}
+           
           />
         </StatsGrid>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <Card hover={false}>
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-1">
@@ -214,11 +193,11 @@ export default function CryptoList() {
           </div>
           <CryptoForm />
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div variants={itemVariants}>
+      <div>
         <CryptoTable cryptocurrencies={cryptocurrencies} metrics={metrics} loading={loading} />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
