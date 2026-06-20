@@ -1,10 +1,14 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { FormButton } from '@/components/FormButton';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
 import type { Stock } from '@/services/stocks/stocks';
 
-export function DividendForm({ stocks }: { stocks: Stock[] }) {
+interface DividendFormProps {
+  stocks: Stock[];
+  onSuccess?: () => void;
+}
+
+export function DividendForm({ stocks, onSuccess }: DividendFormProps) {
   const { addDividend } = useTransactions();
   const [symbol, setSymbol] = useState('');
   const [dividendAmount, setDividendAmount] = useState('');
@@ -17,94 +21,53 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
-
     const result = await addDividend({
-      symbol,
-      dividendAmount: parseFloat(dividendAmount),
-      dividendDate: new Date(dividendDate),
-      notes: notes || undefined,
+      symbol, dividendAmount: parseFloat(dividendAmount), dividendDate: new Date(dividendDate), notes: notes || undefined,
     });
-
     setSubmitting(false);
-
     if (result.success) {
       toast.success(result.message);
-      setSymbol('');
-      setDividendAmount('');
-      setNotes('');
+      onSuccess?.();
     } else {
       toast.error(result.message);
-      if (result.errors) {
-        setErrors(result.errors);
-      }
+      if (result.errors) setErrors(result.errors);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-       <div className="mb-6 border-b border-[var(--border-subtle)] pb-4">
-          <p className="text-xs text-[var(--text-secondary)] mt-1">Dividend income will be automatically added to your available wallet balance.</p>
-       </div>
-
-       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <p className="text-[12px] text-[var(--text-secondary)]">Dividend income will be added to your wallet balance.</p>
+      <div className="grid grid-cols-3 gap-3">
         <div>
-          <label htmlFor="symbol" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Stock Symbol</label>
-          <select 
-            id="symbol" 
-            name="symbol" 
-            required 
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
-          >
-              <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Select a stock</option>
-              {stocks.map((stock) => (<option key={stock.symbol} value={stock.symbol} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
+          <label className="text-[11px] font-medium text-[var(--text-secondary)]">Stock</label>
+          <select value={symbol} onChange={(e) => setSymbol(e.target.value)} required
+            className="mt-1.5 block w-full h-[30px] rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)]">
+            <option value="">Select</option>
+            {stocks.map((s) => <option key={s.symbol} value={s.symbol}>{s.symbol}</option>)}
           </select>
         </div>
         <div>
-          <label htmlFor="dividendAmount" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Amount (PKR)</label>
-          <input 
-            type="number" 
-            id="dividendAmount" 
-            name="dividendAmount" 
-            required 
-            step="0.01" 
-            min="0.01"
-            value={dividendAmount}
-            onChange={(e) => setDividendAmount(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
-          />
-          {errors.dividendAmount && (
-            <p className="mt-1 text-xs text-red-400">{errors.dividendAmount[0]}</p>
-          )}
+          <label className="text-[11px] font-medium text-[var(--text-secondary)]">Amount (PKR)</label>
+          <input type="number" required step="0.01" min="0.01" value={dividendAmount} onChange={(e) => setDividendAmount(e.target.value)}
+            className="mt-1.5 block w-full h-[30px] rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)]" />
+          {errors.dividendAmount && <p className="mt-1 text-[11px] text-[var(--accent-red)]">{errors.dividendAmount[0]}</p>}
         </div>
         <div>
-          <label htmlFor="dividendDate" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Date Received</label>
-          <input 
-            type="date" 
-            id="dividendDate" 
-            name="dividendDate" 
-            required 
-            value={dividendDate}
-            onChange={(e) => setDividendDate(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
-          />
+          <label className="text-[11px] font-medium text-[var(--text-secondary)]">Date</label>
+          <input type="date" required value={dividendDate} onChange={(e) => setDividendDate(e.target.value)}
+            className="mt-1.5 block w-full h-[30px] rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)]" />
         </div>
       </div>
-
-      <div className="mt-6 flex flex-col space-y-4 sm:flex-row sm:items-end sm:justify-between sm:space-y-0">
-        <div className="flex-1 max-w-md">
-          <label htmlFor="notes" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Notes (Optional)</label>
-          <textarea 
-            id="notes" 
-            name="notes" 
-            rows={1}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
-          />
-        </div>
-        <FormButton label="Record Dividend" disabled={submitting} className="btn-primary" />
+      <div>
+        <label className="text-[11px] font-medium text-[var(--text-secondary)]">Notes (Optional)</label>
+        <input value={notes} onChange={(e) => setNotes(e.target.value)}
+          className="mt-1.5 block w-full h-[30px] rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)]" />
+      </div>
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="submit" disabled={submitting}
+          className="h-[30px] px-4 rounded-[6px] bg-[var(--accent-blue)] text-white text-[12px] font-medium hover:bg-[var(--accent-blue-dark)] disabled:opacity-50">
+          {submitting ? 'Processing...' : 'Record Dividend'}
+        </button>
       </div>
     </form>
   );

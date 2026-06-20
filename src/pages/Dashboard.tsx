@@ -3,7 +3,6 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { NetInvestmentChart, AssetAllocationChart, RecentActivity, QuickActions } from '@/components/dashboard';
 import { usePortfolio } from '@/hooks/usePortfolio';
 import { useWallet } from '@/hooks/stocks/useWallet';
@@ -13,7 +12,6 @@ import { useTransactions } from '@/hooks/stocks/useTransactions';
 import { getInvestmentHistory } from '@/services/investmentHistory';
 import type { Transaction } from '@/components/dashboard/RecentActivity';
 import { useState, useEffect, useCallback } from 'react';
-import { clsx } from 'clsx';
 
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', {
@@ -27,20 +25,18 @@ function LoadingSkeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)]">
-            <div className="bg-[var(--bg-tertiary)] space-y-4">
-              <div className="h-10 w-10 rounded-lg bg-[var(--bg-elevated)]" />
-              <div className="space-y-2">
-                <div className="h-3 w-24 rounded bg-[var(--bg-elevated)]" />
-                <div className="h-8 w-32 rounded bg-[var(--bg-elevated)]" />
-              </div>
+          <div key={i} className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)] shadow-soft animate-pulse">
+            <div className="h-9 w-9 rounded-lg bg-[var(--bg-tertiary)] mb-4" />
+            <div className="space-y-2">
+              <div className="h-3 w-20 rounded bg-[var(--bg-tertiary)]" />
+              <div className="h-7 w-28 rounded bg-[var(--bg-tertiary)]" />
             </div>
           </div>
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]" />
-        <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)]" />
+        <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)] shadow-soft animate-pulse" />
+        <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)] shadow-soft animate-pulse" />
       </div>
     </div>
   );
@@ -162,7 +158,7 @@ export default function Dashboard() {
 
   if (chartLoading) {
     return (
-      <div className="max-w-7xl mx-auto">
+      <div>
         <PageHeader
           title="Dashboard"
           description="Performance overview of your investments"
@@ -173,49 +169,43 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="space-y-6">
       <PageHeader
         title="Dashboard"
         description="Performance overview of your investments"
       />
 
-      <div>
-        <StatsGrid columns={4}>
-          <MetricCard
-            title="Total Portfolio Value"
-            value={formatPkr(totalValue)}
-            trend={{ value: totalGainLossPercentage, label: 'vs invested' }}
-            icon={<TrendingUp className="w-5 h-5" />}
-            variant="gold"
-           
-          />
-          <MetricCard
-            title="Total Invested"
-            value={formatPkr(totalInvested)}
-            icon={<DollarSign className="w-5 h-5" />}
-            variant="default"
-           
-          />
-          <MetricCard
-            title="Total Gain/Loss"
-            value={formatPkr(Math.abs(totalGainLoss))}
-            trend={{
-              value: totalGainLossPercentage,
-              label: `${totalGainLoss >= 0 ? '+' : ''}${totalGainLossPercentage.toFixed(1)}%`,
-            }}
-            icon={<PieChart className="w-5 h-5" />}
-            variant={totalGainLoss >= 0 ? 'sage' : 'coral'}
-           
-          />
-          <MetricCard
-            title="Wallet Balance"
-            value={formatPkr(balance)}
-            icon={<Wallet className="w-5 h-5" />}
-            variant="default"
-           
-          />
-        </StatsGrid>
-      </div>
+      <StatsGrid columns={4}>
+        <MetricCard
+          title="Total Portfolio Value"
+          value={formatPkr(totalValue)}
+          trend={{ value: totalGainLossPercentage, label: 'vs invested' }}
+          icon={<TrendingUp className="w-5 h-5" />}
+          variant="blue"
+        />
+        <MetricCard
+          title="Total Invested"
+          value={formatPkr(totalInvested)}
+          icon={<DollarSign className="w-5 h-5" />}
+          variant="default"
+        />
+        <MetricCard
+          title="Total Gain/Loss"
+          value={formatPkr(Math.abs(totalGainLoss))}
+          trend={{
+            value: totalGainLossPercentage,
+            label: `${totalGainLoss >= 0 ? '+' : ''}${totalGainLossPercentage.toFixed(1)}%`,
+          }}
+          icon={<PieChart className="w-5 h-5" />}
+          variant={totalGainLoss >= 0 ? 'green' : 'red'}
+        />
+        <MetricCard
+          title="Wallet Balance"
+          value={formatPkr(balance)}
+          icon={<Wallet className="w-5 h-5" />}
+          variant="default"
+        />
+      </StatsGrid>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <NetInvestmentChart data={investmentHistory} loading={historyLoading} />
@@ -227,96 +217,88 @@ export default function Dashboard() {
         />
       </div>
 
-      <div>
-        <Card>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="h-px w-6 bg-[var(--accent-gold)]" />
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-                  Holdings
-                </span>
-              </div>
-              <h3 className="font-display text-xl text-[var(--text-primary)]">Top Holdings</h3>
-              <p className="text-sm text-[var(--text-muted)] mt-1">Your largest investments by value</p>
-            </div>
-            <Badge variant="gold">{stockMetrics.length} holdings</Badge>
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Top Holdings</h3>
+            <p className="text-sm text-[var(--text-muted)]">Your largest investments by value</p>
           </div>
+          <span className="text-xs font-medium text-[var(--text-secondary)] bg-[var(--bg-tertiary)] px-2 py-1 rounded-md">
+            {stockMetrics.length} holdings
+          </span>
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[var(--border-subtle)]">
-                  <th className="text-left py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                    Symbol
-                  </th>
-                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                    Quantity
-                  </th>
-                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                    Avg. Cost
-                  </th>
-                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                    Current
-                  </th>
-                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                    Value
-                  </th>
-                  <th className="text-right py-3 px-4 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                    Gain/Loss
-                  </th>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[var(--border-subtle)]">
+                <th className="text-left py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)]">
+                  Symbol
+                </th>
+                <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)]">
+                  Quantity
+                </th>
+                <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)]">
+                  Avg. Cost
+                </th>
+                <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)]">
+                  Current
+                </th>
+                <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)]">
+                  Value
+                </th>
+                <th className="text-right py-2.5 px-4 text-[11px] font-semibold text-[var(--text-secondary)]">
+                  Gain/Loss
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border-subtle)]">
+              {stockMetrics.slice(0, 10).map((m) => (
+                <tr key={m.symbol} className="hover:bg-[var(--bg-tertiary)]">
+                  <td className="py-3 px-4">
+                    <span className="font-semibold text-sm text-[var(--text-primary)]">
+                      {m.symbol}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-right text-sm text-[var(--text-secondary)]">
+                    {m.remainingQty.toLocaleString()}
+                  </td>
+                  <td className="py-3 px-4 text-right text-sm text-[var(--text-secondary)]">
+                    {formatPkr(m.avgBuyPrice)}
+                  </td>
+                  <td className="py-3 px-4 text-right text-sm text-[var(--text-secondary)]">
+                    {formatPkr(m.currentPrice)}
+                  </td>
+                  <td className="py-3 px-4 text-right text-sm font-medium text-[var(--text-primary)]">
+                    {formatPkr(m.currentValue)}
+                  </td>
+                  <td className="py-3 px-4 text-right">
+                    <span
+                      className={`text-sm font-medium flex items-center justify-end gap-1 ${
+                        m.unrealizedGainLoss >= 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'
+                      }`}
+                    >
+                      {m.unrealizedGainLoss >= 0 ? (
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      ) : (
+                        <ArrowDownRight className="w-3.5 h-3.5" />
+                      )}
+                      {formatPkr(Math.abs(m.unrealizedGainLoss))}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border-subtle)]">
-                {stockMetrics.slice(0, 10).map((m) => (
-                  <tr
-                    key={m.symbol}
-                    className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-                  >
-                    <td className="py-4 px-4">
-                      <span className="font-mono font-semibold text-[var(--text-primary)]">
-                        {m.symbol}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-right font-mono text-[var(--text-secondary)]">
-                      {m.remainingQty.toLocaleString()}
-                    </td>
-                    <td className="py-4 px-4 text-right font-mono text-[var(--text-secondary)]">
-                      {formatPkr(m.avgBuyPrice)}
-                    </td>
-                    <td className="py-4 px-4 text-right font-mono text-[var(--text-secondary)]">
-                      {formatPkr(m.currentPrice)}
-                    </td>
-                    <td className="py-4 px-4 text-right font-mono font-medium text-[var(--text-primary)]">
-                      {formatPkr(m.currentValue)}
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <span className={clsx(
-                        'font-mono font-medium flex items-center justify-end gap-1',
-                        m.unrealizedGainLoss >= 0 ? 'text-[var(--accent-sage)]' : 'text-[var(--accent-coral)]'
-                      )}>
-                        {m.unrealizedGainLoss >= 0 ? (
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        ) : (
-                          <ArrowDownRight className="w-3.5 h-3.5" />
-                        )}
-                        {formatPkr(Math.abs(m.unrealizedGainLoss))}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {stockMetrics.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-sm text-[var(--text-muted)]">
-                      No stock holdings yet
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </div>
+              ))}
+              {stockMetrics.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="py-10 text-center text-sm text-[var(--text-muted)]">
+                    No stock holdings yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <RecentActivity

@@ -1,254 +1,147 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { DepositForm } from '@/components/stocks/DepositForm';
 import { WithdrawalForm } from '@/components/stocks/WithdrawalForm';
 import { DeleteDepositButton } from '@/components/stocks/DeleteDepositButton';
 import { DeleteWithdrawalButton } from '@/components/stocks/DeleteWithdrawalButton';
-import { Card } from '@/components/ui/Card';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Badge } from '@/components/ui/Badge';
-import { Wallet as WalletIcon, PiggyBank, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+import { SegmentedControl } from '@/components/SegmentedControl';
+import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
+import { Wallet as WalletIcon, PiggyBank, ArrowUpFromLine } from 'lucide-react';
+import type { Deposit, Withdrawal } from '@/services/stocks/wallet';
+
+const subNav = [
+  { label: 'Holdings', value: '/stocks' },
+  { label: 'Wallet', value: '/stocks/wallet' },
+  { label: 'Transactions', value: '/stocks/transactions' },
+  { label: 'Reports', value: '/stocks/reports' },
+];
 
 function formatPkr(amount: number) {
-  return amount.toLocaleString('en-PK', {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-  });
-}
-
-function DepositsTable() {
-  const { deposits, loading } = useWallet();
-
-  if (loading) {
-    return (
-      <Card className="bg-[var(--bg-tertiary)]">
-        <div className="h-64 bg-[var(--bg-elevated)] rounded" />
-      </Card>
-    );
-  }
-
-  return (
-    <Card hover={false}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <ArrowDownToLine className="w-4 h-4 text-[var(--accent-gold)]" />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-              Deposits
-            </span>
-          </div>
-          <h3 className="font-display text-xl text-[var(--text-primary)]">Deposit History</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-1">All your wallet deposits</p>
-        </div>
-        <Badge variant="gold">{deposits.length} transactions</Badge>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[var(--border-subtle)]">
-              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Date
-              </th>
-              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Note
-              </th>
-              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Amount
-              </th>
-              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border-subtle)]">
-            {deposits.map((deposit) => (
-              <tr 
-                key={deposit.id}
-                className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-              >
-                <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
-                  {deposit.deposit_date ? new Intl.DateTimeFormat('en-PK').format(new Date(deposit.deposit_date)) : '-'}
-                </td>
-                <td className="px-4 py-4 text-sm text-[var(--text-muted)] italic">{deposit.note || '-'}</td>
-                <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--accent-sage)]">
-                  +Rs. {formatPkr(deposit.amount)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-4 text-right">
-                  <DeleteDepositButton id={deposit.id} />
-                </td>
-              </tr>
-            ))}
-            {deposits.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
-                  No deposit records found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
-
-function WithdrawalsTable() {
-  const { withdrawals, loading } = useWallet();
-
-  if (loading) {
-    return (
-      <Card className="bg-[var(--bg-tertiary)]">
-        <div className="h-64 bg-[var(--bg-elevated)] rounded" />
-      </Card>
-    );
-  }
-
-  return (
-    <Card hover={false}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <ArrowUpFromLine className="w-4 h-4 text-[var(--accent-coral)]" />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-coral)]">
-              Withdrawals
-            </span>
-          </div>
-          <h3 className="font-display text-xl text-[var(--text-primary)]">Withdrawal History</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-1">All your wallet withdrawals</p>
-        </div>
-        <Badge variant="coral">{withdrawals.length} transactions</Badge>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[var(--border-subtle)]">
-              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Date
-              </th>
-              <th className="px-4 py-3 text-left text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Note
-              </th>
-              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Amount
-              </th>
-              <th className="px-4 py-3 text-right text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border-subtle)]">
-            {withdrawals.map((withdrawal) => (
-              <tr 
-                key={withdrawal.id}
-                className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-              >
-                <td className="whitespace-nowrap px-4 py-4 text-sm text-[var(--text-secondary)]">
-                  {withdrawal.withdrawal_date ? new Intl.DateTimeFormat('en-PK').format(new Date(withdrawal.withdrawal_date)) : '-'}
-                </td>
-                <td className="px-4 py-4 text-sm text-[var(--text-muted)] italic">{withdrawal.note || '-'}</td>
-                <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-medium text-[var(--accent-coral)]">
-                  -Rs. {formatPkr(withdrawal.amount)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-4 text-right">
-                  <DeleteWithdrawalButton id={withdrawal.id} />
-                </td>
-              </tr>
-            ))}
-            {withdrawals.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
-                  No withdrawal records found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
+  return amount.toLocaleString('en-PK', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 }
 
 export default function Wallet() {
-  const { balance, totalDeposited, totalWithdrawn, loading } = useWallet();
+  const navigate = useNavigate();
+  const { balance, totalDeposited, totalWithdrawn, deposits, withdrawals, loading } = useWallet();
+  const [modalType, setModalType] = useState<'deposit' | 'withdrawal' | null>(null);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <PageHeader
-        title="Deposits & Wallet"
-        description="Manage your investment capital and available funds."
-        breadcrumbs={[{ label: 'Stocks' }, { label: 'Wallet' }]}
-      />
-
-      <div>
-        <StatsGrid columns={3}>
-          <MetricCard
-            title="Available Balance"
-            value={loading ? '...' : `Rs. ${formatPkr(balance)}`}
-            icon={<WalletIcon className="w-5 h-5" />}
-            variant="gold"
-           
-          />
-          <MetricCard
-            title="Total Deposited"
-            value={loading ? '...' : `Rs. ${formatPkr(totalDeposited)}`}
-            icon={<PiggyBank className="w-5 h-5" />}
-            variant="sage"
-           
-          />
-          <MetricCard
-            title="Total Withdrawn"
-            value={loading ? '...' : `Rs. ${formatPkr(totalWithdrawn)}`}
-            icon={<ArrowUpFromLine className="w-5 h-5" />}
-            variant="coral"
-           
-          />
-        </StatsGrid>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          <Card hover={false}>
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-1">
-                <ArrowDownToLine className="w-4 h-4 text-[var(--accent-gold)]" />
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-                  Add Funds
-                </span>
-              </div>
-              <h3 className="font-display text-xl text-[var(--text-primary)]">Make a Deposit</h3>
-              <p className="text-sm text-[var(--text-muted)] mt-1">Add money to your investment wallet</p>
-            </div>
-            <DepositForm />
-          </Card>
-        </div>
-
-        <div>
-          <Card hover={false}>
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-1">
-                <ArrowUpFromLine className="w-4 h-4 text-[var(--accent-coral)]" />
-                <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-coral)]">
-                  Withdraw
-                </span>
-              </div>
-              <h3 className="font-display text-xl text-[var(--text-primary)]">Make a Withdrawal</h3>
-              <p className="text-sm text-[var(--text-muted)] mt-1">Withdraw money from your investment wallet</p>
-            </div>
-            <WithdrawalForm />
-          </Card>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <SegmentedControl segments={subNav} value="/stocks/wallet" onChange={(v) => navigate(v)} />
+        <div className="flex gap-2">
+          <button onClick={() => setModalType('deposit')}
+            className="h-[28px] px-3 rounded-[6px] bg-[var(--accent-blue)] text-white text-[12px] font-medium hover:bg-[var(--accent-blue-dark)] flex items-center gap-1.5">
+            + Deposit
+          </button>
+          <button onClick={() => setModalType('withdrawal')}
+            className="h-[28px] px-3 rounded-[6px] border border-[var(--border-default)] text-[var(--text-secondary)] text-[12px] font-medium hover:bg-[var(--bg-tertiary)] flex items-center gap-1.5">
+            + Withdraw
+          </button>
         </div>
       </div>
 
-      <div>
-        <DepositsTable />
+      <StatsGrid columns={3}>
+        <MetricCard
+          title="Available Balance"
+          value={loading ? '...' : `Rs. ${formatPkr(balance)}`}
+          icon={<WalletIcon className="w-5 h-5" />}
+          variant="blue"
+        />
+        <MetricCard
+          title="Total Deposited"
+          value={loading ? '...' : `Rs. ${formatPkr(totalDeposited)}`}
+          icon={<PiggyBank className="w-5 h-5" />}
+          variant="green"
+        />
+        <MetricCard
+          title="Total Withdrawn"
+          value={loading ? '...' : `Rs. ${formatPkr(totalWithdrawn)}`}
+          icon={<ArrowUpFromLine className="w-5 h-5" />}
+          variant="red"
+        />
+      </StatsGrid>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <DepositsTable deposits={deposits} loading={loading} />
+        <WithdrawalsTable withdrawals={withdrawals} loading={loading} />
       </div>
 
-      <div>
-        <WithdrawalsTable />
+      <Modal open={modalType === 'deposit'} onClose={() => setModalType(null)} title="Make a Deposit" width="sm">
+        <DepositForm onSuccess={() => setModalType(null)} />
+      </Modal>
+      <Modal open={modalType === 'withdrawal'} onClose={() => setModalType(null)} title="Make a Withdrawal" width="sm">
+        <WithdrawalForm onSuccess={() => setModalType(null)} />
+      </Modal>
+    </div>
+  );
+}
+
+function DepositsTable({ deposits, loading }: { deposits: Deposit[]; loading: boolean }) {
+  if (loading) return <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] p-5 animate-pulse"><div className="h-40 bg-[var(--bg-tertiary)] rounded" /></div>;
+  return (
+    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+        <h3 className="text-[13px] font-semibold text-[var(--text-primary)]">Deposits</h3>
+        <span className="text-[11px] text-[var(--text-muted)]">{deposits.length} entries</span>
       </div>
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-[var(--border-subtle)]">
+            <th className="px-4 py-2 text-left text-[11px] font-semibold text-[var(--text-secondary)]">Date</th>
+            <th className="px-4 py-2 text-left text-[11px] font-semibold text-[var(--text-secondary)]">Note</th>
+            <th className="px-4 py-2 text-right text-[11px] font-semibold text-[var(--text-secondary)]">Amount</th>
+            <th className="px-4 py-2 text-right text-[11px] font-semibold text-[var(--text-secondary)]"></th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[var(--border-subtle)]">
+          {deposits.map((d) => (
+            <tr key={d.id} className="hover:bg-[var(--bg-tertiary)]">
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{d.deposit_date ? new Date(d.deposit_date).toLocaleDateString('en-PK') : '-'}</td>
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-muted)] italic">{d.note || '-'}</td>
+              <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-green)]">+Rs. {formatPkr(d.amount)}</td>
+              <td className="px-4 py-2.5 text-right"><DeleteDepositButton id={d.id} /></td>
+            </tr>
+          ))}
+          {deposits.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-[13px] text-[var(--text-muted)]">No deposits yet.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function WithdrawalsTable({ withdrawals, loading }: { withdrawals: Withdrawal[]; loading: boolean }) {
+  if (loading) return <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] p-5 animate-pulse"><div className="h-40 bg-[var(--bg-tertiary)] rounded" /></div>;
+  return (
+    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+        <h3 className="text-[13px] font-semibold text-[var(--text-primary)]">Withdrawals</h3>
+        <span className="text-[11px] text-[var(--text-muted)]">{withdrawals.length} entries</span>
+      </div>
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-[var(--border-subtle)]">
+            <th className="px-4 py-2 text-left text-[11px] font-semibold text-[var(--text-secondary)]">Date</th>
+            <th className="px-4 py-2 text-left text-[11px] font-semibold text-[var(--text-secondary)]">Note</th>
+            <th className="px-4 py-2 text-right text-[11px] font-semibold text-[var(--text-secondary)]">Amount</th>
+            <th className="px-4 py-2 text-right text-[11px] font-semibold text-[var(--text-secondary)]"></th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[var(--border-subtle)]">
+          {withdrawals.map((w) => (
+            <tr key={w.id} className="hover:bg-[var(--bg-tertiary)]">
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{w.withdrawal_date ? new Date(w.withdrawal_date).toLocaleDateString('en-PK') : '-'}</td>
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-muted)] italic">{w.note || '-'}</td>
+              <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-red)]">-Rs. {formatPkr(w.amount)}</td>
+              <td className="px-4 py-2.5 text-right"><DeleteWithdrawalButton id={w.id} /></td>
+            </tr>
+          ))}
+          {withdrawals.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-[13px] text-[var(--text-muted)]">No withdrawals yet.</td></tr>}
+        </tbody>
+      </table>
     </div>
   );
 }

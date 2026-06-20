@@ -16,9 +16,9 @@ const formatPKR = (value: number): string => {
 };
 
 const COLORS = {
-  stocks: 'var(--accent-gold)',
-  mutualFunds: 'var(--accent-sage)',
-  crypto: '#8b5cf6',
+  stocks: '#007AFF',
+  mutualFunds: '#34C759',
+  crypto: '#FF9500',
 };
 
 const RADIAN = Math.PI / 180;
@@ -37,12 +37,11 @@ const renderCustomizedLabel = (props: { cx: number; cy: number; midAngle?: numbe
     <text
       x={x}
       y={y}
-      fill="var(--bg-primary)"
+      fill="#FFFFFF"
       textAnchor="middle"
       dominantBaseline="central"
       fontSize={12}
       fontWeight={600}
-      fontFamily="JetBrains Mono"
     >
       {`${(safePercent * 100).toFixed(0)}%`}
     </text>
@@ -53,11 +52,9 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { payl
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--border-subtle)] shadow-elevated">
-        <p className="text-xs text-[var(--text-muted)] mb-1 uppercase tracking-wider">
-          {data.name}
-        </p>
-        <p className="font-mono font-medium text-[var(--text-primary)]">
+      <div className="bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-subtle)] shadow-card">
+        <p className="text-xs text-[var(--text-muted)] mb-1">{data.name}</p>
+        <p className="text-sm font-semibold text-[var(--text-primary)]">
           {formatPKR(data.value)}
         </p>
       </div>
@@ -79,9 +76,9 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
 
   if (loading) {
     return (
-      <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
-        <div className="h-4 w-40 bg-[var(--bg-tertiary)] rounded mb-6" />
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg" />
+      <div className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)] shadow-soft">
+        <div className="h-4 w-36 bg-[var(--bg-tertiary)] rounded mb-4 animate-pulse" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -98,19 +95,16 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
   };
 
   return (
-    <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <PieChartIcon className="w-4 h-4 text-[var(--accent-gold)]" />
-          <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-            Distribution
-          </span>
+    <div className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)] shadow-soft">
+      <div className="flex items-center gap-2 mb-4">
+        <PieChartIcon className="w-4 h-4 text-[var(--accent-blue)]" />
+        <div>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Asset Allocation</h3>
+          <p className="text-xs text-[var(--text-muted)]">Portfolio breakdown by asset type</p>
         </div>
-        <h3 className="font-display text-xl text-[var(--text-primary)]">Asset Allocation</h3>
-        <p className="text-sm text-[var(--text-muted)] mt-1">Portfolio breakdown by asset type</p>
       </div>
 
-      <div className="h-80">
+      <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -119,10 +113,9 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
               cy="50%"
               labelLine={false}
               label={renderCustomizedLabel}
-              outerRadius={110}
-              innerRadius={55}
+              outerRadius={100}
+              innerRadius={50}
               dataKey="value"
-              animationDuration={1500}
               paddingAngle={2}
             >
               {data.map((entry, index) => (
@@ -134,7 +127,7 @@ export function AssetAllocationChart({ stocks, mutualFunds, crypto, loading }: A
                 />
               ))}
             </Pie>
-            <Tooltip animationDuration={200} content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip />} />
             <Legend
               verticalAlign="bottom"
               height={36}

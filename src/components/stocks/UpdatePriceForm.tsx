@@ -27,7 +27,7 @@ export function UpdatePriceForm({ symbol, currentPrice }: { symbol: string, curr
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="flex items-center gap-1.5">
       <input
         type="number"
         name="currentPrice"
@@ -35,9 +35,9 @@ export function UpdatePriceForm({ symbol, currentPrice }: { symbol: string, curr
         value={price}
         onChange={(e) => setPrice(e.target.value)}
         required
-        className="mt-1 block w-32 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
+        className="h-[28px] w-28 rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-[2.5px] focus:ring-[var(--accent-blue)]/20"
       />
-      <FormButton label="Update" loadingLabel="..." className="btn-secondary px-3 py-1.5" disabled={submitting} />
+      <FormButton label="Update" loadingLabel="..." className="h-[28px] px-2.5 rounded-[6px] text-[12px] bg-[var(--accent-blue)] text-white font-medium hover:bg-[var(--accent-blue-dark)]" disabled={submitting} />
     </form>
   );
 }

@@ -3,13 +3,13 @@ import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
 import type { Cryptocurrency } from '@/services/crypto/crypto';
-import { ArrowUpRight } from 'lucide-react';
 
 interface WithdrawalFormProps {
   cryptocurrencies: Cryptocurrency[];
+  onSuccess?: () => void;
 }
 
-export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
+export function WithdrawalForm({ cryptocurrencies, onSuccess }: WithdrawalFormProps) {
   const { addWithdrawal } = useCrypto();
   const [symbol, setSymbol] = useState('');
   const [amountPkr, setAmountPkr] = useState('');
@@ -38,6 +38,7 @@ export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
       setAmountPkr('');
       setWithdrawalDate(new Date().toISOString().split('T')[0]);
       setNotes('');
+      onSuccess?.();
     } else {
       toast.error(result.message);
       if (result.errors) {
@@ -47,84 +48,49 @@ export function WithdrawalForm({ cryptocurrencies }: WithdrawalFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <ArrowUpRight className="h-5 w-5 text-[var(--accent-gold)]" />
-        <h3 className="text-[var(--accent-gold)] text-sm uppercase tracking-wider font-semibold">
-          Record Withdrawal
-        </h3>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="symbol" className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Cryptocurrency</label>
+        <select
+          id="symbol" name="symbol" required value={symbol}
+          onChange={(e) => setSymbol(e.target.value)}
+          className="h-[30px] w-full rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2.5 text-[13px] text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-[2.5px] focus:ring-[var(--accent-blue)]/20"
+        >
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-muted)]">Select a cryptocurrency</option>
+          {cryptocurrencies.map((crypto) => (
+            <option key={crypto.symbol} value={crypto.symbol} className="bg-[var(--bg-secondary)]">{crypto.symbol} - {crypto.name}</option>
+          ))}
+        </select>
+        {errors.symbol && <p className="mt-1 text-[11px] text-[var(--accent-red)]">{errors.symbol[0]}</p>}
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="symbol" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
-            Cryptocurrency
-          </label>
-          <select
-            id="symbol"
-            name="symbol"
-            required
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value)}
-            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
-          >
-            <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-secondary)]">Select a cryptocurrency</option>
-            {cryptocurrencies.map((crypto) => (
-              <option key={crypto.symbol} value={crypto.symbol} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
-                {crypto.symbol} - {crypto.name}
-              </option>
-            ))}
-          </select>
-          {errors.symbol && <p className="mt-1 text-xs text-red-500">{errors.symbol[0]}</p>}
-        </div>
-        <div>
-          <label htmlFor="amountPkr" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
-            Amount (PKR)
-          </label>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-[var(--text-muted)]">Rs.</span>
-            <input
-              type="number"
-              id="amountPkr"
-              name="amountPkr"
-              required
-              min="0.01"
-              step="0.01"
-              value={amountPkr}
-              onChange={(e) => setAmountPkr(e.target.value)}
-              className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
-            />
-          </div>
-          {errors.amountPkr && <p className="mt-1 text-xs text-red-500">{errors.amountPkr[0]}</p>}
-        </div>
-        <div>
-          <label htmlFor="withdrawalDate" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
-            Withdrawal Date
-          </label>
+          <label htmlFor="amountPkr" className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Amount (PKR)</label>
           <input
-            type="date"
-            id="withdrawalDate"
-            name="withdrawalDate"
-            required
-            value={withdrawalDate}
-            onChange={(e) => setWithdrawalDate(e.target.value)}
-            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
+            type="number" id="amountPkr" name="amountPkr" required min="0.01" step="0.01"
+            value={amountPkr} onChange={(e) => setAmountPkr(e.target.value)}
+            className="h-[30px] w-full rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2.5 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-[2.5px] focus:ring-[var(--accent-blue)]/20"
           />
+          {errors.amountPkr && <p className="mt-1 text-[11px] text-[var(--accent-red)]">{errors.amountPkr[0]}</p>}
         </div>
         <div>
-          <label htmlFor="notes" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
-            Notes
-          </label>
+          <label htmlFor="withdrawalDate" className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Withdrawal Date</label>
           <input
-            type="text"
-            id="notes"
-            name="notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
+            type="date" id="withdrawalDate" name="withdrawalDate" required
+            value={withdrawalDate} onChange={(e) => setWithdrawalDate(e.target.value)}
+            className="h-[30px] w-full rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2.5 text-[13px] text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-[2.5px] focus:ring-[var(--accent-blue)]/20"
           />
         </div>
       </div>
-      <div className="pt-2">
+      <div>
+        <label htmlFor="notes" className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">Notes</label>
+        <input
+          type="text" id="notes" name="notes"
+          value={notes} onChange={(e) => setNotes(e.target.value)}
+          className="h-[30px] w-full rounded-[6px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2.5 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-[2.5px] focus:ring-[var(--accent-blue)]/20"
+        />
+      </div>
+      <div className="flex justify-end pt-1">
         <FormButton label="Record Withdrawal" disabled={submitting} />
       </div>
     </form>

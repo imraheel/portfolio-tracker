@@ -4,15 +4,11 @@ import Dashboard from './pages/Dashboard';
 import Wallet from './pages/stocks/Wallet';
 import Stocks from './pages/stocks/Stocks';
 import Transactions from './pages/stocks/Transactions';
-import Reports from './pages/Reports';
+import StockReports from './pages/stocks/Reports';
 import Settings from './pages/Settings';
 import MutualFundsList from './pages/mutualFunds/FundsList';
-import MutualFundPurchases from './pages/mutualFunds/Purchases';
-import MutualFundWithdrawals from './pages/mutualFunds/Withdrawals';
 import MutualFundTransactions from './pages/mutualFunds/Transactions';
 import CryptoList from './pages/crypto/CryptoList';
-import CryptoPurchases from './pages/crypto/Purchases';
-import CryptoWithdrawals from './pages/crypto/Withdrawals';
 import CryptoTransactions from './pages/crypto/Transactions';
 
 function App() {
@@ -26,19 +22,15 @@ function App() {
         <Route path="stocks" element={<Stocks />} />
         <Route path="stocks/wallet" element={<Wallet />} />
         <Route path="stocks/transactions" element={<Transactions />} />
-        <Route path="stocks/reports" element={<Reports />} />
+        <Route path="stocks/reports" element={<StockReports />} />
         
         {/* Mutual Funds Routes */}
         <Route path="mutual-funds" element={<MutualFundsList />} />
         <Route path="mutual-funds/transactions" element={<MutualFundTransactions />} />
-        <Route path="mutual-funds/purchases" element={<MutualFundPurchases />} />
-        <Route path="mutual-funds/withdrawals" element={<MutualFundWithdrawals />} />
         
         {/* Crypto Routes */}
         <Route path="crypto" element={<CryptoList />} />
         <Route path="crypto/transactions" element={<CryptoTransactions />} />
-        <Route path="crypto/purchases" element={<CryptoPurchases />} />
-        <Route path="crypto/withdrawals" element={<CryptoWithdrawals />} />
       </Route>
     </Routes>
   );

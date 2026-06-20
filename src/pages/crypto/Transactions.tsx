@@ -1,14 +1,20 @@
-import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { ShoppingCart, ArrowDownCircle, TrendingUp, Coins, Bitcoin, ArrowRightLeft } from 'lucide-react';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { ShoppingCart, ArrowDownCircle, TrendingUp } from 'lucide-react';
+import { SegmentedControl } from '@/components/SegmentedControl';
+import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { PurchaseForm } from '@/components/crypto/PurchaseForm';
 import { WithdrawalForm } from '@/components/crypto/WithdrawalForm';
+import type { CryptoPurchase, CryptoWithdrawal } from '@/services/crypto/crypto';
+
+const subNav = [
+  { label: 'Holdings', value: '/crypto' },
+  { label: 'Transactions', value: '/crypto/transactions' },
+];
 
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -19,301 +25,117 @@ function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right'
     <thead>
       <tr className="border-b border-[var(--border-subtle)]">
         {cols.map((col, i) => (
-          <th
-            key={i}
-            className={clsx(
-              "px-4 py-3 text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-medium",
-              col.align === 'right' ? "text-right" : "text-left"
-            )}
-          >
-            {col.label}
-          </th>
+          <th key={i} className={clsx("px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)]", col.align === 'right' ? "text-right" : "text-left")}>{col.label}</th>
         ))}
       </tr>
     </thead>
   );
 }
 
-function PurchasesTable() {
-  const { purchases, loading } = useCrypto();
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB');
-  };
-
-  if (loading) {
-    return (
-      <Card className="bg-[var(--bg-tertiary)]">
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
-      </Card>
-    );
-  }
-
-  return (
-    <Card hover={false}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-              Buy History
-            </span>
-          </div>
-          <h3 className="font-display text-xl text-[var(--text-primary)]">Purchase History</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-1">All your cryptocurrency purchases</p>
-        </div>
-        <Badge variant="gold">{purchases.length} purchases</Badge>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <TableHeader cols={[
-            { label: 'Date' },
-            { label: 'Cryptocurrency' },
-            { label: 'Amount', align: 'right' },
-            { label: 'Notes' },
-          ]} />
-          <tbody className="divide-y divide-[var(--border-subtle)]">
-            {purchases.map((purchase) => (
-              <tr
-                key={purchase.id}
-                className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-              >
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-secondary)]">
-                  {formatDate(purchase.purchase_date)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <Bitcoin className="w-4 h-4 text-[var(--accent-gold)]" />
-                    <span className="font-mono font-medium text-[var(--text-primary)]">{purchase.cryptocurrency?.symbol}</span>
-                    <span className="text-sm text-[var(--text-muted)]">{purchase.cryptocurrency?.name}</span>
-                  </div>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-mono font-medium text-[var(--accent-coral)]">
-                  {formatPkr(purchase.amount_pkr)}
-                </td>
-                <td className="px-4 py-3 text-sm text-[var(--text-muted)]">{purchase.notes || '-'}</td>
-              </tr>
-            ))}
-            {purchases.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
-                  No purchases recorded yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
-
-function WithdrawalsTable() {
-  const { withdrawals, loading } = useCrypto();
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB');
-  };
-
-  if (loading) {
-    return (
-      <Card className="bg-[var(--bg-tertiary)]">
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded" />
-      </Card>
-    );
-  }
-
-  return (
-    <Card hover={false}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <ArrowDownCircle className="w-4 h-4 text-[var(--accent-gold)]" />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-              Sell History
-            </span>
-          </div>
-          <h3 className="font-display text-xl text-[var(--text-primary)]">Withdrawal History</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-1">All your cryptocurrency withdrawals</p>
-        </div>
-        <Badge variant="coral">{withdrawals.length} withdrawals</Badge>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <TableHeader cols={[
-            { label: 'Date' },
-            { label: 'Cryptocurrency' },
-            { label: 'Amount', align: 'right' },
-            { label: 'Notes' },
-          ]} />
-          <tbody className="divide-y divide-[var(--border-subtle)]">
-            {withdrawals.map((withdrawal) => (
-              <tr
-                key={withdrawal.id}
-                className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
-              >
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-secondary)]">
-                  {formatDate(withdrawal.withdrawal_date)}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <Bitcoin className="w-4 h-4 text-[var(--accent-gold)]" />
-                    <span className="font-mono font-medium text-[var(--text-primary)]">{withdrawal.cryptocurrency?.symbol}</span>
-                    <span className="text-sm text-[var(--text-muted)]">{withdrawal.cryptocurrency?.name}</span>
-                  </div>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-mono font-medium text-[var(--accent-sage)]">
-                  {formatPkr(withdrawal.amount_pkr)}
-                </td>
-                <td className="px-4 py-3 text-sm text-[var(--text-muted)]">{withdrawal.notes || '-'}</td>
-              </tr>
-            ))}
-            {withdrawals.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center text-sm text-[var(--text-muted)]">
-                  No withdrawals recorded yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
-}
-
-export default function Transactions() {
+export default function CryptoTransactions() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentView = searchParams.get('view') === 'withdrawals' ? 'withdrawals' : 'invest';
+  const [modalType, setModalType] = useState<'invest' | 'withdrawal' | null>(null);
 
   const { purchases, withdrawals, cryptocurrencies } = useCrypto();
-
   const totalInvested = purchases.reduce((sum, p) => sum + p.amount_pkr, 0);
   const totalWithdrawn = withdrawals.reduce((sum, w) => sum + w.amount_pkr, 0);
 
-  const handleTabChange = (view: string) => {
-    setSearchParams({ view });
-  };
-
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <PageHeader
-        title="Crypto Transactions"
-        description="Invest and withdraw from your cryptocurrency holdings."
-        breadcrumbs={[{ label: 'Crypto' }, { label: 'Transactions' }]}
-      />
+    <div className="space-y-5">
+      <SegmentedControl segments={subNav} value="/crypto/transactions" onChange={(v) => navigate(v)} />
 
-      <div>
-        <StatsGrid columns={4}>
-          <MetricCard
-            title="Total Invested"
-            value={formatPkr(totalInvested)}
-            icon={<ShoppingCart className="w-5 h-5" />}
-            variant="default"
-           
-          />
-          <MetricCard
-            title="Total Withdrawn"
-            value={formatPkr(totalWithdrawn)}
-            icon={<ArrowDownCircle className="w-5 h-5" />}
-            variant="sage"
-           
-          />
-          <MetricCard
-            title="Active Assets"
-            value={cryptocurrencies.length.toString()}
-            icon={<TrendingUp className="w-5 h-5" />}
-            variant="default"
-           
-          />
-          <MetricCard
-            title="Available Assets"
-            value={cryptocurrencies.length.toString()}
-            icon={<Coins className="w-5 h-5" />}
-            variant="gold"
-           
-          />
-        </StatsGrid>
-      </div>
+      <StatsGrid columns={3}>
+        <MetricCard title="Total Invested" value={formatPkr(totalInvested)} icon={<ShoppingCart className="w-5 h-5" />} variant="default" />
+        <MetricCard title="Total Withdrawn" value={formatPkr(totalWithdrawn)} icon={<ArrowDownCircle className="w-5 h-5" />} variant="green" />
+        <MetricCard title="Active Assets" value={cryptocurrencies.length.toString()} icon={<TrendingUp className="w-5 h-5" />} variant="blue" />
+      </StatsGrid>
 
-      <div className="border-b border-[var(--border-subtle)]">
-        <nav className="-mb-px flex space-x-8">
+      <div className="flex items-center justify-between">
+        <div className="flex gap-1 bg-[var(--bg-tertiary)] p-0.5 rounded-lg">
           <button
-            onClick={() => handleTabChange('invest')}
-            className={clsx(
-              "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors",
-              currentView === 'invest' 
-                ? 'border-[var(--accent-gold)] text-[var(--accent-gold)]' 
-                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            )}
-          >
-            <ArrowRightLeft className="w-4 h-4" />
-            Invest
+            onClick={() => setSearchParams({ view: 'invest' })}
+            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentView === 'invest' ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}
+          >Invest
           </button>
           <button
-            onClick={() => handleTabChange('withdrawals')}
-            className={clsx(
-              "flex items-center gap-2 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium tracking-wide transition-colors",
-              currentView === 'withdrawals' 
-                ? 'border-[var(--accent-coral)] text-[var(--accent-coral)]' 
-                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-            )}
-          >
-            <ArrowDownCircle className="w-4 h-4" />
-            Withdrawals
+            onClick={() => setSearchParams({ view: 'withdrawals' })}
+            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentView === 'withdrawals' ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}
+          >Withdrawals
           </button>
-        </nav>
+        </div>
+        <div className="flex gap-2">
+          {currentView === 'invest' && (
+            <button onClick={() => setModalType('invest')}
+              className="h-[28px] px-3 rounded-[6px] bg-[var(--accent-blue)] text-white text-[12px] font-medium hover:bg-[var(--accent-blue-dark)] flex items-center gap-1.5">+ Buy</button>
+          )}
+          {currentView === 'withdrawals' && (
+            <button onClick={() => setModalType('withdrawal')}
+              className="h-[28px] px-3 rounded-[6px] bg-[var(--accent-blue)] text-white text-[12px] font-medium hover:bg-[var(--accent-blue-dark)] flex items-center gap-1.5">+ Sell</button>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-6">
-        {currentView === 'invest' && (
-          <div>
-            <Card hover={false}>
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <ShoppingCart className="w-4 h-4 text-[var(--accent-gold)]" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-                    Buy
-                  </span>
-                </div>
-                <h3 className="font-display text-xl text-[var(--text-primary)]">Buy Crypto</h3>
-                <p className="text-sm text-[var(--text-muted)] mt-1">Add a new cryptocurrency purchase</p>
-              </div>
-              <PurchaseForm cryptocurrencies={cryptocurrencies} />
-            </Card>
-          </div>
-        )}
-        {currentView === 'withdrawals' && (
-          <div>
-            <Card hover={false}>
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <ArrowDownCircle className="w-4 h-4 text-[var(--accent-coral)]" />
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-coral)]">
-                    Sell
-                  </span>
-                </div>
-                <h3 className="font-display text-xl text-[var(--text-primary)]">Sell Crypto</h3>
-                <p className="text-sm text-[var(--text-muted)] mt-1">Add a new cryptocurrency withdrawal</p>
-              </div>
-              <WithdrawalForm cryptocurrencies={cryptocurrencies} />
-            </Card>
-          </div>
-        )}
+      {currentView === 'invest' && <PurchasesTable purchases={purchases} loading={purchases.length === 0} />}
+      {currentView === 'withdrawals' && <WithdrawalsTable withdrawals={withdrawals} loading={withdrawals.length === 0} />}
 
-        {currentView === 'invest' && (
-          <div>
-            <PurchasesTable />
-          </div>
-        )}
-        {currentView === 'withdrawals' && (
-          <div>
-            <WithdrawalsTable />
-          </div>
-        )}
-      </div>
+      <Modal open={modalType === 'invest'} onClose={() => setModalType(null)} title="Buy Crypto" width="sm">
+        <PurchaseForm cryptocurrencies={cryptocurrencies} onSuccess={() => setModalType(null)} />
+      </Modal>
+      <Modal open={modalType === 'withdrawal'} onClose={() => setModalType(null)} title="Sell Crypto" width="sm">
+        <WithdrawalForm cryptocurrencies={cryptocurrencies} onSuccess={() => setModalType(null)} />
+      </Modal>
+    </div>
+  );
+}
+
+function PurchasesTable({ purchases, loading }: { purchases: CryptoPurchase[]; loading: boolean }) {
+  if (loading) return <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] p-5 animate-pulse"><div className="h-40 bg-[var(--bg-tertiary)] rounded" /></div>;
+  return (
+    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
+      <table className="w-full">
+        <TableHeader cols={[{ label: 'Date' }, { label: 'Crypto' }, { label: 'Amount', align: 'right' }, { label: 'Notes' }]} />
+        <tbody className="divide-y divide-[var(--border-subtle)]">
+          {purchases.map((p: CryptoPurchase) => (
+            <tr key={p.id} className="hover:bg-[var(--bg-tertiary)]">
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{new Date(p.purchase_date).toLocaleDateString('en-PK')}</td>
+              <td className="px-4 py-2.5">
+                <span className="text-[12px] font-semibold text-[var(--text-primary)]">{p.cryptocurrency?.symbol}</span>
+                <span className="ml-1.5 text-[12px] text-[var(--text-muted)]">{p.cryptocurrency?.name}</span>
+              </td>
+              <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-red)]">{formatPkr(p.amount_pkr)}</td>
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-muted)]">{p.notes || '-'}</td>
+            </tr>
+          ))}
+          {purchases.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-[13px] text-[var(--text-muted)]">No purchases recorded.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function WithdrawalsTable({ withdrawals, loading }: { withdrawals: CryptoWithdrawal[]; loading: boolean }) {
+  if (loading) return <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] p-5 animate-pulse"><div className="h-40 bg-[var(--bg-tertiary)] rounded" /></div>;
+  return (
+    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
+      <table className="w-full">
+        <TableHeader cols={[{ label: 'Date' }, { label: 'Crypto' }, { label: 'Amount', align: 'right' }, { label: 'Notes' }]} />
+        <tbody className="divide-y divide-[var(--border-subtle)]">
+          {withdrawals.map((w: CryptoWithdrawal) => (
+            <tr key={w.id} className="hover:bg-[var(--bg-tertiary)]">
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{new Date(w.withdrawal_date).toLocaleDateString('en-PK')}</td>
+              <td className="px-4 py-2.5">
+                <span className="text-[12px] font-semibold text-[var(--text-primary)]">{w.cryptocurrency?.symbol}</span>
+                <span className="ml-1.5 text-[12px] text-[var(--text-muted)]">{w.cryptocurrency?.name}</span>
+              </td>
+              <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-green)]">{formatPkr(w.amount_pkr)}</td>
+              <td className="px-4 py-2.5 text-[12px] text-[var(--text-muted)]">{w.notes || '-'}</td>
+            </tr>
+          ))}
+          {withdrawals.length === 0 && <tr><td colSpan={4} className="px-4 py-10 text-center text-[13px] text-[var(--text-muted)]">No withdrawals recorded.</td></tr>}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { FormButton } from '@/components/FormButton';
 import { useStocks } from '@/hooks/stocks/useStocks';
 
-export function StockForm() {
+interface StockFormProps {
+  onSuccess?: () => void;
+}
+
+export function StockForm({ onSuccess }: StockFormProps) {
   const { addStock } = useStocks();
   const [symbol, setSymbol] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -15,72 +18,44 @@ export function StockForm() {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
-
     const result = await addStock({
-      symbol,
-      companyName: companyName || undefined,
-      sector: sector || undefined,
+      symbol, companyName: companyName || undefined, sector: sector || undefined,
     });
-
     setSubmitting(false);
-
     if (result.success) {
       toast.success(result.message);
-      setSymbol('');
-      setCompanyName('');
-      setSector('');
+      onSuccess?.();
     } else {
       toast.error(result.message);
-      if (result.errors) {
-        setErrors(result.errors);
-      }
+      if (result.errors) setErrors(result.errors);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
         <div>
-          <label htmlFor="symbol" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Symbol</label>
-          <input 
-            type="text" 
-            id="symbol" 
-            name="symbol" 
-            required 
-            maxLength={10}
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
-          />
-          {errors.symbol && (
-            <p className="mt-1 text-xs text-red-400">{errors.symbol[0]}</p>
-          )}
+          <label className="text-[11px] font-medium text-[var(--text-secondary)]">Symbol</label>
+          <input type="text" required maxLength={10} value={symbol} onChange={(e) => setSymbol(e.target.value)}
+            className="mt-1.5 block w-full h-[30px] rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)]" />
+          {errors.symbol && <p className="mt-1 text-[11px] text-[var(--accent-red)]">{errors.symbol[0]}</p>}
         </div>
         <div>
-          <label htmlFor="companyName" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Company Name</label>
-          <input 
-            type="text" 
-            id="companyName" 
-            name="companyName"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
-          />
+          <label className="text-[11px] font-medium text-[var(--text-secondary)]">Company Name</label>
+          <input value={companyName} onChange={(e) => setCompanyName(e.target.value)}
+            className="mt-1.5 block w-full h-[30px] rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)]" />
         </div>
         <div>
-          <label htmlFor="sector" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Sector</label>
-          <input 
-            type="text" 
-            id="sector" 
-            name="sector"
-            value={sector}
-            onChange={(e) => setSector(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]" 
-          />
+          <label className="text-[11px] font-medium text-[var(--text-secondary)]">Sector</label>
+          <input value={sector} onChange={(e) => setSector(e.target.value)}
+            className="mt-1.5 block w-full h-[30px] rounded-[6px] border border-[var(--border-default)] bg-[var(--bg-primary)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent-blue)]" />
         </div>
       </div>
-      <div className="mt-4">
-        <FormButton label="Add Stock" disabled={submitting} className="btn-primary" />
+      <div className="flex justify-end gap-2 pt-2">
+        <button type="submit" disabled={submitting}
+          className="h-[30px] px-4 rounded-[6px] bg-[var(--accent-blue)] text-white text-[12px] font-medium hover:bg-[var(--accent-blue-dark)] disabled:opacity-50">
+          {submitting ? 'Processing...' : 'Add Stock'}
+        </button>
       </div>
     </form>
   );

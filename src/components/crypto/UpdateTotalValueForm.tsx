@@ -47,13 +47,13 @@ export function UpdateTotalValueForm({ symbol, currentValue }: UpdateTotalValueF
 
   if (!isEditing) {
     return (
-      <div className="flex items-center justify-end space-x-2">
-        <span className="text-sm font-medium text-[var(--text-primary)]">
+      <div className="flex items-center justify-end gap-1.5">
+        <span className="text-[12px] font-medium text-[var(--text-primary)]">
           {formatCurrency(parseFloat(currentValue) || 0)}
         </span>
         <button
           onClick={() => setIsEditing(true)}
-          className="btn-secondary text-xs py-1 px-2 flex items-center gap-1"
+          className="h-[26px] px-2 rounded-[5px] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:bg-[var(--bg-tertiary)] flex items-center gap-1"
         >
           <Edit3 className="h-3 w-3" />
           Update
@@ -63,27 +63,24 @@ export function UpdateTotalValueForm({ symbol, currentValue }: UpdateTotalValueF
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center justify-end space-x-2">
-      <div className="flex items-center space-x-1">
-        <span className="text-sm text-[var(--text-muted)]">Rs.</span>
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          className="w-32 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 py-1 text-sm text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)]"
-          placeholder="0.00"
-        />
-      </div>
-      <FormButton label="Save" loadingLabel="Saving..." disabled={submitting} />
+    <form onSubmit={handleSubmit} className="flex items-center justify-end gap-1.5">
+      <input
+        type="number"
+        step="0.01"
+        min="0"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="h-[26px] w-28 rounded-[5px] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-2 text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-blue)] focus:outline-none focus:ring-[2.5px] focus:ring-[var(--accent-blue)]/20"
+        placeholder="0.00"
+      />
+      <FormButton label="Save" loadingLabel="..." disabled={submitting} className="h-[26px] px-2.5 rounded-[5px] text-[11px] bg-[var(--accent-blue)] text-white font-medium hover:bg-[var(--accent-blue-dark)]" />
       <button
         type="button"
         onClick={() => {
           setIsEditing(false);
           setValue(currentValue);
         }}
-        className="btn-secondary text-xs py-1 px-2"
+        className="h-[26px] px-2.5 rounded-[5px] text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent-red)] hover:bg-[var(--bg-tertiary)]"
       >
         Cancel
       </button>

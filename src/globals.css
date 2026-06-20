@@ -1,38 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --bg-primary: #0a0a0b;
-    --bg-secondary: #121214;
-    --bg-tertiary: #1a1a1d;
-    --bg-elevated: #222226;
-    
-    --text-primary: #faf9f7;
-    --text-secondary: #a0a0a0;
-    --text-muted: #6b6b6b;
-    
-    --accent-gold: #d4a574;
-    --accent-gold-light: #e8c9a0;
-    --accent-gold-dark: #b8935f;
-    
-    --accent-coral: #e07a5f;
-    --accent-coral-light: #f0937a;
-    
-    --accent-sage: #81b29a;
-    --accent-sage-light: #9bc4b0;
-    
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.1);
-    --border-accent: rgba(212, 165, 116, 0.3);
-    
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
-    --shadow-gold: 0 0 30px rgba(212, 165, 116, 0.15);
+    --bg-primary: #F5F5F7;
+    --bg-secondary: #FFFFFF;
+    --bg-tertiary: #F2F2F7;
+
+    --toolbar-bg: #E8E8EA;
+    --sidebar-bg: #F2F2F7;
+    --sidebar-hover: #E5E5E8;
+
+    --text-primary: #1D1D1F;
+    --text-secondary: #86868B;
+    --text-muted: #A1A1A6;
+
+    --accent-blue: #007AFF;
+    --accent-blue-light: #409CFF;
+    --accent-blue-dark: #0066D6;
+    --accent-red: #FF3B30;
+    --accent-red-light: #FF6259;
+    --accent-green: #34C759;
+    --accent-green-light: #4CD964;
+    --accent-orange: #FF9500;
+
+    --border-subtle: #E5E5E7;
+    --border-default: #D2D2D7;
+
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    --accent-gold: #007AFF;
+    --accent-gold-light: #409CFF;
+    --accent-gold-dark: #0066D6;
+    --accent-coral: #FF3B30;
+    --accent-coral-light: #FF6259;
+    --accent-sage: #34C759;
+    --accent-sage-light: #4CD964;
   }
 
   * {
@@ -41,188 +46,12 @@
 
   body {
     @apply bg-[var(--bg-primary)] text-[var(--text-primary)] antialiased;
-    font-family: 'Roboto', sans-serif;
-  }
-}
-
-@layer components {
-  .font-display {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
-  }
-
-  .font-mono {
-    font-family: 'Roboto', sans-serif;
-  }
-
-  .glass-card {
-    @apply relative overflow-hidden rounded-lg;
-    background: linear-gradient(145deg, rgba(26, 26, 29, 0.8), rgba(18, 18, 20, 0.9));
-    border: 1px solid var(--border-subtle);
-  }
-
-  .border-accent-left {
-    position: relative;
-  }
-
-  .border-accent-left::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg, 
-      var(--accent-gold) 0%, 
-      var(--accent-gold-dark) 50%,
-      transparent 100%
-    );
-  }
-
-  .text-gradient-gold {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, var(--accent-gold-light) 0%, var(--accent-gold) 50%, var(--accent-gold-dark) 100%);
-  }
-
-  .status-positive {
-    color: var(--accent-sage);
-  }
-
-  .status-negative {
-    color: var(--accent-coral);
-  }
-
-  .data-table {
-    @apply w-full border-collapse;
-  }
-
-  .data-table th {
-    @apply text-left py-3 px-4 text-xs uppercase tracking-widest;
-    color: var(--text-muted);
-    font-weight: 500;
-    border-bottom: 1px solid var(--border-default);
-  }
-
-  .data-table td {
-    @apply py-4 px-4;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-
-  .data-table tr:last-child td {
-    border-bottom: none;
-  }
-
-  .data-table tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
-  }
-
-  .btn-primary {
-    @apply px-6 py-3 rounded-md font-medium;
-    background: linear-gradient(145deg, var(--accent-gold), var(--accent-gold-dark));
-    color: var(--bg-primary);
-    border: none;
-  }
-
-  .btn-secondary {
-    @apply px-6 py-3 rounded-md font-medium;
-    background: var(--bg-elevated);
-    color: var(--text-primary);
-    border: 1px solid var(--border-default);
-  }
-
-  .input-elegant {
-    @apply w-full px-4 py-3 rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)];
-    border: 1px solid var(--border-default);
-    font-family: 'Roboto', sans-serif;
-  }
-
-  .input-elegant:focus {
-    outline: none;
-    border-color: var(--accent-gold);
-  }
-
-  .input-elegant::placeholder {
-    color: var(--text-muted);
-  }
-
-  .section-header {
-    @apply flex items-baseline gap-4 mb-6;
-  }
-
-  .section-header h2 {
-    @apply text-2xl;
-    color: var(--text-primary);
-  }
-
-  .section-header .line {
-    @apply flex-1 h-px;
-    background: linear-gradient(90deg, var(--border-default) 0%, transparent 100%);
-  }
-
-  .metric-value {
-    @apply text-3xl font-semibold;
-    color: var(--text-primary);
-  }
-
-  .metric-value.positive {
-    color: var(--accent-sage);
-  }
-
-  .metric-value.negative {
-    color: var(--accent-coral);
-  }
-
-  .currency-pkr {
-    @apply font-normal;
-  }
-
-  .currency-pkr::before {
-    content: 'Rs.';
-    @apply text-sm mr-1 opacity-60;
-  }
-
-  .chart-container {
-    @apply relative rounded-lg p-6;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-subtle);
-  }
-
-  .nav-active {
-    position: relative;
-    background: linear-gradient(90deg, rgba(212, 165, 116, 0.1) 0%, transparent 100%);
-    color: var(--accent-gold) !important;
-  }
-
-  .nav-active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--accent-gold);
-  }
-
-  .card-hover {
-    @apply transition-colors duration-200;
-  }
-
-  .card-hover:hover {
-    border-color: var(--border-accent);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", sans-serif;
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .status-positive { color: var(--accent-green); }
+  .status-negative { color: var(--accent-red); }
+  .text-balance { text-wrap: balance; }
 }

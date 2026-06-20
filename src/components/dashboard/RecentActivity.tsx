@@ -4,7 +4,6 @@ import {
   ArrowDownCircle,
   DollarSign,
   CreditCard,
-  Wallet,
   TrendingUp,
   Activity,
 } from 'lucide-react';
@@ -36,46 +35,40 @@ const formatPKR = (value: number): string => {
 const getTransactionIcon = (type: Transaction['type']) => {
   switch (type) {
     case 'buy':
-      return { 
-        icon: ArrowDownCircle, 
-        color: 'text-[var(--accent-sage)]', 
-        bg: 'bg-[var(--accent-sage)]/10',
-        border: 'border-[var(--accent-sage)]/20'
+      return {
+        icon: ArrowDownCircle,
+        bg: 'bg-[var(--accent-green)]/10',
+        color: 'text-[var(--accent-green)]',
       };
     case 'sell':
-      return { 
-        icon: ArrowUpCircle, 
-        color: 'text-[var(--accent-coral)]', 
-        bg: 'bg-[var(--accent-coral)]/10',
-        border: 'border-[var(--accent-coral)]/20'
+      return {
+        icon: ArrowUpCircle,
+        bg: 'bg-[var(--accent-red)]/10',
+        color: 'text-[var(--accent-red)]',
       };
     case 'dividend':
-      return { 
-        icon: TrendingUp, 
-        color: 'text-[var(--accent-gold)]', 
-        bg: 'bg-[var(--accent-gold)]/10',
-        border: 'border-[var(--accent-gold)]/20'
+      return {
+        icon: TrendingUp,
+        bg: 'bg-[var(--accent-blue)]/10',
+        color: 'text-[var(--accent-blue)]',
       };
     case 'deposit':
-      return { 
-        icon: DollarSign, 
-        color: 'text-[var(--accent-sage)]', 
-        bg: 'bg-[var(--accent-sage)]/10',
-        border: 'border-[var(--accent-sage)]/20'
+      return {
+        icon: DollarSign,
+        bg: 'bg-[var(--accent-green)]/10',
+        color: 'text-[var(--accent-green)]',
       };
     case 'withdrawal':
-      return { 
-        icon: CreditCard, 
-        color: 'text-[var(--accent-coral)]', 
-        bg: 'bg-[var(--accent-coral)]/10',
-        border: 'border-[var(--accent-coral)]/20'
+      return {
+        icon: CreditCard,
+        bg: 'bg-[var(--accent-red)]/10',
+        color: 'text-[var(--accent-red)]',
       };
     default:
-      return { 
-        icon: Wallet, 
-        color: 'text-[var(--text-muted)]', 
-        bg: 'bg-[var(--bg-elevated)]',
-        border: 'border-[var(--border-subtle)]'
+      return {
+        icon: Activity,
+        bg: 'bg-[var(--bg-tertiary)]',
+        color: 'text-[var(--text-muted)]',
       };
   }
 };
@@ -101,23 +94,20 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
   const displayTransactions = transactions.slice(0, 10);
 
   return (
-    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
-      <div className="p-6 border-b border-[var(--border-subtle)]">
+    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] shadow-soft overflow-hidden">
+      <div className="p-5 border-b border-[var(--border-subtle)]">
         <div className="flex justify-between items-center">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Activity className="w-4 h-4 text-[var(--accent-gold)]" />
-              <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-                Activity
-              </span>
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-[var(--accent-blue)]" />
+            <div>
+              <h3 className="text-sm font-semibold text-[var(--text-primary)]">Recent Activity</h3>
+              <p className="text-xs text-[var(--text-muted)]">Your latest transactions</p>
             </div>
-            <h3 className="font-display text-xl text-[var(--text-primary)]">Recent Activity</h3>
-            <p className="text-sm text-[var(--text-muted)] mt-1">Your latest transactions</p>
           </div>
           {onViewAll && (
             <button
               onClick={onViewAll}
-              className="text-xs font-medium text-[var(--accent-gold)] hover:text-[var(--accent-gold-light)] transition-colors"
+              className="text-xs font-medium text-[var(--accent-blue)] hover:text-[var(--accent-blue-dark)]"
             >
               View All
             </button>
@@ -126,17 +116,17 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
       </div>
 
       <div className="divide-y divide-[var(--border-subtle)]">
-        <ul className="max-h-[400px] overflow-y-auto scrollbar-hide">
+        <ul className="max-h-[380px] overflow-y-auto">
           {displayTransactions.map((transaction) => {
-            const { icon: Icon, color, bg, border } = getTransactionIcon(transaction.type);
+            const { icon: Icon, color, bg } = getTransactionIcon(transaction.type);
             const isPositive = ['buy', 'dividend', 'deposit'].includes(transaction.type);
 
             return (
               <li
                 key={transaction.id}
-                className="flex items-center gap-4 p-4 hover:bg-[var(--bg-elevated)]/30 transition-colors cursor-pointer"
+                className="flex items-center gap-3 p-3.5 hover:bg-[var(--bg-tertiary)]"
               >
-                <div className={clsx('p-2 rounded-lg border', bg, border)}>
+                <div className={clsx('p-2 rounded-lg', bg)}>
                   <Icon className={clsx('w-4 h-4', color)} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -147,10 +137,10 @@ export function RecentActivity({ transactions, onViewAll }: RecentActivityProps)
                     {format(new Date(transaction.date), 'MMM d, yyyy • h:mm a')}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <p className={clsx(
-                    'text-sm font-mono font-medium',
-                    isPositive ? 'text-[var(--accent-sage)]' : 'text-[var(--accent-coral)]'
+                    'text-sm font-semibold',
+                    isPositive ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'
                   )}>
                     {isPositive ? '+' : '-'}{formatPKR(transaction.amount)}
                   </p>

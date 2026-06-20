@@ -58,12 +58,10 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
       mutualFundsInvestment: 'Mutual Funds',
       cryptoInvestment: 'Crypto',
     };
-    
+
     return (
-      <div className="bg-[var(--bg-secondary)] p-4 rounded-lg border border-[var(--border-subtle)] shadow-elevated">
-        <p className="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">
-          {formatDate(label)}
-        </p>
+      <div className="bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-subtle)] shadow-card">
+        <p className="text-xs text-[var(--text-muted)] mb-2">{formatDate(label)}</p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 mb-1">
             <div
@@ -73,7 +71,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
             <span className="text-xs text-[var(--text-secondary)]">
               {labelMap[entry.dataKey] || entry.dataKey.replace(/([A-Z])/g, ' $1').trim()}:
             </span>
-            <span className="text-sm font-mono font-medium text-[var(--text-primary)]">
+            <span className="text-sm font-semibold text-[var(--text-primary)]">
               {formatPKR(entry.value)}
             </span>
           </div>
@@ -97,9 +95,9 @@ const getDaysForRange = (range: TimeRange): number => {
 };
 
 const COLORS = {
-  stocksInvestment: 'var(--accent-gold)',
-  mutualFundsInvestment: 'var(--accent-sage)',
-  cryptoInvestment: '#8b5cf6',
+  stocksInvestment: '#007AFF',
+  mutualFundsInvestment: '#34C759',
+  cryptoInvestment: '#FF9500',
 };
 
 export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
@@ -115,37 +113,34 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
 
   if (loading) {
     return (
-      <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
-        <div className="h-4 w-48 bg-[var(--bg-tertiary)] rounded mb-6" />
-        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg" />
+      <div className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)] shadow-soft">
+        <div className="h-4 w-44 bg-[var(--bg-tertiary)] rounded mb-4 animate-pulse" />
+        <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg bg-[var(--bg-secondary)] p-6 border border-[var(--border-subtle)]">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-[var(--accent-gold)]" />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--accent-gold)]">
-              Timeline
-            </span>
+    <div className="rounded-lg bg-[var(--bg-secondary)] p-5 border border-[var(--border-subtle)] shadow-soft">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-[var(--accent-blue)]" />
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Investment History</h3>
+            <p className="text-xs text-[var(--text-muted)]">
+              Stock wallet shows deposits minus withdrawals.
+            </p>
           </div>
-          <h3 className="font-display text-xl text-[var(--text-primary)]">Investment History</h3>
-          <p className="text-sm text-[var(--text-muted)] mt-1">
-            Stock wallet shows deposits minus withdrawals. Mutual funds and crypto show net investments.
-          </p>
         </div>
 
-        <div className="flex gap-1 bg-[var(--bg-tertiary)] p-1 rounded-lg">
+        <div className="flex gap-0.5 bg-[var(--bg-tertiary)] p-0.5 rounded-lg">
           {timeRanges.map((range) => (
             <button
               key={range}
               onClick={() => setSelectedRange(range)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
+              className={`px-2.5 py-1 text-xs font-medium rounded-md ${
                 selectedRange === range
-                  ? 'bg-[var(--bg-elevated)] text-[var(--accent-gold)]'
+                  ? 'bg-[var(--bg-secondary)] text-[var(--accent-blue)] shadow-soft'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -155,35 +150,35 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
         </div>
       </div>
 
-      <div className="h-72">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={filteredData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
-              vertical={false} 
-              stroke="var(--border-subtle)" 
+          <LineChart data={filteredData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke="var(--border-subtle)"
             />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
-              tick={{ fontSize: 11, fill: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}
+              tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
               axisLine={false}
               tickLine={false}
               dy={10}
             />
             <YAxis
               tickFormatter={formatYAxis}
-              tick={{ fontSize: 11, fill: 'var(--text-muted)', fontFamily: 'JetBrains Mono' }}
+              tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
               axisLine={false}
               tickLine={false}
               dx={-10}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
-              wrapperStyle={{ paddingTop: 20 }}
+              wrapperStyle={{ paddingTop: 16 }}
               formatter={(value) => {
                 const labelMap: Record<string, string> = {
-                  stocksInvestment: 'Stock Wallet (Deposits - Withdrawals)',
+                  stocksInvestment: 'Stock Wallet',
                   mutualFundsInvestment: 'Mutual Funds',
                   cryptoInvestment: 'Crypto',
                 };
@@ -201,7 +196,6 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
               stroke={COLORS.stocksInvestment}
               strokeWidth={2}
               dot={false}
-              animationDuration={1500}
             />
             <Line
               type="monotone"
@@ -210,7 +204,6 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
               stroke={COLORS.mutualFundsInvestment}
               strokeWidth={2}
               dot={false}
-              animationDuration={1500}
             />
             <Line
               type="monotone"
@@ -219,7 +212,6 @@ export function NetInvestmentChart({ data, loading }: NetInvestmentChartProps) {
               stroke={COLORS.cryptoInvestment}
               strokeWidth={2}
               dot={false}
-              animationDuration={1500}
             />
           </LineChart>
         </ResponsiveContainer>

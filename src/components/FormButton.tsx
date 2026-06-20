@@ -19,30 +19,27 @@ export function FormButton({
   type = 'submit',
   onClick,
 }: FormButtonProps) {
-  const baseStyles = 'relative px-6 py-3 rounded-md font-medium transition-all duration-300 inline-flex justify-center items-center';
-  
+  const baseStyles = 'relative px-5 py-2 rounded-md text-sm font-medium inline-flex justify-center items-center transition-colors';
+
   const variantStyles = {
     primary: clsx(
-      'bg-gradient-to-br from-[var(--accent-gold)] to-[var(--accent-gold-dark)]',
-      'text-[var(--bg-primary)] border-none',
-      'hover:translate-y-[-1px] hover:shadow-[var(--shadow-gold)]',
-      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)]',
-      'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none'
+      'bg-[var(--accent-blue)] text-white',
+      'hover:bg-[var(--accent-blue-dark)]',
+      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-1',
+      'disabled:opacity-50 disabled:cursor-not-allowed'
     ),
     secondary: clsx(
-      'bg-[var(--bg-elevated)]',
-      'text-[var(--text-primary)]',
+      'bg-[var(--bg-secondary)] text-[var(--text-primary)]',
       'border border-[var(--border-default)]',
-      'hover:border-[var(--accent-gold)] hover:text-[var(--accent-gold)]',
-      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-gold)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)]',
+      'hover:bg-[var(--bg-tertiary)]',
+      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] focus:ring-offset-1',
       'disabled:opacity-50 disabled:cursor-not-allowed'
     ),
     danger: clsx(
-      'bg-[var(--accent-coral)]/10',
-      'text-[var(--accent-coral)]',
-      'border border-[var(--accent-coral)]/30',
-      'hover:bg-[var(--accent-coral)]/20 hover:border-[var(--accent-coral)]',
-      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-coral)] focus:ring-offset-2 focus:ring-offset-[var(--bg-primary)]',
+      'bg-[var(--accent-red)]/10 text-[var(--accent-red)]',
+      'border border-[var(--accent-red)]/30',
+      'hover:bg-[var(--accent-red)]/20',
+      'focus:outline-none focus:ring-2 focus:ring-[var(--accent-red)] focus:ring-offset-1',
       'disabled:opacity-50 disabled:cursor-not-allowed'
     ),
   };
@@ -52,11 +49,7 @@ export function FormButton({
       type={type}
       disabled={disabled}
       onClick={onClick}
-      className={clsx(
-        baseStyles,
-        variantStyles[variant],
-        className
-      )}
+      className={clsx(baseStyles, variantStyles[variant], className)}
     >
       {disabled ? loadingLabel : label}
     </button>
