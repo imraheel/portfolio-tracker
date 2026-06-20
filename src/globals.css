@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root,
+  [data-theme="light"] {
     --bg-primary: #F5F5F7;
     --bg-secondary: #FFFFFF;
     --bg-tertiary: #F2F2F7;
@@ -37,6 +38,43 @@
     --accent-coral: #FF3B30;
     --accent-coral-light: #FF6259;
     --accent-sage: #34C759;
+    --accent-sage-light: #4CD964;
+  }
+
+  [data-theme="dark"] {
+    --bg-primary: #1C1C1E;
+    --bg-secondary: #2C2C2E;
+    --bg-tertiary: #3A3A3C;
+
+    --toolbar-bg: #2C2C2E;
+    --sidebar-bg: #1C1C1E;
+    --sidebar-hover: #3A3A3C;
+
+    --text-primary: #F5F5F7;
+    --text-secondary: #98989D;
+    --text-muted: #636366;
+
+    --accent-blue: #0A84FF;
+    --accent-blue-light: #409CFF;
+    --accent-blue-dark: #0066D6;
+    --accent-red: #FF453A;
+    --accent-red-light: #FF6259;
+    --accent-green: #30D158;
+    --accent-green-light: #4CD964;
+    --accent-orange: #FF9F0A;
+
+    --border-subtle: #38383A;
+    --border-default: #48484A;
+
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+    --accent-gold: #0A84FF;
+    --accent-gold-light: #409CFF;
+    --accent-gold-dark: #0066D6;
+    --accent-coral: #FF453A;
+    --accent-coral-light: #FF6259;
+    --accent-sage: #30D158;
     --accent-sage-light: #4CD964;
   }
 

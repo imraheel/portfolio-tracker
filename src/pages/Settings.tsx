@@ -1,14 +1,38 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Download, AlertTriangle, FileJson, Database, RotateCcw } from 'lucide-react';
+import { Download, AlertTriangle, FileJson, Database, RotateCcw, Moon, Sun } from 'lucide-react';
 import { useDataExport } from '@/hooks/useDataExport';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function Settings() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="space-y-5 max-w-3xl">
       <div>
-        <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Backup & Recovery</h2>
-        <p className="text-[12px] text-[var(--text-muted)]">Manage your data portability</p>
+        <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Settings</h2>
+        <p className="text-[12px] text-[var(--text-muted)]">Preferences and data management</p>
+      </div>
+
+      <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
+        <div className="px-5 py-3 border-b border-[var(--border-subtle)] flex items-center gap-2">
+          {theme === 'dark' ? <Moon className="w-4 h-4 text-[var(--accent-blue)]" /> : <Sun className="w-4 h-4 text-[var(--accent-blue)]" />}
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">Appearance</span>
+        </div>
+        <div className="p-5 flex items-center justify-between">
+          <div>
+            <h3 className="text-[13px] font-medium text-[var(--text-primary)] mb-0.5">Dark Mode</h3>
+            <p className="text-[12px] text-[var(--text-secondary)]">Switch between light and dark appearance</p>
+          </div>
+          <button
+            onClick={toggleTheme}
+            className={`relative w-11 h-6 rounded-full transition-colors ${theme === 'dark' ? 'bg-[var(--accent-blue)]' : 'bg-[var(--border-default)]'}`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${theme === 'dark' ? 'translate-x-5' : 'translate-x-0'}`}
+            />
+          </button>
+        </div>
       </div>
 
       <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">

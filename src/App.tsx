@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { useTheme } from '@/hooks/useTheme';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Wallet from './pages/stocks/Wallet';
@@ -12,8 +14,11 @@ import CryptoList from './pages/crypto/CryptoList';
 import CryptoTransactions from './pages/crypto/Transactions';
 
 function App() {
+  const { theme } = useTheme();
   return (
-    <Routes>
+    <>
+      <Toaster position="top-right" richColors theme={theme} />
+      <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="settings" element={<Settings />} />
@@ -33,6 +38,7 @@ function App() {
         <Route path="crypto/transactions" element={<CryptoTransactions />} />
       </Route>
     </Routes>
+    </>
   );
 }
 
