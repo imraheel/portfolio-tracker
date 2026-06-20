@@ -40,12 +40,12 @@ export function useTransactions() {
     }
   }, []);
 
-  const addBuyTransaction = useCallback(async (data: { 
-    stockId: number; 
-    quantity: number; 
-    buyRate: number; 
-    buyDate: Date; 
-    notes?: string 
+  const addBuyTransaction = useCallback(async (data: {
+    symbol: string;
+    quantity: number;
+    buyRate: number;
+    buyDate: Date;
+    notes?: string;
   }) => {
     const result = await transactionsService.addBuyTransaction(data);
     if (result.success) {
@@ -54,12 +54,12 @@ export function useTransactions() {
     return result;
   }, [fetchBuyTransactions]);
 
-  const addSellTransaction = useCallback(async (data: { 
-    stockId: number; 
-    quantity: number; 
-    sellRate: number; 
-    sellDate: Date; 
-    notes?: string 
+  const addSellTransaction = useCallback(async (data: {
+    symbol: string;
+    quantity: number;
+    sellRate: number;
+    sellDate: Date;
+    notes?: string;
   }) => {
     const result = await transactionsService.addSellTransaction(data);
     if (result.success) {
@@ -68,11 +68,11 @@ export function useTransactions() {
     return result;
   }, [fetchSellTransactions]);
 
-  const addDividend = useCallback(async (data: { 
-    stockId: number; 
-    dividendAmount: number; 
-    dividendDate: Date; 
-    notes?: string 
+  const addDividend = useCallback(async (data: {
+    symbol: string;
+    dividendAmount: number;
+    dividendDate: Date;
+    notes?: string;
   }) => {
     const result = await transactionsService.addDividend(data);
     if (result.success) {

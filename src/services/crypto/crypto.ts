@@ -1,5 +1,18 @@
-import { supabase } from '@/lib/supabase/client';
+import { db } from '@/lib/firebase/client';
 import { z } from 'zod';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+} from 'firebase/firestore';
 
 const CryptocurrencySchema = z.object({
   symbol: z.string().min(1, 'Symbol is required').max(20),
@@ -7,26 +20,25 @@ const CryptocurrencySchema = z.object({
 });
 
 const TotalValueSchema = z.object({
-  cryptoId: z.number().int().positive(),
+  symbol: z.string().min(1).max(20),
   totalValue: z.number().nonnegative(),
 });
 
 const PurchaseSchema = z.object({
-  cryptoId: z.number().int().positive(),
+  symbol: z.string().min(1, 'Symbol is required').max(20),
   amountPkr: z.number().positive('Amount must be positive'),
   purchaseDate: z.date(),
   notes: z.string().optional(),
 });
 
 const WithdrawalSchema = z.object({
-  cryptoId: z.number().int().positive(),
+  symbol: z.string().min(1, 'Symbol is required').max(20),
   amountPkr: z.number().positive('Amount must be positive'),
   withdrawalDate: z.date(),
   notes: z.string().optional(),
 });
 
 export interface Cryptocurrency {
-  id: number;
   symbol: string;
   name: string;
   current_total_value: number;
@@ -34,8 +46,8 @@ export interface Cryptocurrency {
 }
 
 export interface CryptoPurchase {
-  id: number;
-  crypto_id: number;
+  id: string;
+  symbol: string;
   amount_pkr: number;
   purchase_date: string;
   notes: string | null;
@@ -44,14 +56,18 @@ export interface CryptoPurchase {
 }
 
 export interface CryptoWithdrawal {
-  id: number;
-  crypto_id: number;
+  id: string;
+  symbol: string;
   amount_pkr: number;
   withdrawal_date: string;
   notes: string | null;
   created_at: string;
   cryptocurrency: { symbol: string; name: string } | null;
 }
+
+const cryptosCollection = collection(db, 'cryptocurrencies');
+const purchasesCollection = collection(db, 'crypto_purchases');
+const withdrawalsCollection = collection(db, 'crypto_withdrawals');
 
 export async function addCryptocurrency(data: { symbol: string; name: string }) {
   const validatedFields = CryptocurrencySchema.safeParse(data);
@@ -65,25 +81,20 @@ export async function addCryptocurrency(data: { symbol: string; name: string }) 
   }
 
   const { symbol, name } = validatedFields.data;
+  const docRef = doc(db, 'cryptocurrencies', symbol.toUpperCase());
 
   try {
-    const { data: existingCrypto } = await supabase
-      .from('cryptocurrencies')
-      .select('id')
-      .eq('symbol', symbol.toUpperCase())
-      .maybeSingle();
-
-    if (existingCrypto) {
+    const existingSnap = await getDoc(docRef);
+    if (existingSnap.exists()) {
       return { success: false, message: 'Cryptocurrency with this symbol already exists.' };
     }
 
-    const { error } = await supabase.from('cryptocurrencies').insert({
+    await setDoc(docRef, {
       symbol: symbol.toUpperCase(),
       name,
       current_total_value: 0,
+      created_at: Timestamp.now().toDate().toISOString(),
     });
-
-    if (error) throw error;
 
     return { success: true, message: `Added cryptocurrency ${symbol.toUpperCase()}.` };
   } catch (error) {
@@ -94,39 +105,32 @@ export async function addCryptocurrency(data: { symbol: string; name: string }) 
 
 export async function getCryptocurrencies(): Promise<Cryptocurrency[]> {
   try {
-    const { data: cryptos, error } = await supabase
-      .from('cryptocurrencies')
-      .select('*')
-      .order('symbol', { ascending: true });
-
-    if (error) throw error;
-
-    return (cryptos || []).map((c) => ({
-      ...c,
-      current_total_value: Number(c.current_total_value),
-    }));
+    const q = query(cryptosCollection, orderBy('symbol', 'asc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      symbol: doc.id,
+      ...doc.data(),
+      current_total_value: Number((doc.data() as { current_total_value: number }).current_total_value),
+    })) as Cryptocurrency[];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch cryptocurrencies.');
   }
 }
 
-export async function updateTotalValue(data: { cryptoId: number; totalValue: number }) {
+export async function updateTotalValue(data: { symbol: string; totalValue: number }) {
   const validatedFields = TotalValueSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return { success: false, message: 'Invalid total value data.' };
   }
 
-  const { cryptoId, totalValue } = validatedFields.data;
+  const { symbol, totalValue } = validatedFields.data;
 
   try {
-    const { error } = await supabase
-      .from('cryptocurrencies')
-      .update({ current_total_value: totalValue })
-      .eq('id', cryptoId);
-
-    if (error) throw error;
+    await updateDoc(doc(db, 'cryptocurrencies', symbol.toUpperCase()), {
+      current_total_value: totalValue,
+    });
 
     return { success: true, message: 'Total value updated.' };
   } catch (error) {
@@ -136,7 +140,7 @@ export async function updateTotalValue(data: { cryptoId: number; totalValue: num
 }
 
 export async function addPurchase(data: {
-  cryptoId: number;
+  symbol: string;
   amountPkr: number;
   purchaseDate: Date;
   notes?: string;
@@ -151,17 +155,16 @@ export async function addPurchase(data: {
     };
   }
 
-  const { cryptoId, amountPkr, purchaseDate, notes } = validatedFields.data;
+  const { symbol, amountPkr, purchaseDate, notes } = validatedFields.data;
 
   try {
-    const { error } = await supabase.from('crypto_purchases').insert({
-      crypto_id: cryptoId,
+    await addDoc(purchasesCollection, {
+      symbol: symbol.toUpperCase(),
       amount_pkr: amountPkr,
       purchase_date: purchaseDate.toISOString(),
-      notes,
+      notes: notes || null,
+      created_at: Timestamp.now().toDate().toISOString(),
     });
-
-    if (error) throw error;
 
     return { success: true, message: 'Successfully recorded purchase.' };
   } catch (error) {
@@ -172,21 +175,25 @@ export async function addPurchase(data: {
 
 export async function getPurchases(): Promise<CryptoPurchase[]> {
   try {
-    const { data: purchases, error } = await supabase
-      .from('crypto_purchases')
-      .select(`
-        *,
-        cryptocurrencies (symbol, name)
-      `)
-      .order('purchase_date', { ascending: false });
+    const q = query(purchasesCollection, orderBy('purchase_date', 'desc'));
+    const [purchaseSnap, cryptosSnap] = await Promise.all([getDocs(q), getDocs(cryptosCollection)]);
 
-    if (error) throw error;
+    const cryptoMap = new Map<string, string>();
+    cryptosSnap.docs.forEach(c => {
+      const data = c.data() as { name: string };
+      cryptoMap.set(c.id, data.name);
+    });
 
-    return (purchases || []).map((p) => ({
-      ...p,
-      cryptocurrency: p.cryptocurrencies,
-      amount_pkr: Number(p.amount_pkr),
-    }));
+    return purchaseSnap.docs.map(p => {
+      const data = p.data() as Omit<CryptoPurchase, 'id' | 'cryptocurrency'>;
+      const s = data.symbol;
+      return {
+        id: p.id,
+        ...data,
+        amount_pkr: Number(data.amount_pkr),
+        cryptocurrency: { symbol: s, name: cryptoMap.get(s) || s },
+      };
+    });
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch purchases.');
@@ -194,7 +201,7 @@ export async function getPurchases(): Promise<CryptoPurchase[]> {
 }
 
 export async function addWithdrawal(data: {
-  cryptoId: number;
+  symbol: string;
   amountPkr: number;
   withdrawalDate: Date;
   notes?: string;
@@ -209,17 +216,16 @@ export async function addWithdrawal(data: {
     };
   }
 
-  const { cryptoId, amountPkr, withdrawalDate, notes } = validatedFields.data;
+  const { symbol, amountPkr, withdrawalDate, notes } = validatedFields.data;
 
   try {
-    const { error } = await supabase.from('crypto_withdrawals').insert({
-      crypto_id: cryptoId,
+    await addDoc(withdrawalsCollection, {
+      symbol: symbol.toUpperCase(),
       amount_pkr: amountPkr,
       withdrawal_date: withdrawalDate.toISOString(),
-      notes,
+      notes: notes || null,
+      created_at: Timestamp.now().toDate().toISOString(),
     });
-
-    if (error) throw error;
 
     return { success: true, message: 'Successfully recorded withdrawal.' };
   } catch (error) {
@@ -230,21 +236,25 @@ export async function addWithdrawal(data: {
 
 export async function getWithdrawals(): Promise<CryptoWithdrawal[]> {
   try {
-    const { data: withdrawals, error } = await supabase
-      .from('crypto_withdrawals')
-      .select(`
-        *,
-        cryptocurrencies (symbol, name)
-      `)
-      .order('withdrawal_date', { ascending: false });
+    const q = query(withdrawalsCollection, orderBy('withdrawal_date', 'desc'));
+    const [withdrawalSnap, cryptosSnap] = await Promise.all([getDocs(q), getDocs(cryptosCollection)]);
 
-    if (error) throw error;
+    const cryptoMap = new Map<string, string>();
+    cryptosSnap.docs.forEach(c => {
+      const data = c.data() as { name: string };
+      cryptoMap.set(c.id, data.name);
+    });
 
-    return (withdrawals || []).map((w) => ({
-      ...w,
-      cryptocurrency: w.cryptocurrencies,
-      amount_pkr: Number(w.amount_pkr),
-    }));
+    return withdrawalSnap.docs.map(w => {
+      const data = w.data() as Omit<CryptoWithdrawal, 'id' | 'cryptocurrency'>;
+      const s = data.symbol;
+      return {
+        id: w.id,
+        ...data,
+        amount_pkr: Number(data.amount_pkr),
+        cryptocurrency: { symbol: s, name: cryptoMap.get(s) || s },
+      };
+    });
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch withdrawals.');
@@ -252,7 +262,6 @@ export async function getWithdrawals(): Promise<CryptoWithdrawal[]> {
 }
 
 export interface CryptoMetrics {
-  cryptoId: number;
   symbol: string;
   name: string;
   totalPurchases: number;
@@ -263,39 +272,25 @@ export interface CryptoMetrics {
   gainLossPercent: number;
 }
 
-export async function getCryptoMetrics(cryptoId: number): Promise<CryptoMetrics | null> {
+async function getCryptoMetrics(symbol: string): Promise<CryptoMetrics | null> {
   try {
-    const { data: crypto, error: cryptoError } = await supabase
-      .from('cryptocurrencies')
-      .select('*')
-      .eq('id', cryptoId)
-      .single();
+    const cryptoSnap = await getDoc(doc(db, 'cryptocurrencies', symbol));
+    if (!cryptoSnap.exists()) return null;
+    const crypto = cryptoSnap.data() as Cryptocurrency;
 
-    if (cryptoError || !crypto) return null;
+    const [purchasesSnap, withdrawalsSnap] = await Promise.all([
+      getDocs(query(purchasesCollection, where('symbol', '==', symbol))),
+      getDocs(query(withdrawalsCollection, where('symbol', '==', symbol))),
+    ]);
 
-    const { data: purchases, error: purchasesError } = await supabase
-      .from('crypto_purchases')
-      .select('amount_pkr')
-      .eq('crypto_id', cryptoId);
-
-    if (purchasesError) throw purchasesError;
-
-    const { data: withdrawals, error: withdrawalsError } = await supabase
-      .from('crypto_withdrawals')
-      .select('amount_pkr')
-      .eq('crypto_id', cryptoId);
-
-    if (withdrawalsError) throw withdrawalsError;
-
-    const totalPurchases = (purchases || []).reduce((sum, p) => sum + Number(p.amount_pkr), 0);
-    const totalWithdrawals = (withdrawals || []).reduce((sum, w) => sum + Number(w.amount_pkr), 0);
+    const totalPurchases = purchasesSnap.docs.reduce((sum, p) => sum + Number((p.data() as { amount_pkr: number }).amount_pkr), 0);
+    const totalWithdrawals = withdrawalsSnap.docs.reduce((sum, w) => sum + Number((w.data() as { amount_pkr: number }).amount_pkr), 0);
     const netInvestment = totalPurchases - totalWithdrawals;
     const currentTotalValue = Number(crypto.current_total_value);
     const gainLoss = currentTotalValue - netInvestment;
     const gainLossPercent = netInvestment > 0 ? (gainLoss / netInvestment) * 100 : 0;
 
     return {
-      cryptoId: crypto.id,
       symbol: crypto.symbol,
       name: crypto.name,
       totalPurchases,
@@ -314,7 +309,7 @@ export async function getCryptoMetrics(cryptoId: number): Promise<CryptoMetrics 
 export async function getAllCryptoMetrics(): Promise<CryptoMetrics[]> {
   try {
     const cryptos = await getCryptocurrencies();
-    const metrics = await Promise.all(cryptos.map((c) => getCryptoMetrics(c.id)));
+    const metrics = await Promise.all(cryptos.map(c => getCryptoMetrics(c.symbol)));
     return metrics.filter((m): m is CryptoMetrics => m !== null);
   } catch (error) {
     console.error('Database Error:', error);

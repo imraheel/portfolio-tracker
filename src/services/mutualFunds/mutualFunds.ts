@@ -1,5 +1,18 @@
-import { supabase } from '@/lib/supabase/client';
+import { db } from '@/lib/firebase/client';
 import { z } from 'zod';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+} from 'firebase/firestore';
 
 const MutualFundSchema = z.object({
   symbol: z.string().min(1, 'Symbol is required').max(20),
@@ -8,26 +21,25 @@ const MutualFundSchema = z.object({
 });
 
 const MarketValueSchema = z.object({
-  fundId: z.number().int().positive(),
+  symbol: z.string().min(1).max(20),
   currentValue: z.number().nonnegative(),
 });
 
 const PurchaseSchema = z.object({
-  fundId: z.number().int().positive(),
+  symbol: z.string().min(1, 'Symbol is required').max(20),
   amount: z.number().positive('Amount must be positive'),
   purchaseDate: z.date(),
   notes: z.string().optional(),
 });
 
 const WithdrawalSchema = z.object({
-  fundId: z.number().int().positive(),
+  symbol: z.string().min(1, 'Symbol is required').max(20),
   amount: z.number().positive('Amount must be positive'),
   withdrawalDate: z.date(),
   notes: z.string().optional(),
 });
 
 export interface MutualFund {
-  id: number;
   symbol: string;
   name: string;
   description: string | null;
@@ -36,8 +48,8 @@ export interface MutualFund {
 }
 
 export interface MutualFundPurchase {
-  id: number;
-  fund_id: number;
+  id: string;
+  symbol: string;
   amount: number;
   purchase_date: string;
   notes: string | null;
@@ -46,14 +58,18 @@ export interface MutualFundPurchase {
 }
 
 export interface MutualFundWithdrawal {
-  id: number;
-  fund_id: number;
+  id: string;
+  symbol: string;
   amount: number;
   withdrawal_date: string;
   notes: string | null;
   created_at: string;
   fund: { symbol: string; name: string } | null;
 }
+
+const fundsCollection = collection(db, 'mutual_funds');
+const purchasesCollection = collection(db, 'mutual_fund_purchases');
+const withdrawalsCollection = collection(db, 'mutual_fund_withdrawals');
 
 export async function addMutualFund(data: { symbol: string; name: string; description?: string }) {
   const validatedFields = MutualFundSchema.safeParse(data);
@@ -67,26 +83,21 @@ export async function addMutualFund(data: { symbol: string; name: string; descri
   }
 
   const { symbol, name, description } = validatedFields.data;
+  const docRef = doc(db, 'mutual_funds', symbol.toUpperCase());
 
   try {
-    const { data: existingFund } = await supabase
-      .from('mutual_funds')
-      .select('id')
-      .eq('symbol', symbol.toUpperCase())
-      .maybeSingle();
-
-    if (existingFund) {
+    const existingSnap = await getDoc(docRef);
+    if (existingSnap.exists()) {
       return { success: false, message: 'Mutual fund with this symbol already exists.' };
     }
 
-    const { error } = await supabase.from('mutual_funds').insert({
+    await setDoc(docRef, {
       symbol: symbol.toUpperCase(),
       name,
-      description,
+      description: description || null,
       current_market_value: 0,
+      created_at: Timestamp.now().toDate().toISOString(),
     });
-
-    if (error) throw error;
 
     return { success: true, message: `Added mutual fund ${symbol.toUpperCase()}.` };
   } catch (error) {
@@ -97,39 +108,32 @@ export async function addMutualFund(data: { symbol: string; name: string; descri
 
 export async function getMutualFunds(): Promise<MutualFund[]> {
   try {
-    const { data: funds, error } = await supabase
-      .from('mutual_funds')
-      .select('*')
-      .order('symbol', { ascending: true });
-
-    if (error) throw error;
-
-    return (funds || []).map((f) => ({
-      ...f,
-      current_market_value: Number(f.current_market_value),
-    }));
+    const q = query(fundsCollection, orderBy('symbol', 'asc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      symbol: doc.id,
+      ...doc.data(),
+      current_market_value: Number((doc.data() as { current_market_value: number }).current_market_value),
+    })) as MutualFund[];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch mutual funds.');
   }
 }
 
-export async function updateMarketValue(data: { fundId: number; currentValue: number }) {
+export async function updateMarketValue(data: { symbol: string; currentValue: number }) {
   const validatedFields = MarketValueSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return { success: false, message: 'Invalid market value data.' };
   }
 
-  const { fundId, currentValue } = validatedFields.data;
+  const { symbol, currentValue } = validatedFields.data;
 
   try {
-    const { error } = await supabase
-      .from('mutual_funds')
-      .update({ current_market_value: currentValue })
-      .eq('id', fundId);
-
-    if (error) throw error;
+    await updateDoc(doc(db, 'mutual_funds', symbol.toUpperCase()), {
+      current_market_value: currentValue,
+    });
 
     return { success: true, message: 'Market value updated.' };
   } catch (error) {
@@ -139,7 +143,7 @@ export async function updateMarketValue(data: { fundId: number; currentValue: nu
 }
 
 export async function addPurchase(data: {
-  fundId: number;
+  symbol: string;
   amount: number;
   purchaseDate: Date;
   notes?: string;
@@ -154,17 +158,16 @@ export async function addPurchase(data: {
     };
   }
 
-  const { fundId, amount, purchaseDate, notes } = validatedFields.data;
+  const { symbol, amount, purchaseDate, notes } = validatedFields.data;
 
   try {
-    const { error } = await supabase.from('mutual_fund_purchases').insert({
-      fund_id: fundId,
+    await addDoc(purchasesCollection, {
+      symbol: symbol.toUpperCase(),
       amount,
       purchase_date: purchaseDate.toISOString(),
-      notes,
+      notes: notes || null,
+      created_at: Timestamp.now().toDate().toISOString(),
     });
-
-    if (error) throw error;
 
     return { success: true, message: 'Successfully recorded purchase.' };
   } catch (error) {
@@ -175,21 +178,25 @@ export async function addPurchase(data: {
 
 export async function getPurchases(): Promise<MutualFundPurchase[]> {
   try {
-    const { data: purchases, error } = await supabase
-      .from('mutual_fund_purchases')
-      .select(`
-        *,
-        mutual_funds (symbol, name)
-      `)
-      .order('purchase_date', { ascending: false });
+    const q = query(purchasesCollection, orderBy('purchase_date', 'desc'));
+    const [purchaseSnap, fundsSnap] = await Promise.all([getDocs(q), getDocs(fundsCollection)]);
 
-    if (error) throw error;
+    const fundMap = new Map<string, string>();
+    fundsSnap.docs.forEach(f => {
+      const data = f.data() as { name: string };
+      fundMap.set(f.id, data.name);
+    });
 
-    return (purchases || []).map((p) => ({
-      ...p,
-      fund: p.mutual_funds,
-      amount: Number(p.amount),
-    }));
+    return purchaseSnap.docs.map(p => {
+      const data = p.data() as Omit<MutualFundPurchase, 'id' | 'fund'>;
+      const s = data.symbol;
+      return {
+        id: p.id,
+        ...data,
+        amount: Number(data.amount),
+        fund: { symbol: s, name: fundMap.get(s) || s },
+      };
+    });
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch purchases.');
@@ -197,7 +204,7 @@ export async function getPurchases(): Promise<MutualFundPurchase[]> {
 }
 
 export async function addWithdrawal(data: {
-  fundId: number;
+  symbol: string;
   amount: number;
   withdrawalDate: Date;
   notes?: string;
@@ -212,17 +219,16 @@ export async function addWithdrawal(data: {
     };
   }
 
-  const { fundId, amount, withdrawalDate, notes } = validatedFields.data;
+  const { symbol, amount, withdrawalDate, notes } = validatedFields.data;
 
   try {
-    const { error } = await supabase.from('mutual_fund_withdrawals').insert({
-      fund_id: fundId,
+    await addDoc(withdrawalsCollection, {
+      symbol: symbol.toUpperCase(),
       amount,
       withdrawal_date: withdrawalDate.toISOString(),
-      notes,
+      notes: notes || null,
+      created_at: Timestamp.now().toDate().toISOString(),
     });
-
-    if (error) throw error;
 
     return { success: true, message: 'Successfully recorded withdrawal.' };
   } catch (error) {
@@ -233,21 +239,25 @@ export async function addWithdrawal(data: {
 
 export async function getWithdrawals(): Promise<MutualFundWithdrawal[]> {
   try {
-    const { data: withdrawals, error } = await supabase
-      .from('mutual_fund_withdrawals')
-      .select(`
-        *,
-        mutual_funds (symbol, name)
-      `)
-      .order('withdrawal_date', { ascending: false });
+    const q = query(withdrawalsCollection, orderBy('withdrawal_date', 'desc'));
+    const [withdrawalSnap, fundsSnap] = await Promise.all([getDocs(q), getDocs(fundsCollection)]);
 
-    if (error) throw error;
+    const fundMap = new Map<string, string>();
+    fundsSnap.docs.forEach(f => {
+      const data = f.data() as { name: string };
+      fundMap.set(f.id, data.name);
+    });
 
-    return (withdrawals || []).map((w) => ({
-      ...w,
-      fund: w.mutual_funds,
-      amount: Number(w.amount),
-    }));
+    return withdrawalSnap.docs.map(w => {
+      const data = w.data() as Omit<MutualFundWithdrawal, 'id' | 'fund'>;
+      const s = data.symbol;
+      return {
+        id: w.id,
+        ...data,
+        amount: Number(data.amount),
+        fund: { symbol: s, name: fundMap.get(s) || s },
+      };
+    });
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch withdrawals.');
@@ -255,7 +265,6 @@ export async function getWithdrawals(): Promise<MutualFundWithdrawal[]> {
 }
 
 export interface FundMetrics {
-  fundId: number;
   symbol: string;
   name: string;
   totalPurchases: number;
@@ -266,39 +275,25 @@ export interface FundMetrics {
   gainLossPercent: number;
 }
 
-async function getFundMetrics(fundId: number): Promise<FundMetrics | null> {
+async function getFundMetrics(symbol: string): Promise<FundMetrics | null> {
   try {
-    const { data: fund, error: fundError } = await supabase
-      .from('mutual_funds')
-      .select('*')
-      .eq('id', fundId)
-      .single();
+    const fundSnap = await getDoc(doc(db, 'mutual_funds', symbol));
+    if (!fundSnap.exists()) return null;
+    const fund = fundSnap.data() as MutualFund;
 
-    if (fundError || !fund) return null;
+    const [purchasesSnap, withdrawalsSnap] = await Promise.all([
+      getDocs(query(purchasesCollection, where('symbol', '==', symbol))),
+      getDocs(query(withdrawalsCollection, where('symbol', '==', symbol))),
+    ]);
 
-    const { data: purchases, error: purchasesError } = await supabase
-      .from('mutual_fund_purchases')
-      .select('amount')
-      .eq('fund_id', fundId);
-
-    if (purchasesError) throw purchasesError;
-
-    const { data: withdrawals, error: withdrawalsError } = await supabase
-      .from('mutual_fund_withdrawals')
-      .select('amount')
-      .eq('fund_id', fundId);
-
-    if (withdrawalsError) throw withdrawalsError;
-
-    const totalPurchases = (purchases || []).reduce((sum, p) => sum + Number(p.amount), 0);
-    const totalWithdrawals = (withdrawals || []).reduce((sum, w) => sum + Number(w.amount), 0);
+    const totalPurchases = purchasesSnap.docs.reduce((sum, p) => sum + Number((p.data() as { amount: number }).amount), 0);
+    const totalWithdrawals = withdrawalsSnap.docs.reduce((sum, w) => sum + Number((w.data() as { amount: number }).amount), 0);
     const netInvestment = totalPurchases - totalWithdrawals;
     const currentMarketValue = Number(fund.current_market_value);
     const gainLoss = currentMarketValue - netInvestment;
     const gainLossPercent = netInvestment > 0 ? (gainLoss / netInvestment) * 100 : 0;
 
     return {
-      fundId: fund.id,
       symbol: fund.symbol,
       name: fund.name,
       totalPurchases,
@@ -317,7 +312,7 @@ async function getFundMetrics(fundId: number): Promise<FundMetrics | null> {
 export async function getAllFundMetrics(): Promise<FundMetrics[]> {
   try {
     const funds = await getMutualFunds();
-    const metrics = await Promise.all(funds.map((f) => getFundMetrics(f.id)));
+    const metrics = await Promise.all(funds.map(f => getFundMetrics(f.symbol)));
     return metrics.filter((m): m is FundMetrics => m !== null);
   } catch (error) {
     console.error('Database Error:', error);

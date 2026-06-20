@@ -22,14 +22,14 @@ pnpm lint                  # Run ESLint with max 0 warnings
 
 ## Project Architecture
 
-**Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Supabase + Electron
+**Stack:** React 18 + Vite + TypeScript + Tailwind CSS + Firebase Firestore + Electron
 
 **Key Directories:**
 - `src/components/` - Reusable UI components (organized by investment type: stocks/, crypto/, mutualFunds/, dashboard/)
 - `src/pages/` - Route components (organized by investment type: stocks/, crypto/, mutualFunds/)
 - `src/hooks/` - Custom React hooks (organized by investment type: stocks/, crypto/, mutualFunds/)
 - `src/services/` - Business logic and API calls (organized by investment type: stocks/, crypto/, mutualFunds/)
-- `src/lib/supabase/` - Supabase client configuration
+- `src/lib/firebase/` - Firebase client configuration
 - `src/types/` - TypeScript type definitions
 - `electron/` - Electron main process and preload scripts
 
@@ -79,7 +79,7 @@ pnpm lint                  # Run ESLint with max 0 warnings
 ### State Management
 - React hooks for local state
 - Custom hooks for data fetching with SWR-like pattern
-- Services handle all Supabase interactions
+- Services handle all Firebase Firestore interactions
 - No global state library (Redux/Zustand) - use hooks composition
 
 ### Routing
@@ -103,8 +103,10 @@ Key rules:
 
 Required in `.env`:
 ```
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
 ```
 
 ## Testing
@@ -112,7 +114,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 No test framework is currently configured. When adding tests:
 - Use Vitest (aligns with Vite)
 - Place tests next to source files (e.g., `stocks.test.ts`)
-- Mock Supabase client for unit tests
+- Mock Firebase client for unit tests
 
 ## Business Rules to Remember
 

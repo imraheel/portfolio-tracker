@@ -5,9 +5,9 @@ import { FormButton } from '@/components/FormButton';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
 import type { Stock } from '@/services/stocks/stocks';
 
-export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<number, number> }) {
+export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<string, number> }) {
   const { addSellTransaction } = useTransactions();
-  const [stockId, setStockId] = useState('');
+  const [symbol, setSymbol] = useState('');
   const [qty, setQty] = useState<number>(0);
   const [rate, setRate] = useState<number>(0);
   const [sellDate, setSellDate] = useState(new Date().toISOString().split('T')[0]);
@@ -15,7 +15,7 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const availableQty = stockId ? (holdings.get(parseInt(stockId)) || 0) : 0;
+  const availableQty = symbol ? (holdings.get(symbol) || 0) : 0;
   const isExceeded = qty > availableQty;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +29,7 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
     setErrors({});
 
     const result = await addSellTransaction({
-      stockId: parseInt(stockId),
+      symbol,
       quantity: qty,
       sellRate: rate,
       sellDate: new Date(sellDate),
@@ -40,7 +40,7 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
 
     if (result.success) {
       toast.success(result.message);
-      setStockId('');
+      setSymbol('');
       setQty(0);
       setRate(0);
       setNotes('');
@@ -63,17 +63,17 @@ export function SellForm({ stocks, holdings }: { stocks: Stock[], holdings: Map<
 
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <label htmlFor="stockId" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Stock Symbol</label>
+          <label htmlFor="symbol" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Stock Symbol</label>
           <select 
-              id="stockId" 
-              name="stockId" 
+              id="symbol" 
+              name="symbol" 
               required 
-              value={stockId}
-              onChange={(e) => setStockId(e.target.value)}
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
               className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           >
               <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Select a stock</option>
-              {stocks.map((stock) => (<option key={stock.id} value={stock.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
+              {stocks.map((stock) => (<option key={stock.symbol} value={stock.symbol} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
           </select>
         </div>
         <div>

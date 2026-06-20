@@ -124,7 +124,7 @@ export default function Purchases() {
           />
           <MetricCard
             title="Assets Purchased"
-            value={new Set(purchases.map((p) => p.crypto_id)).size.toString()}
+            value={new Set(purchases.map((p) => p.symbol)).size.toString()}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="sage"
            

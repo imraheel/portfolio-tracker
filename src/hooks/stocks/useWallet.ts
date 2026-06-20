@@ -49,7 +49,7 @@ export function useWallet() {
     return result;
   }, [fetchDeposits, fetchBalance]);
 
-  const deleteDeposit = useCallback(async (id: number) => {
+  const deleteDeposit = useCallback(async (id: string) => {
     const result = await walletService.deleteDeposit(id);
     if (result.success) {
       await fetchDeposits();
@@ -67,7 +67,7 @@ export function useWallet() {
     return result;
   }, [fetchWithdrawals, fetchBalance]);
 
-  const deleteWithdrawal = useCallback(async (id: number) => {
+  const deleteWithdrawal = useCallback(async (id: string) => {
     const result = await walletService.deleteWithdrawal(id);
     if (result.success) {
       await fetchWithdrawals();

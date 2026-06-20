@@ -37,7 +37,7 @@ export default defineConfig({
         manualChunks: {
           // Split vendor chunks for better caching
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-firebase': ['firebase/app', 'firebase/firestore'],
           'vendor-ui': ['lucide-react', 'clsx', 'tailwind-merge', 'sonner']
         }
       }
@@ -65,7 +65,8 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom',
-      '@supabase/supabase-js',
+      'firebase/app',
+      'firebase/firestore',
       'zod',
       'sonner',
       'lucide-react'

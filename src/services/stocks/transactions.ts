@@ -1,9 +1,18 @@
-import { supabase } from '@/lib/supabase/client';
+import { db } from '@/lib/firebase/client';
 import { z } from 'zod';
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+} from 'firebase/firestore';
 import { getWalletBalance } from './wallet';
 
 const BuyTransactionSchema = z.object({
-  stockId: z.number().int().positive(),
+  symbol: z.string().min(1, 'Symbol is required').max(10),
   quantity: z.number().int().positive(),
   buyRate: z.number().positive(),
   buyDate: z.date(),
@@ -11,7 +20,7 @@ const BuyTransactionSchema = z.object({
 });
 
 const SellTransactionSchema = z.object({
-  stockId: z.number().int().positive(),
+  symbol: z.string().min(1, 'Symbol is required').max(10),
   quantity: z.number().int().positive(),
   sellRate: z.number().positive(),
   sellDate: z.date(),
@@ -19,15 +28,15 @@ const SellTransactionSchema = z.object({
 });
 
 const DividendSchema = z.object({
-  stockId: z.number().int().positive(),
+  symbol: z.string().min(1, 'Symbol is required').max(10),
   dividendAmount: z.number().positive(),
   dividendDate: z.date(),
   notes: z.string().optional(),
 });
 
 export interface BuyTransaction {
-  id: number;
-  stock_id: number;
+  id: string;
+  symbol: string;
   quantity: number;
   buy_rate: number;
   total_cost: number;
@@ -38,8 +47,8 @@ export interface BuyTransaction {
 }
 
 export interface SellTransaction {
-  id: number;
-  stock_id: number;
+  id: string;
+  symbol: string;
   quantity: number;
   sell_rate: number;
   total_proceeds: number;
@@ -51,8 +60,8 @@ export interface SellTransaction {
 }
 
 export interface Dividend {
-  id: number;
-  stock_id: number;
+  id: string;
+  symbol: string;
   dividend_amount: number;
   dividend_date: string;
   notes: string | null;
@@ -60,12 +69,45 @@ export interface Dividend {
   stock: { symbol: string };
 }
 
-export async function addBuyTransaction(data: { 
-  stockId: number; 
-  quantity: number; 
-  buyRate: number; 
-  buyDate: Date; 
-  notes?: string 
+function mapBuyTransaction(doc: { id: string; data: () => Record<string, unknown> }): BuyTransaction {
+  const data = doc.data() as Omit<BuyTransaction, 'id' | 'stock'>;
+  return {
+    id: doc.id,
+    ...data,
+    buy_rate: Number(data.buy_rate),
+    total_cost: Number(data.total_cost),
+    stock: { symbol: data.symbol },
+  };
+}
+
+function mapSellTransaction(doc: { id: string; data: () => Record<string, unknown> }): SellTransaction {
+  const data = doc.data() as Omit<SellTransaction, 'id' | 'stock'>;
+  return {
+    id: doc.id,
+    ...data,
+    sell_rate: Number(data.sell_rate),
+    total_proceeds: Number(data.total_proceeds),
+    realized_gain_loss: Number(data.realized_gain_loss),
+    stock: { symbol: data.symbol },
+  };
+}
+
+function mapDividend(doc: { id: string; data: () => Record<string, unknown> }): Dividend {
+  const data = doc.data() as Omit<Dividend, 'id' | 'stock'>;
+  return {
+    id: doc.id,
+    ...data,
+    dividend_amount: Number(data.dividend_amount),
+    stock: { symbol: data.symbol },
+  };
+}
+
+export async function addBuyTransaction(data: {
+  symbol: string;
+  quantity: number;
+  buyRate: number;
+  buyDate: Date;
+  notes?: string;
 }) {
   const validatedFields = BuyTransactionSchema.safeParse(data);
 
@@ -77,29 +119,24 @@ export async function addBuyTransaction(data: {
     };
   }
 
-  const { stockId, quantity, buyRate, buyDate, notes } = validatedFields.data;
+  const { symbol, quantity, buyRate, buyDate, notes } = validatedFields.data;
   const totalCost = quantity * buyRate;
 
   try {
-    // Validation: Check Wallet Balance
     const currentBalance = await getWalletBalance();
     if (currentBalance < totalCost) {
       return { success: false, message: 'Insufficient wallet balance.' };
     }
 
-    // Create Transaction
-    const { error } = await supabase
-      .from('stock_buy_transactions')
-      .insert({
-        stock_id: stockId,
-        quantity,
-        buy_rate: buyRate,
-        total_cost: totalCost,
-        buy_date: buyDate.toISOString(),
-        notes,
-      });
-
-    if (error) throw error;
+    await addDoc(collection(db, 'stock_buy_transactions'), {
+      symbol: symbol.toUpperCase(),
+      quantity,
+      buy_rate: buyRate,
+      total_cost: totalCost,
+      buy_date: buyDate.toISOString(),
+      notes: notes || null,
+      created_at: Timestamp.now().toDate().toISOString(),
+    });
 
     return { success: true, message: 'Successfully recorded buy transaction.' };
   } catch (error) {
@@ -110,35 +147,21 @@ export async function addBuyTransaction(data: {
 
 export async function getBuyTransactions(): Promise<BuyTransaction[]> {
   try {
-    const { data: transactions, error } = await supabase
-      .from('stock_buy_transactions')
-      .select(`
-        *,
-        stocks (symbol)
-      `)
-      .order('buy_date', { ascending: false });
-
-    if (error) throw error;
-
-    // Transform the data to match the expected format
-    return (transactions || []).map(tx => ({
-      ...tx,
-      stock: { symbol: tx.stocks?.symbol },
-      buy_rate: Number(tx.buy_rate),
-      total_cost: Number(tx.total_cost),
-    }));
+    const q = query(collection(db, 'stock_buy_transactions'), orderBy('buy_date', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(mapBuyTransaction);
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch buy transactions.');
   }
 }
 
-export async function addSellTransaction(data: { 
-  stockId: number; 
-  quantity: number; 
-  sellRate: number; 
-  sellDate: Date; 
-  notes?: string 
+export async function addSellTransaction(data: {
+  symbol: string;
+  quantity: number;
+  sellRate: number;
+  sellDate: Date;
+  notes?: string;
 }) {
   const validatedFields = SellTransactionSchema.safeParse(data);
 
@@ -150,51 +173,46 @@ export async function addSellTransaction(data: {
     };
   }
 
-  const { stockId, quantity: sellQuantity, sellRate, sellDate, notes } = validatedFields.data;
+  const { symbol: stockSymbol, quantity: sellQuantity, sellRate, sellDate, notes } = validatedFields.data;
+  const symbol = stockSymbol.toUpperCase();
 
   try {
-    // Get all buy transactions for this stock
-    const { data: buyTransactions, error: buyError } = await supabase
-      .from('stock_buy_transactions')
-      .select('*')
-      .eq('stock_id', stockId)
-      .order('buy_date', { ascending: true });
+    const [buySnap, sellSnap] = await Promise.all([
+      getDocs(query(
+        collection(db, 'stock_buy_transactions'),
+        where('symbol', '==', symbol),
+        orderBy('buy_date', 'asc')
+      )),
+      getDocs(query(
+        collection(db, 'stock_sell_transactions'),
+        where('symbol', '==', symbol),
+        orderBy('sell_date', 'asc')
+      )),
+    ]);
 
-    if (buyError) throw buyError;
+    const buyTransactions = buySnap.docs.map(d => d.data() as { quantity: number; buy_rate: number });
+    const sellTransactions = sellSnap.docs.map(d => d.data() as { quantity: number });
 
-    // Get all sell transactions for this stock
-    const { data: sellTransactions, error: sellError } = await supabase
-      .from('stock_sell_transactions')
-      .select('*')
-      .eq('stock_id', stockId)
-      .order('sell_date', { ascending: true });
-
-    if (sellError) throw sellError;
-
-    const totalBought = (buyTransactions || []).reduce((sum, tx) => sum + tx.quantity, 0);
-    const totalSold = (sellTransactions || []).reduce((sum, tx) => sum + tx.quantity, 0);
+    const totalBought = buyTransactions.reduce((sum, tx) => sum + tx.quantity, 0);
+    const totalSold = sellTransactions.reduce((sum, tx) => sum + tx.quantity, 0);
     const availableQuantity = totalBought - totalSold;
 
     if (sellQuantity > availableQuantity) {
-      return { 
-        success: false, 
-        message: `Insufficient quantity. You only have ${availableQuantity} shares to sell.` 
+      return {
+        success: false,
+        message: `Insufficient quantity. You only have ${availableQuantity} shares to sell.`,
       };
     }
 
-    // FIFO Calculation
     let costOfSoldShares = 0;
     let quantityToSell = sellQuantity;
-    
-    // Create a mutable copy of buys with remaining quantities
-    const buyLots = (buyTransactions || []).map(tx => ({ 
-      ...tx, 
+
+    const buyLots = buyTransactions.map(tx => ({
       remaining: tx.quantity,
-      buy_rate: Number(tx.buy_rate)
+      buy_rate: Number(tx.buy_rate),
     }));
 
-    // First, account for previous sells
-    for (const sellTx of (sellTransactions || [])) {
+    for (const sellTx of sellTransactions) {
       let soldQty = sellTx.quantity;
       for (const lot of buyLots) {
         if (soldQty === 0) break;
@@ -204,7 +222,6 @@ export async function addSellTransaction(data: {
       }
     }
 
-    // Now, calculate cost for the current sell from remaining lots
     for (const lot of buyLots) {
       if (quantityToSell === 0) break;
       const consume = Math.min(lot.remaining, quantityToSell);
@@ -215,23 +232,18 @@ export async function addSellTransaction(data: {
     const totalProceeds = sellQuantity * sellRate;
     const realizedGainLoss = totalProceeds - costOfSoldShares;
 
-    // Insert sell transaction
-    const { error: insertError } = await supabase
-      .from('stock_sell_transactions')
-      .insert({
-        stock_id: stockId,
-        quantity: sellQuantity,
-        sell_rate: sellRate,
-        total_proceeds: totalProceeds,
-        realized_gain_loss: realizedGainLoss,
-        sell_date: sellDate.toISOString(),
-        notes,
-      });
-
-    if (insertError) throw insertError;
+    await addDoc(collection(db, 'stock_sell_transactions'), {
+      symbol,
+      quantity: sellQuantity,
+      sell_rate: sellRate,
+      total_proceeds: totalProceeds,
+      realized_gain_loss: realizedGainLoss,
+      sell_date: sellDate.toISOString(),
+      notes: notes || null,
+      created_at: Timestamp.now().toDate().toISOString(),
+    });
 
     return { success: true, message: 'Successfully recorded sell transaction.' };
-
   } catch (error) {
     console.error('Database Error:', error);
     return { success: false, message: 'Database Error: Failed to record transaction.' };
@@ -240,35 +252,20 @@ export async function addSellTransaction(data: {
 
 export async function getSellTransactions(): Promise<SellTransaction[]> {
   try {
-    const { data: transactions, error } = await supabase
-      .from('stock_sell_transactions')
-      .select(`
-        *,
-        stocks (symbol)
-      `)
-      .order('sell_date', { ascending: false });
-
-    if (error) throw error;
-
-    // Transform the data to match the expected format
-    return (transactions || []).map(tx => ({
-      ...tx,
-      stock: { symbol: tx.stocks?.symbol },
-      sell_rate: Number(tx.sell_rate),
-      total_proceeds: Number(tx.total_proceeds),
-      realized_gain_loss: Number(tx.realized_gain_loss),
-    }));
+    const q = query(collection(db, 'stock_sell_transactions'), orderBy('sell_date', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(mapSellTransaction);
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch sell transactions.');
   }
 }
 
-export async function addDividend(data: { 
-  stockId: number; 
-  dividendAmount: number; 
-  dividendDate: Date; 
-  notes?: string 
+export async function addDividend(data: {
+  symbol: string;
+  dividendAmount: number;
+  dividendDate: Date;
+  notes?: string;
 }) {
   const validatedFields = DividendSchema.safeParse(data);
 
@@ -280,17 +277,16 @@ export async function addDividend(data: {
     };
   }
 
-  try {
-    const { error } = await supabase
-      .from('dividends')
-      .insert({
-        stock_id: validatedFields.data.stockId,
-        dividend_amount: validatedFields.data.dividendAmount,
-        dividend_date: validatedFields.data.dividendDate.toISOString(),
-        notes: validatedFields.data.notes,
-      });
+  const { symbol, dividendAmount, dividendDate, notes } = validatedFields.data;
 
-    if (error) throw error;
+  try {
+    await addDoc(collection(db, 'dividends'), {
+      symbol: symbol.toUpperCase(),
+      dividend_amount: dividendAmount,
+      dividend_date: dividendDate.toISOString(),
+      notes: notes || null,
+      created_at: Timestamp.now().toDate().toISOString(),
+    });
 
     return { success: true, message: 'Successfully recorded dividend.' };
   } catch (error) {
@@ -301,22 +297,9 @@ export async function addDividend(data: {
 
 export async function getDividends(): Promise<Dividend[]> {
   try {
-    const { data: dividends, error } = await supabase
-      .from('dividends')
-      .select(`
-        *,
-        stocks (symbol)
-      `)
-      .order('dividend_date', { ascending: false });
-
-    if (error) throw error;
-
-    // Transform the data to match the expected format
-    return (dividends || []).map(d => ({
-      ...d,
-      stock: { symbol: d.stocks?.symbol },
-      dividend_amount: Number(d.dividend_amount),
-    }));
+    const q = query(collection(db, 'dividends'), orderBy('dividend_date', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(mapDividend);
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch dividends.');

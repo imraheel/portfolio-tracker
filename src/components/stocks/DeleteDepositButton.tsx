@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
 import { useWallet } from '@/hooks/stocks/useWallet';
 
-export function DeleteDepositButton({ id }: { id: number }) {
+export function DeleteDepositButton({ id }: { id: string }) {
   const { deleteDeposit } = useWallet();
 
   const handleDelete = async () => {

@@ -6,7 +6,7 @@ import type { Stock } from '@/services/stocks/stocks';
 
 export function DividendForm({ stocks }: { stocks: Stock[] }) {
   const { addDividend } = useTransactions();
-  const [stockId, setStockId] = useState('');
+  const [symbol, setSymbol] = useState('');
   const [dividendAmount, setDividendAmount] = useState('');
   const [dividendDate, setDividendDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
@@ -19,7 +19,7 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
     setErrors({});
 
     const result = await addDividend({
-      stockId: parseInt(stockId),
+      symbol,
       dividendAmount: parseFloat(dividendAmount),
       dividendDate: new Date(dividendDate),
       notes: notes || undefined,
@@ -29,7 +29,7 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
 
     if (result.success) {
       toast.success(result.message);
-      setStockId('');
+      setSymbol('');
       setDividendAmount('');
       setNotes('');
     } else {
@@ -48,17 +48,17 @@ export function DividendForm({ stocks }: { stocks: Stock[] }) {
 
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         <div>
-          <label htmlFor="stockId" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Stock Symbol</label>
+          <label htmlFor="symbol" className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Stock Symbol</label>
           <select 
-            id="stockId" 
-            name="stockId" 
+            id="symbol" 
+            name="symbol" 
             required 
-            value={stockId}
-            onChange={(e) => setStockId(e.target.value)}
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value)}
             className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           >
               <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Select a stock</option>
-              {stocks.map((stock) => (<option key={stock.id} value={stock.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
+              {stocks.map((stock) => (<option key={stock.symbol} value={stock.symbol} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{stock.symbol}</option>))}
           </select>
         </div>
         <div>

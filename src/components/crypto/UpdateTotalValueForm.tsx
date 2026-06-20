@@ -5,11 +5,11 @@ import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { Edit3 } from 'lucide-react';
 
 interface UpdateTotalValueFormProps {
-  cryptoId: number;
+  symbol: string;
   currentValue: string;
 }
 
-export function UpdateTotalValueForm({ cryptoId, currentValue }: UpdateTotalValueFormProps) {
+export function UpdateTotalValueForm({ symbol, currentValue }: UpdateTotalValueFormProps) {
   const { updateTotalValue } = useCrypto();
   const [value, setValue] = useState(currentValue);
   const [isEditing, setIsEditing] = useState(false);
@@ -27,7 +27,7 @@ export function UpdateTotalValueForm({ cryptoId, currentValue }: UpdateTotalValu
     }
 
     const result = await updateTotalValue({
-      cryptoId,
+      symbol,
       totalValue: numericValue,
     });
 

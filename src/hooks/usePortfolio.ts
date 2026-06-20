@@ -24,16 +24,14 @@ export function usePortfolio() {
     fetchMetrics();
   }, [fetchMetrics]);
 
-  // Calculate summary values
   const portfolioValue = metrics.reduce((sum, m) => sum + m.currentValue, 0);
   const unrealizedPl = metrics.reduce((sum, m) => sum + m.unrealizedGainLoss, 0);
   const realizedPl = metrics.reduce((sum, m) => sum + m.realizedGainLoss, 0);
   const totalDividends = metrics.reduce((sum, m) => sum + m.totalDividends, 0);
   const totalInvested = metrics.reduce((sum, m) => sum + m.investedAmount, 0);
 
-  // Create holdings map for sell form
-  const holdingsMap = new Map<number, number>(
-    metrics.map(m => [m.stockId, m.remainingQty])
+  const holdingsMap = new Map<string, number>(
+    metrics.map(m => [m.symbol, m.remainingQty])
   );
 
   return {

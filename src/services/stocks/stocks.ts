@@ -1,5 +1,15 @@
-import { supabase } from '@/lib/supabase/client';
+import { db } from '@/lib/firebase/client';
 import { z } from 'zod';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  query,
+  orderBy,
+  Timestamp,
+} from 'firebase/firestore';
 
 const StockSchema = z.object({
   symbol: z.string().min(1, 'Symbol is required').max(10),
@@ -8,12 +18,11 @@ const StockSchema = z.object({
 });
 
 const PriceUpdateSchema = z.object({
-  stockId: z.number().int().positive(),
+  symbol: z.string().min(1).max(10),
   currentPrice: z.number().nonnegative(),
 });
 
 export interface Stock {
-  id: number;
   symbol: string;
   company_name: string | null;
   sector: string | null;
@@ -21,8 +30,7 @@ export interface Stock {
 }
 
 export interface StockPrice {
-  id: number;
-  stock_id: number;
+  symbol: string;
   current_price: number;
   updated_at: string;
 }
@@ -39,29 +47,20 @@ export async function addStock(data: { symbol: string; companyName?: string; sec
   }
 
   const { symbol, companyName, sector } = validatedFields.data;
+  const docRef = doc(db, 'stocks', symbol.toUpperCase());
 
   try {
-    // Check if stock already exists
-    const { data: existingStock } = await supabase
-      .from('stocks')
-      .select('id')
-      .eq('symbol', symbol.toUpperCase())
-      .single();
-
-    if (existingStock) {
+    const existingSnap = await getDoc(docRef);
+    if (existingSnap.exists()) {
       return { success: false, message: 'Stock with this symbol already exists.' };
     }
 
-    // Insert new stock
-    const { error } = await supabase
-      .from('stocks')
-      .insert({
-        symbol: symbol.toUpperCase(),
-        company_name: companyName,
-        sector: sector,
-      });
-
-    if (error) throw error;
+    await setDoc(docRef, {
+      symbol: symbol.toUpperCase(),
+      company_name: companyName || null,
+      sector: sector || null,
+      created_at: Timestamp.now().toDate().toISOString(),
+    });
 
     return { success: true, message: `Added stock ${symbol.toUpperCase()}.` };
   } catch (error) {
@@ -72,56 +71,34 @@ export async function addStock(data: { symbol: string; companyName?: string; sec
 
 export async function getStocks(): Promise<Stock[]> {
   try {
-    const { data: stocks, error } = await supabase
-      .from('stocks')
-      .select('*')
-      .order('symbol', { ascending: true });
-
-    if (error) throw error;
-
-    return stocks || [];
+    const q = query(collection(db, 'stocks'), orderBy('symbol', 'asc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      symbol: doc.id,
+      ...doc.data(),
+    })) as Stock[];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch stocks.');
   }
 }
 
-export async function updateStockPrice(data: { stockId: number; currentPrice: number }) {
+export async function updateStockPrice(data: { symbol: string; currentPrice: number }) {
   const validatedFields = PriceUpdateSchema.safeParse(data);
 
   if (!validatedFields.success) {
     return { success: false, message: 'Invalid price data.' };
   }
 
-  const { stockId, currentPrice } = validatedFields.data;
+  const { symbol, currentPrice } = validatedFields.data;
+  const docRef = doc(db, 'stock_prices', symbol.toUpperCase());
 
   try {
-    // Check if price record exists
-    const { data: existingPrice } = await supabase
-      .from('stock_prices')
-      .select('id')
-      .eq('stock_id', stockId)
-      .single();
-
-    if (existingPrice) {
-      // Update existing price
-      const { error } = await supabase
-        .from('stock_prices')
-        .update({ current_price: currentPrice })
-        .eq('stock_id', stockId);
-      
-      if (error) throw error;
-    } else {
-      // Insert new price
-      const { error } = await supabase
-        .from('stock_prices')
-        .insert({
-          stock_id: stockId,
-          current_price: currentPrice,
-        });
-      
-      if (error) throw error;
-    }
+    await setDoc(docRef, {
+      symbol: symbol.toUpperCase(),
+      current_price: currentPrice,
+      updated_at: Timestamp.now().toDate().toISOString(),
+    });
 
     return { success: true, message: 'Price updated.' };
   } catch (error) {
@@ -132,16 +109,12 @@ export async function updateStockPrice(data: { stockId: number; currentPrice: nu
 
 export async function getStockPrices(): Promise<StockPrice[]> {
   try {
-    const { data: prices, error } = await supabase
-      .from('stock_prices')
-      .select('*');
-
-    if (error) throw error;
-
-    return (prices || []).map(p => ({
-      ...p,
-      current_price: Number(p.current_price),
-    }));
+    const snapshot = await getDocs(collection(db, 'stock_prices'));
+    return snapshot.docs.map(doc => ({
+      ...doc.data(),
+      symbol: doc.id,
+      current_price: Number((doc.data() as StockPrice).current_price),
+    })) as StockPrice[];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch stock prices.');

@@ -121,7 +121,7 @@ export default function Withdrawals() {
           />
           <MetricCard
             title="Funds Withdrawn From"
-            value={new Set(withdrawals.map((w) => w.fund_id)).size.toString()}
+            value={new Set(withdrawals.map((w) => w.symbol)).size.toString()}
             icon={<TrendingUp className="w-5 h-5" />}
             variant="sage"
            

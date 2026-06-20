@@ -270,7 +270,7 @@ export default function Dashboard() {
               <tbody className="divide-y divide-[var(--border-subtle)]">
                 {stockMetrics.slice(0, 10).map((m) => (
                   <tr
-                    key={m.stockId}
+                    key={m.symbol}
                     className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
                   >
                     <td className="py-4 px-4">

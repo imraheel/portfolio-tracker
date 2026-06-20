@@ -1,5 +1,15 @@
-import { supabase } from '@/lib/supabase/client';
+import { db } from '@/lib/firebase/client';
 import { z } from 'zod';
+import {
+  collection,
+  doc,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  query,
+  orderBy,
+  Timestamp,
+} from 'firebase/firestore';
 
 const DepositSchema = z.object({
   amount: z.number().positive('Amount must be positive'),
@@ -14,7 +24,7 @@ const WithdrawalSchema = z.object({
 });
 
 export interface Deposit {
-  id: number;
+  id: string;
   amount: number;
   deposit_date: string;
   note: string | null;
@@ -22,7 +32,7 @@ export interface Deposit {
 }
 
 export interface Withdrawal {
-  id: number;
+  id: string;
   amount: number;
   withdrawal_date: string;
   note: string | null;
@@ -43,15 +53,12 @@ export async function addDeposit(data: { amount: number; depositDate: Date; note
   const { amount, depositDate, note } = validatedFields.data;
 
   try {
-    const { error } = await supabase
-      .from('deposits')
-      .insert({
-        amount,
-        deposit_date: depositDate.toISOString(),
-        note,
-      });
-
-    if (error) throw error;
+    await addDoc(collection(db, 'deposits'), {
+      amount,
+      deposit_date: depositDate.toISOString(),
+      note: note || null,
+      created_at: Timestamp.now().toDate().toISOString(),
+    });
 
     return { success: true, message: 'Successfully added deposit.' };
   } catch (error) {
@@ -60,15 +67,9 @@ export async function addDeposit(data: { amount: number; depositDate: Date; note
   }
 }
 
-export async function deleteDeposit(id: number) {
+export async function deleteDeposit(id: string) {
   try {
-    const { error } = await supabase
-      .from('deposits')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-
+    await deleteDoc(doc(db, 'deposits', id));
     return { success: true, message: 'Deleted deposit.' };
   } catch (error) {
     console.error('Database Error:', error);
@@ -78,18 +79,13 @@ export async function deleteDeposit(id: number) {
 
 export async function getDeposits(): Promise<Deposit[]> {
   try {
-    const { data: deposits, error } = await supabase
-      .from('deposits')
-      .select('*')
-      .order('deposit_date', { ascending: false });
-
-    if (error) throw error;
-
-    // Transform decimal amounts to numbers
-    return (deposits || []).map(d => ({
-      ...d,
-      amount: Number(d.amount),
-    }));
+    const q = query(collection(db, 'deposits'), orderBy('deposit_date', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data(),
+      amount: Number((d.data() as { amount: number }).amount),
+    })) as Deposit[];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch deposits.');
@@ -109,7 +105,6 @@ export async function addWithdrawal(data: { amount: number; withdrawalDate: Date
 
   const { amount, withdrawalDate, note } = validatedFields.data;
 
-  // Check if sufficient balance exists
   try {
     const currentBalance = await getWalletBalance();
     if (amount > currentBalance) {
@@ -119,15 +114,12 @@ export async function addWithdrawal(data: { amount: number; withdrawalDate: Date
       };
     }
 
-    const { error } = await supabase
-      .from('withdrawals')
-      .insert({
-        amount,
-        withdrawal_date: withdrawalDate.toISOString(),
-        note,
-      });
-
-    if (error) throw error;
+    await addDoc(collection(db, 'withdrawals'), {
+      amount,
+      withdrawal_date: withdrawalDate.toISOString(),
+      note: note || null,
+      created_at: Timestamp.now().toDate().toISOString(),
+    });
 
     return { success: true, message: 'Successfully added withdrawal.' };
   } catch (error) {
@@ -136,15 +128,9 @@ export async function addWithdrawal(data: { amount: number; withdrawalDate: Date
   }
 }
 
-export async function deleteWithdrawal(id: number) {
+export async function deleteWithdrawal(id: string) {
   try {
-    const { error } = await supabase
-      .from('withdrawals')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
-
+    await deleteDoc(doc(db, 'withdrawals', id));
     return { success: true, message: 'Deleted withdrawal.' };
   } catch (error) {
     console.error('Database Error:', error);
@@ -154,18 +140,13 @@ export async function deleteWithdrawal(id: number) {
 
 export async function getWithdrawals(): Promise<Withdrawal[]> {
   try {
-    const { data: withdrawals, error } = await supabase
-      .from('withdrawals')
-      .select('*')
-      .order('withdrawal_date', { ascending: false });
-
-    if (error) throw error;
-
-    // Transform decimal amounts to numbers
-    return (withdrawals || []).map(w => ({
-      ...w,
-      amount: Number(w.amount),
-    }));
+    const q = query(collection(db, 'withdrawals'), orderBy('withdrawal_date', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(w => ({
+      id: w.id,
+      ...w.data(),
+      amount: Number((w.data() as { amount: number }).amount),
+    })) as Withdrawal[];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch withdrawals.');
@@ -174,45 +155,21 @@ export async function getWithdrawals(): Promise<Withdrawal[]> {
 
 export async function getWalletBalance(): Promise<number> {
   try {
-    // Get total deposits
-    const { data: depositsData } = await supabase
-      .from('deposits')
-      .select('amount');
-    
-    const totalDeposits = (depositsData || []).reduce((sum, d) => sum + Number(d.amount), 0);
+    const [depositsSnap, withdrawalsSnap, buysSnap, sellsSnap, dividendsSnap] = await Promise.all([
+      getDocs(collection(db, 'deposits')),
+      getDocs(collection(db, 'withdrawals')),
+      getDocs(collection(db, 'stock_buy_transactions')),
+      getDocs(collection(db, 'stock_sell_transactions')),
+      getDocs(collection(db, 'dividends')),
+    ]);
 
-    // Get total withdrawals
-    const { data: withdrawalsData } = await supabase
-      .from('withdrawals')
-      .select('amount');
-    
-    const totalWithdrawals = (withdrawalsData || []).reduce((sum, w) => sum + Number(w.amount), 0);
+    const totalDeposits = depositsSnap.docs.reduce((sum, d) => sum + Number((d.data() as { amount: number }).amount), 0);
+    const totalWithdrawals = withdrawalsSnap.docs.reduce((sum, w) => sum + Number((w.data() as { amount: number }).amount), 0);
+    const totalBuys = buysSnap.docs.reduce((sum, t) => sum + Number((t.data() as { total_cost: number }).total_cost), 0);
+    const totalSells = sellsSnap.docs.reduce((sum, t) => sum + Number((t.data() as { total_proceeds: number }).total_proceeds), 0);
+    const totalDividends = dividendsSnap.docs.reduce((sum, d) => sum + Number((d.data() as { dividend_amount: number }).dividend_amount), 0);
 
-    // Get total buy costs
-    const { data: buysData } = await supabase
-      .from('stock_buy_transactions')
-      .select('total_cost');
-    
-    const totalBuys = (buysData || []).reduce((sum, t) => sum + Number(t.total_cost), 0);
-
-    // Get total sell proceeds
-    const { data: sellsData } = await supabase
-      .from('stock_sell_transactions')
-      .select('total_proceeds');
-    
-    const totalSells = (sellsData || []).reduce((sum, t) => sum + Number(t.total_proceeds), 0);
-
-    // Get total dividends
-    const { data: dividendsData } = await supabase
-      .from('dividends')
-      .select('dividend_amount');
-    
-    const totalDividends = (dividendsData || []).reduce((sum, d) => sum + Number(d.dividend_amount), 0);
-
-    // Calculate balance: Deposits - Withdrawals - Buys + Sells + Dividends
-    const balance = totalDeposits - totalWithdrawals - totalBuys + totalSells + totalDividends;
-    
-    return balance;
+    return totalDeposits - totalWithdrawals - totalBuys + totalSells + totalDividends;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch wallet balance.');

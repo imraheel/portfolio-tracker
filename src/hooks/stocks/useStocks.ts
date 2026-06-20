@@ -38,7 +38,7 @@ export function useStocks() {
     return result;
   }, [fetchStocks]);
 
-  const updatePrice = useCallback(async (data: { stockId: number; currentPrice: number }) => {
+  const updatePrice = useCallback(async (data: { symbol: string; currentPrice: number }) => {
     const result = await stocksService.updateStockPrice(data);
     if (result.success) {
       await fetchPrices();
@@ -51,8 +51,7 @@ export function useStocks() {
     fetchPrices();
   }, [fetchStocks, fetchPrices]);
 
-  // Create a map of stock_id to price for quick lookup
-  const priceMap = new Map(prices.map(p => [p.stock_id, p.current_price]));
+  const priceMap = new Map(prices.map(p => [p.symbol, p.current_price]));
 
   return {
     stocks,

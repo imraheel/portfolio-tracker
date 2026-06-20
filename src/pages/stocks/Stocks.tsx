@@ -57,7 +57,7 @@ function StocksTable() {
           <tbody className="divide-y divide-[var(--border-subtle)]">
             {stocks.map((stock) => (
               <tr 
-                key={stock.id}
+                key={stock.symbol}
                 className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
               >
                 <td className="whitespace-nowrap px-4 py-4">
@@ -69,8 +69,8 @@ function StocksTable() {
                 </td>
                 <td className="whitespace-nowrap px-4 py-4 text-right">
                   <UpdatePriceForm 
-                    stockId={stock.id} 
-                    currentPrice={priceMap.get(stock.id)?.toString() ?? '0'} 
+                    symbol={stock.symbol} 
+                    currentPrice={priceMap.get(stock.symbol)?.toString() ?? '0'} 
                   />
                 </td>
               </tr>
@@ -94,7 +94,7 @@ export default function Stocks() {
   
   const totalStocks = stocks.length;
   const totalValue = stocks.reduce((sum, stock) => {
-    const price = priceMap.get(stock.id) || 0;
+    const price = priceMap.get(stock.symbol) || 0;
     return sum + price;
   }, 0);
   const avgPrice = totalStocks > 0 ? totalValue / totalStocks : 0;

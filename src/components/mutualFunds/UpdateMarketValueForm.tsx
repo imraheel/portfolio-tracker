@@ -5,11 +5,11 @@ import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
 import { TrendingUp, X } from 'lucide-react';
 
 interface UpdateMarketValueFormProps {
-  fundId: number;
+  symbol: string;
   currentValue: string;
 }
 
-export function UpdateMarketValueForm({ fundId, currentValue }: UpdateMarketValueFormProps) {
+export function UpdateMarketValueForm({ symbol, currentValue }: UpdateMarketValueFormProps) {
   const { updateMarketValue } = useMutualFunds();
   const [value, setValue] = useState(currentValue);
   const [isEditing, setIsEditing] = useState(false);
@@ -27,7 +27,7 @@ export function UpdateMarketValueForm({ fundId, currentValue }: UpdateMarketValu
     }
 
     const result = await updateMarketValue({
-      fundId,
+      symbol,
       currentValue: numericValue,
     });
 

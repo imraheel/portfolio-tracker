@@ -24,8 +24,8 @@ function FundsTable({ funds, metrics, loading }: FundsTableProps) {
     return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const getMetricsForFund = (fundId: number) => {
-    return metrics.find((m) => m.fundId === fundId);
+  const getMetricsForFund = (symbol: string) => {
+    return metrics.find((m) => m.symbol === symbol);
   };
 
   if (loading) {
@@ -64,10 +64,10 @@ function FundsTable({ funds, metrics, loading }: FundsTableProps) {
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
             {funds.map((fund) => {
-              const fundMetrics = getMetricsForFund(fund.id);
+              const fundMetrics = getMetricsForFund(fund.symbol);
               return (
                 <tr
-                  key={fund.id}
+                  key={fund.symbol}
                   className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
                 >
                   <td className="whitespace-nowrap px-4 py-3">
@@ -79,7 +79,7 @@ function FundsTable({ funds, metrics, loading }: FundsTableProps) {
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
                     <UpdateMarketValueForm
-                      fundId={fund.id}
+                      symbol={fund.symbol}
                       currentValue={fund.current_market_value?.toString() ?? '0'}
                     />
                   </td>

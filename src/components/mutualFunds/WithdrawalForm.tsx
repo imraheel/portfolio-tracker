@@ -11,7 +11,7 @@ interface WithdrawalFormProps {
 
 export function WithdrawalForm({ funds }: WithdrawalFormProps) {
   const { addWithdrawal } = useMutualFunds();
-  const [fundId, setFundId] = useState('');
+  const [symbol, setSymbol] = useState('');
   const [amount, setAmount] = useState('');
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
@@ -24,7 +24,7 @@ export function WithdrawalForm({ funds }: WithdrawalFormProps) {
     setErrors({});
 
     const result = await addWithdrawal({
-      fundId: parseInt(fundId),
+      symbol,
       amount: parseFloat(amount),
       withdrawalDate: new Date(withdrawalDate),
       notes: notes || undefined,
@@ -34,7 +34,7 @@ export function WithdrawalForm({ funds }: WithdrawalFormProps) {
 
     if (result.success) {
       toast.success(result.message);
-      setFundId('');
+      setSymbol('');
       setAmount('');
       setWithdrawalDate(new Date().toISOString().split('T')[0]);
       setNotes('');
@@ -56,30 +56,30 @@ export function WithdrawalForm({ funds }: WithdrawalFormProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label
-            htmlFor="fundId"
+            htmlFor="symbol"
             className="block text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]"
           >
             Fund
           </label>
           <select
-            id="fundId"
-            name="fundId"
+            id="symbol"
+            name="symbol"
             required
-            value={fundId}
-            onChange={(e) => setFundId(e.target.value)}
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value)}
             className="mt-1 block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-gold)]"
           >
             <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-muted)]">
               Select a fund
             </option>
             {funds.map((fund) => (
-              <option key={fund.id} value={fund.id} className="bg-[var(--bg-secondary)]">
+              <option key={fund.symbol} value={fund.symbol} className="bg-[var(--bg-secondary)]">
                 {fund.symbol} - {fund.name}
               </option>
             ))}
           </select>
-          {errors.fundId && (
-            <p className="mt-1 text-xs text-[var(--accent-red)]">{errors.fundId[0]}</p>
+          {errors.symbol && (
+            <p className="mt-1 text-xs text-[var(--accent-red)]">{errors.symbol[0]}</p>
           )}
         </div>
         <div>

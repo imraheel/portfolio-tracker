@@ -24,8 +24,8 @@ function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
     return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const getMetricsForCrypto = (cryptoId: number) => {
-    return metrics.find((m) => m.cryptoId === cryptoId);
+  const getMetricsForCrypto = (symbol: string) => {
+    return metrics.find((m) => m.symbol === symbol);
   };
 
   if (loading) {
@@ -64,10 +64,10 @@ function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
           </thead>
           <tbody className="divide-y divide-[var(--border-subtle)]">
             {cryptocurrencies.map((crypto) => {
-              const cryptoMetrics = getMetricsForCrypto(crypto.id);
+              const cryptoMetrics = getMetricsForCrypto(crypto.symbol);
               return (
                 <tr
-                  key={crypto.id}
+                  key={crypto.symbol}
                   className="hover:bg-[var(--bg-elevated)]/30 transition-colors"
                 >
                   <td className="whitespace-nowrap px-4 py-3">
@@ -79,7 +79,7 @@ function CryptoTable({ cryptocurrencies, metrics, loading }: CryptoTableProps) {
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--text-primary)]">{crypto.name}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
                     <UpdateTotalValueForm
-                      cryptoId={crypto.id}
+                      symbol={crypto.symbol}
                       currentValue={crypto.current_total_value?.toString() ?? '0'}
                     />
                   </td>

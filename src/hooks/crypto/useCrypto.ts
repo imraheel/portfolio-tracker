@@ -67,7 +67,7 @@ export function useCrypto() {
   );
 
   const updateTotalValue = useCallback(
-    async (data: { cryptoId: number; totalValue: number }) => {
+    async (data: { symbol: string; totalValue: number }) => {
       const result = await cryptoService.updateTotalValue(data);
       if (result.success) {
         await fetchCryptocurrencies();
@@ -79,7 +79,7 @@ export function useCrypto() {
   );
 
   const addPurchase = useCallback(
-    async (data: { cryptoId: number; amountPkr: number; purchaseDate: Date; notes?: string }) => {
+    async (data: { symbol: string; amountPkr: number; purchaseDate: Date; notes?: string }) => {
       const result = await cryptoService.addPurchase(data);
       if (result.success) {
         await fetchPurchases();
@@ -91,7 +91,7 @@ export function useCrypto() {
   );
 
   const addWithdrawal = useCallback(
-    async (data: { cryptoId: number; amountPkr: number; withdrawalDate: Date; notes?: string }) => {
+    async (data: { symbol: string; amountPkr: number; withdrawalDate: Date; notes?: string }) => {
       const result = await cryptoService.addWithdrawal(data);
       if (result.success) {
         await fetchWithdrawals();

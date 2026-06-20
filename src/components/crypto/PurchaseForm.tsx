@@ -11,7 +11,7 @@ interface PurchaseFormProps {
 
 export function PurchaseForm({ cryptocurrencies }: PurchaseFormProps) {
   const { addPurchase } = useCrypto();
-  const [cryptoId, setCryptoId] = useState('');
+  const [symbol, setSymbol] = useState('');
   const [amountPkr, setAmountPkr] = useState('');
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
@@ -24,7 +24,7 @@ export function PurchaseForm({ cryptocurrencies }: PurchaseFormProps) {
     setErrors({});
 
     const result = await addPurchase({
-      cryptoId: parseInt(cryptoId),
+      symbol,
       amountPkr: parseFloat(amountPkr),
       purchaseDate: new Date(purchaseDate),
       notes: notes || undefined,
@@ -34,7 +34,7 @@ export function PurchaseForm({ cryptocurrencies }: PurchaseFormProps) {
 
     if (result.success) {
       toast.success(result.message);
-      setCryptoId('');
+      setSymbol('');
       setAmountPkr('');
       setPurchaseDate(new Date().toISOString().split('T')[0]);
       setNotes('');
@@ -56,25 +56,25 @@ export function PurchaseForm({ cryptocurrencies }: PurchaseFormProps) {
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="cryptoId" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
+          <label htmlFor="symbol" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">
             Cryptocurrency
           </label>
           <select
-            id="cryptoId"
-            name="cryptoId"
+            id="symbol"
+            name="symbol"
             required
-            value={cryptoId}
-            onChange={(e) => setCryptoId(e.target.value)}
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value)}
             className="block w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-[var(--text-primary)] focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] sm:text-sm"
           >
             <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-secondary)]">Select a cryptocurrency</option>
             {cryptocurrencies.map((crypto) => (
-              <option key={crypto.id} value={crypto.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
+              <option key={crypto.symbol} value={crypto.symbol} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
                 {crypto.symbol} - {crypto.name}
               </option>
             ))}
           </select>
-          {errors.cryptoId && <p className="mt-1 text-xs text-red-500">{errors.cryptoId[0]}</p>}
+          {errors.symbol && <p className="mt-1 text-xs text-red-500">{errors.symbol[0]}</p>}
         </div>
         <div>
           <label htmlFor="amountPkr" className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1">

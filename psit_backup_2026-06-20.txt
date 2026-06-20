@@ -1,0 +1,428 @@
+{
+  "version": "1.0",
+  "exportDate": "2026-06-20T22:16:50.823Z",
+  "stocks": [
+    {
+      "symbol": "MARI",
+      "company_name": "Mari Energies Limited",
+      "sector": "OIL & GAS EXPLORATION COMPANIES",
+      "created_at": "2026-01-17T00:32:54.455+00:00"
+    },
+    {
+      "symbol": "OGDC",
+      "company_name": "Oil & Gas Development Company Limited",
+      "sector": "OIL & GAS EXPLORATION COMPANIES",
+      "created_at": "2026-01-17T00:33:29.107+00:00"
+    },
+    {
+      "symbol": "LUCK",
+      "company_name": "Lucky Cement Limited",
+      "sector": "CEMENT",
+      "created_at": "2026-02-02T00:27:16.708+00:00"
+    },
+    {
+      "symbol": "EFERT",
+      "company_name": "Engro Fertilizers Limited",
+      "sector": "FERTILIZER",
+      "created_at": "2026-02-02T00:27:50.84+00:00"
+    },
+    {
+      "symbol": "SPSL",
+      "company_name": "Sitara Petroleum Service Limited",
+      "sector": "OIL & GAS MARKETING COMPANIES",
+      "created_at": "2026-05-22T13:53:51.207959+00:00"
+    }
+  ],
+  "deposits": [
+    {
+      "amount": 10000,
+      "deposit_date": "2026-01-12T00:00:00+00:00",
+      "note": "Inital deposit from Bank Al-Habib",
+      "created_at": "2026-01-17T00:32:12.164+00:00"
+    },
+    {
+      "amount": 5000,
+      "deposit_date": "2026-01-31T00:00:00+00:00",
+      "note": "deposit from al-habib through RAST account",
+      "created_at": "2026-02-02T00:17:54.574+00:00"
+    },
+    {
+      "amount": 20000,
+      "deposit_date": "2026-02-03T00:00:00+00:00",
+      "note": "deposit from al-habib through RAST account",
+      "created_at": "2026-02-03T10:12:16.902+00:00"
+    },
+    {
+      "amount": 10000,
+      "deposit_date": "2026-02-20T00:00:00+00:00",
+      "note": null,
+      "created_at": "2026-02-24T10:20:08.760356+00:00"
+    },
+    {
+      "amount": 15000,
+      "deposit_date": "2026-03-12T00:00:00+00:00",
+      "note": "deposit from al-habib through RAST account",
+      "created_at": "2026-03-13T17:54:02.991849+00:00"
+    },
+    {
+      "amount": 20000,
+      "deposit_date": "2026-04-21T00:00:00+00:00",
+      "note": "deposit from al-habib through RAST account\t",
+      "created_at": "2026-04-21T10:16:25.055958+00:00"
+    },
+    {
+      "amount": 20000,
+      "deposit_date": "2026-05-21T00:00:00+00:00",
+      "note": "deposit from al-habib through rast",
+      "created_at": "2026-05-22T00:02:56.686733+00:00"
+    }
+  ],
+  "buyTransactions": [
+    {
+      "quantity": 8,
+      "buy_rate": 723,
+      "total_cost": 5784,
+      "buy_date": "2026-01-15T00:00:00+00:00",
+      "notes": "",
+      "created_at": "2026-01-17T00:34:04.301+00:00",
+      "symbol": "MARI",
+      "buyRate": 723,
+      "totalCost": 5784
+    },
+    {
+      "quantity": 10,
+      "buy_rate": 305.8,
+      "total_cost": 3058,
+      "buy_date": "2026-01-15T00:00:00+00:00",
+      "notes": "",
+      "created_at": "2026-01-17T00:34:16.754+00:00",
+      "symbol": "OGDC",
+      "buyRate": 305.8,
+      "totalCost": 3058
+    },
+    {
+      "quantity": 18,
+      "buy_rate": 328.99,
+      "total_cost": 5921.82,
+      "buy_date": "2026-02-02T00:00:00+00:00",
+      "notes": "",
+      "created_at": "2026-02-02T09:50:30.041754+00:00",
+      "symbol": "OGDC",
+      "buyRate": 328.99,
+      "totalCost": 5921.82
+    },
+    {
+      "quantity": 12,
+      "buy_rate": 707.99,
+      "total_cost": 8495.88,
+      "buy_date": "2026-02-04T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-04T08:40:56.725078+00:00",
+      "symbol": "MARI",
+      "buyRate": 707.99,
+      "totalCost": 8495.88
+    },
+    {
+      "quantity": 45,
+      "buy_rate": 237.49,
+      "total_cost": 10687.05,
+      "buy_date": "2026-02-04T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-04T08:41:16.3879+00:00",
+      "symbol": "EFERT",
+      "buyRate": 237.49,
+      "totalCost": 10687.05
+    },
+    {
+      "quantity": 30,
+      "buy_rate": 281.3,
+      "total_cost": 8439,
+      "buy_date": "2026-03-06T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-03-06T04:25:37.403682+00:00",
+      "symbol": "OGDC",
+      "buyRate": 281.3,
+      "totalCost": 8439
+    },
+    {
+      "quantity": 5,
+      "buy_rate": 390,
+      "total_cost": 1950,
+      "buy_date": "2026-03-06T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-03-06T04:33:22.708984+00:00",
+      "symbol": "LUCK",
+      "buyRate": 390,
+      "totalCost": 1950
+    },
+    {
+      "quantity": 25,
+      "buy_rate": 348,
+      "total_cost": 8700,
+      "buy_date": "2026-03-17T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-03-17T04:24:03.174851+00:00",
+      "symbol": "LUCK",
+      "buyRate": 348,
+      "totalCost": 8700
+    },
+    {
+      "quantity": 30,
+      "buy_rate": 204.5,
+      "total_cost": 6135,
+      "buy_date": "2026-03-17T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-03-17T04:24:18.789881+00:00",
+      "symbol": "EFERT",
+      "buyRate": 204.5,
+      "totalCost": 6135
+    },
+    {
+      "quantity": 30,
+      "buy_rate": 671.8,
+      "total_cost": 20154,
+      "buy_date": "2026-04-21T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-04-21T10:16:58.160301+00:00",
+      "symbol": "MARI",
+      "buyRate": 671.8,
+      "totalCost": 20154
+    },
+    {
+      "quantity": 42,
+      "buy_rate": 199.6,
+      "total_cost": 8383.2,
+      "buy_date": "2026-05-21T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-05-22T00:06:03.85887+00:00",
+      "symbol": "EFERT",
+      "buyRate": 199.6,
+      "totalCost": 8383.2
+    },
+    {
+      "quantity": 10,
+      "buy_rate": 650.08,
+      "total_cost": 6500.8,
+      "buy_date": "2026-05-21T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-05-22T00:06:18.985635+00:00",
+      "symbol": "MARI",
+      "buyRate": 650.08,
+      "totalCost": 6500.8
+    },
+    {
+      "quantity": 240,
+      "buy_rate": 20.85,
+      "total_cost": 5004,
+      "buy_date": "2026-05-22T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-05-22T13:54:29.113141+00:00",
+      "symbol": "SPSL",
+      "buyRate": 20.85,
+      "totalCost": 5004
+    }
+  ],
+  "sellTransactions": [],
+  "dividends": [
+    {
+      "dividend_amount": 56,
+      "dividend_date": "2026-02-07T00:00:00+00:00",
+      "notes": "\nReference Number\t: 292330-292330\nInitiated on\t: 07/02/2026 11:55:09\nAmount\t: PKR 56.00\nTransferred From Account\t: 002*******163\nFrom Account Title\t: MARI ENERGIES LIMITED - DIVIDE\nFrom Bank Name\t: ACB\nTransferred To Account\t: 1049-0095-******-01-7\nTo Account Title\t: RAHEEL AHMED KHAN\nTo Bank Name\t: BANK AL HABIB LTD\nPurpose of Payment\t: Miscellaneous Payments\nEFT Type\t: Inter Bank Fund Transfer\nChannel\t: Onelink",
+      "created_at": "2026-02-07T20:17:11.327301+00:00",
+      "symbol": "MARI",
+      "dividendAmount": 56
+    },
+    {
+      "dividend_amount": 94,
+      "dividend_date": "2026-03-17T00:00:00+00:00",
+      "notes": "CD-OGDC-D-97\nTransaction ID: OGDC2026481PK116412PKBAH00CDC116412970315090",
+      "created_at": "2026-03-17T18:42:24.5142+00:00",
+      "symbol": "OGDC",
+      "dividendAmount": 94
+    },
+    {
+      "dividend_amount": 142,
+      "dividend_date": "2026-04-02T00:00:00+00:00",
+      "notes": "ENGRO FERTILIZERS LIMITED DIVI",
+      "created_at": "2026-04-14T21:06:42.59144+00:00",
+      "symbol": "EFERT",
+      "dividendAmount": 142
+    },
+    {
+      "dividend_amount": 127,
+      "dividend_date": "2026-05-13T00:00:00+00:00",
+      "notes": "ENGRO FERTILIZERS LIMITED - DIVIDEND",
+      "created_at": "2026-05-15T13:36:56.427915+00:00",
+      "symbol": "EFERT",
+      "dividendAmount": 127
+    },
+    {
+      "dividend_amount": 160.5,
+      "dividend_date": "2026-05-22T00:00:00+00:00",
+      "notes": "CD-ogdc-D-98\nTransaction ID: OGDC20261131PK123459PKBAH02CDC123459980323322",
+      "created_at": "2026-05-22T13:10:32.26893+00:00",
+      "symbol": "OGDC",
+      "dividendAmount": 160.5
+    }
+  ],
+  "stockPrices": [
+    {
+      "current_price": 656.67,
+      "updated_at": "2026-02-02T00:18:52.7+00:00",
+      "symbol": "MARI",
+      "currentPrice": 656.67
+    },
+    {
+      "current_price": 323.51,
+      "updated_at": "2026-02-02T00:19:08.007+00:00",
+      "symbol": "OGDC",
+      "currentPrice": 323.51
+    },
+    {
+      "current_price": 434.36,
+      "updated_at": "2026-02-02T00:27:25.169+00:00",
+      "symbol": "LUCK",
+      "currentPrice": 434.36
+    },
+    {
+      "current_price": 207.82,
+      "updated_at": "2026-02-02T00:28:00.974+00:00",
+      "symbol": "EFERT",
+      "currentPrice": 207.82
+    },
+    {
+      "current_price": 21.16,
+      "updated_at": "2026-05-22T14:02:44.217478+00:00",
+      "symbol": "SPSL",
+      "currentPrice": 21.16
+    }
+  ],
+  "mutualFunds": [
+    {
+      "symbol": "MIIF",
+      "name": "Meezan Islamic Income Fund",
+      "description": "Fixed Income Funds - Meezan Islamic Income Fund Type B Units",
+      "current_market_value": 103031,
+      "created_at": "2026-02-03T23:24:57.163704+00:00",
+      "currentMarketValue": 103031
+    }
+  ],
+  "mutualFundPurchases": [
+    {
+      "amount": 5000,
+      "purchase_date": "2025-01-02T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:31:45.718673+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 15000,
+      "purchase_date": "2025-01-06T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:32:11.006148+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 11000,
+      "purchase_date": "2025-05-27T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:33:18.366482+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 10000,
+      "purchase_date": "2025-07-24T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:33:33.255969+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 20000,
+      "purchase_date": "2025-10-19T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:33:48.704925+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 10000,
+      "purchase_date": "2025-12-29T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:34:04.466415+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 10000,
+      "purchase_date": "2026-02-03T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:34:21.113702+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 10000,
+      "purchase_date": "2026-02-20T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-24T10:19:06.001485+00:00",
+      "symbol": "MIIF"
+    },
+    {
+      "amount": 10000,
+      "purchase_date": "2026-03-12T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-03-13T17:54:46.512957+00:00",
+      "symbol": "MIIF"
+    }
+  ],
+  "mutualFundWithdrawals": [
+    {
+      "amount": 1000,
+      "withdrawal_date": "2025-01-13T00:00:00+00:00",
+      "notes": "test withdrawal",
+      "created_at": "2026-02-03T23:32:49.131172+00:00",
+      "symbol": "MIIF"
+    }
+  ],
+  "cryptocurrencies": [
+    {
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "current_total_value": 19809,
+      "created_at": "2026-02-03T23:36:45.610929+00:00",
+      "currentTotalValue": 19809
+    }
+  ],
+  "cryptoPurchases": [
+    {
+      "amount_pkr": 5000,
+      "purchase_date": "2025-08-20T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:37:11.253231+00:00",
+      "symbol": "BTC",
+      "amountPkr": 5000
+    },
+    {
+      "amount_pkr": 5000,
+      "purchase_date": "2025-09-23T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:37:25.585096+00:00",
+      "symbol": "BTC",
+      "amountPkr": 5000
+    },
+    {
+      "amount_pkr": 5000,
+      "purchase_date": "2025-11-14T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-03T23:37:38.675344+00:00",
+      "symbol": "BTC",
+      "amountPkr": 5000
+    },
+    {
+      "amount_pkr": 10000,
+      "purchase_date": "2026-02-06T00:00:00+00:00",
+      "notes": null,
+      "created_at": "2026-02-06T23:28:11.74854+00:00",
+      "symbol": "BTC",
+      "amountPkr": 10000
+    }
+  ],
+  "cryptoWithdrawals": []
+}

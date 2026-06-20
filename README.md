@@ -14,7 +14,7 @@ PSIT is a simple, cloud-based, personal-use investment tracking system for manag
 - **Portfolio Analytics:** Real-time calculation of invested amount, current value, and P/L (Realized & Unrealized).
 - **Investment History Chart:** Visualize cumulative investments over time for Stocks, Mutual Funds, and Crypto.
 - **Data Management:** Export and Import functionality for all investment types.
-- **Cloud-Based:** All data is stored in Supabase PostgreSQL database (accessible from any device).
+- **Cloud-Based:** All data is stored in Firebase Firestore database (accessible from any device).
 - **Desktop App:** Available as a standalone Electron application for macOS and Windows.
 
 ## Tech Stack
@@ -23,7 +23,7 @@ PSIT is a simple, cloud-based, personal-use investment tracking system for manag
 - **Routing:** [React Router](https://reactrouter.com/) (HashRouter for Electron compatibility)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **Database:** [Supabase](https://supabase.com/) (PostgreSQL)
+- **Database:** [Firebase Firestore](https://firebase.google.com/products/firestore)
 - **Validation:** [Zod](https://zod.dev/)
 - **Icons:** [Lucide React](https://lucide.dev/)
 - **Notifications:** [Sonner](https://sonner.emilkowal.ski/)
@@ -35,7 +35,7 @@ PSIT is a simple, cloud-based, personal-use investment tracking system for manag
 
 - Node.js (Latest LTS recommended)
 - pnpm (recommended) or npm
-- Supabase account (free tier works fine)
+- Firebase account (free tier works fine)
 
 ### Setup
 
@@ -51,16 +51,28 @@ PSIT is a simple, cloud-based, personal-use investment tracking system for manag
    ```
 
 3. **Environment Variables:**
-   Create a `.env` file in the root directory with your Supabase credentials:
+   Create a `.env` file in the root directory with your Firebase credentials:
    ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_FIREBASE_API_KEY=your_firebase_api_key
+   VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   VITE_FIREBASE_PROJECT_ID=your_project_id
+   VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
    ```
 
 4. **Database Setup:**
-   - Go to your Supabase project dashboard
-   - Open the SQL Editor
-   - Run the SQL migration from `supabase_migration.sql`
+   - Go to your [Firebase Console](https://console.firebase.google.com)
+   - Enable **Cloud Firestore**
+   - Set Firestore security rules to allow read/write:
+     ```
+     rules_version = '2';
+     service cloud.firestore {
+       match /databases/{database}/documents {
+         match /{document=**} {
+           allow read, write: if true;
+         }
+       }
+     }
+     ```
 
 5. **Run the development server:**
    ```bash
@@ -101,7 +113,7 @@ The built application will be available in the `dist-electron/` directory:
 
 ### Environment Variables in Production
 
-The `.env` file is automatically bundled with the Electron app. Make sure it contains your Supabase credentials before building.
+The `.env` file is automatically bundled with the Electron app. Make sure it contains your Firebase credentials before building.
 
 ## Business Rules
 
@@ -144,10 +156,9 @@ src/
 │   ├── portfolio.ts   # Portfolio metrics calculation
 │   ├── investmentHistory.ts  # Investment history chart data
 │   └── data.ts        # Data export/import
-├── lib/supabase/       # Supabase client configuration
+├── lib/firebase/       # Firebase client configuration
 │   └── client.ts
 ├── types/              # TypeScript type definitions
-│   └── supabase.ts
 ├── App.tsx             # React Router setup
 ├── main.tsx            # Application entry point
 └── globals.css         # Tailwind CSS styles
@@ -183,19 +194,22 @@ The application includes a settings page where you can export all your data to a
 3. Click "Restore from Backup"
 4. **Warning:** This will replace all current data
 
-## Migration from SQLite
+## Data Import
 
-If you were previously using the SQLite version, you can migrate your data:
-1. Export your data from the old SQLite version using the Settings page
-2. Set up Supabase database (follow steps above)
-3. Import your backup file in the new version
+To import the initial backup into Firestore:
+
+```bash
+pnpm tsx src/scripts/importBackup.ts
+```
+
+Requires `firebase_service_account.json` (service account key) in the project root.
 
 ## Architecture Notes
 
 - **Client-Side Only:** This is a pure React.js application with no server-side rendering
 - **HashRouter:** Uses hash-based routing for compatibility with Electron's `file://` protocol
 - **Relative Paths:** All assets use relative paths (`./`) for Electron compatibility
-- **Supabase Client:** Direct browser client connection to Supabase (no server middleware)
+- **Firestore Client:** Direct browser client connection to Firestore (no server middleware)
 
 ## Troubleshooting
 
@@ -203,7 +217,7 @@ If you were previously using the SQLite version, you can migrate your data:
 If the Electron app shows a white screen after building:
 1. Check that `dist/assets/` folder exists with JS/CSS files
 2. Open DevTools (View → Toggle Developer Tools) to see console errors
-3. Ensure `.env` file is present with correct Supabase credentials
+3. Ensure `.env` file is present with correct Firebase credentials
 
 ### Build Errors
 If you encounter build errors:

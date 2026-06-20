@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { FormButton } from '@/components/FormButton';
 import { useStocks } from '@/hooks/stocks/useStocks';
 
-export function UpdatePriceForm({ stockId, currentPrice }: { stockId: number, currentPrice: string }) {
+export function UpdatePriceForm({ symbol, currentPrice }: { symbol: string, currentPrice: string }) {
   const { updatePrice } = useStocks();
   const [price, setPrice] = useState(currentPrice);
   const [submitting, setSubmitting] = useState(false);
@@ -13,7 +13,7 @@ export function UpdatePriceForm({ stockId, currentPrice }: { stockId: number, cu
     setSubmitting(true);
 
     const result = await updatePrice({
-      stockId,
+      symbol,
       currentPrice: parseFloat(price),
     });
 

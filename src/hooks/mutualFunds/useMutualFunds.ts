@@ -67,7 +67,7 @@ export function useMutualFunds() {
   );
 
   const updateMarketValue = useCallback(
-    async (data: { fundId: number; currentValue: number }) => {
+    async (data: { symbol: string; currentValue: number }) => {
       const result = await mutualFundsService.updateMarketValue(data);
       if (result.success) {
         await fetchFunds();
@@ -79,7 +79,7 @@ export function useMutualFunds() {
   );
 
   const addPurchase = useCallback(
-    async (data: { fundId: number; amount: number; purchaseDate: Date; notes?: string }) => {
+    async (data: { symbol: string; amount: number; purchaseDate: Date; notes?: string }) => {
       const result = await mutualFundsService.addPurchase(data);
       if (result.success) {
         await fetchPurchases();
@@ -91,7 +91,7 @@ export function useMutualFunds() {
   );
 
   const addWithdrawal = useCallback(
-    async (data: { fundId: number; amount: number; withdrawalDate: Date; notes?: string }) => {
+    async (data: { symbol: string; amount: number; withdrawalDate: Date; notes?: string }) => {
       const result = await mutualFundsService.addWithdrawal(data);
       if (result.success) {
         await fetchWithdrawals();
