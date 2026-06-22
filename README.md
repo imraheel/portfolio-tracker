@@ -1,6 +1,6 @@
-# Personal Stock Investment Tracker (PSIT)
+# Portfolio Tracker
 
-PSIT is a simple, cloud-based, personal-use investment tracking system for managing **Stocks (PSX)**, **Mutual Funds**, and **Cryptocurrency** investments in **Pakistani Rupees (PKR)**. It prioritizes simplicity, accuracy, and full manual control over real-time market integration.
+Portfolio Tracker is a simple, cloud-based, personal-use investment tracking system for managing **Stocks (PSX)**, **Mutual Funds**, and **Cryptocurrency** investments in **Pakistani Rupees (PKR)**. It prioritizes simplicity, accuracy, and full manual control over real-time market integration.
 
 ## Key Features
 
@@ -42,7 +42,7 @@ PSIT is a simple, cloud-based, personal-use investment tracking system for manag
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
-   cd personal-stock-investment-tracker
+   cd portfolio-tracker
    ```
 
 2. **Install dependencies:**
@@ -108,7 +108,7 @@ pnpm electron:build
 ```
 
 The built application will be available in the `dist-electron/` directory:
-- **macOS:** `dist-electron/mac/Personal Stock Tracker.app` and `.dmg` installer
+- **macOS:** `dist-electron/mac/Portfolio Tracker.app` and `.dmg` installer
 - **Windows:** `dist-electron/win-unpacked/` and `.exe` installer
 
 ### Environment Variables in Production

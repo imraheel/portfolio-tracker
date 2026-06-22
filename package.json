@@ -1,6 +1,6 @@
 {
-  "name": "personal-stock-investment-tracker",
-  "version": "1.0.3",
+  "name": "portfolio-tracker",
+  "version": "1.0.4",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.raheel.psit",
-    "productName": "Personal Stock Tracker",
+    "productName": "Portfolio Tracker",
     "directories": {
       "output": "dist-electron"
     },

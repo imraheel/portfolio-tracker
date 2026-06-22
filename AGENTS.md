@@ -1,4 +1,4 @@
-# AGENTS.md - Coding Guidelines for Personal Stock Investment Tracker
+# AGENTS.md - Coding Guidelines for Portfolio Tracker
 
 ## Build & Development Commands
 
