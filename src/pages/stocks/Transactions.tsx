@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { TrendingUp, DollarSign, ShoppingCart, ArrowDownCircle } from 'lucide-react';
+import { AlertCircle, TrendingUp, DollarSign, ShoppingCart, ArrowDownCircle } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -40,6 +40,16 @@ function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right'
   );
 }
 
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mb-4" />
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">Failed to load transactions</h3>
+      <p className="text-sm text-[var(--text-muted)]">{message}</p>
+    </div>
+  );
+}
+
 export default function Transactions() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,7 +59,7 @@ export default function Transactions() {
   const { stocks } = useStocks();
   const { balance } = useWallet();
   const { holdingsMap } = usePortfolio();
-  const { buyTransactions, sellTransactions, dividends, loading } = useTransactions();
+  const { buyTransactions, sellTransactions, dividends, loading, error } = useTransactions();
 
   const totalInvested = buyTransactions.reduce((sum, tx) => sum + tx.total_cost, 0);
   const totalSold = sellTransactions.reduce((sum, tx) => sum + tx.total_proceeds, 0);
@@ -57,6 +67,15 @@ export default function Transactions() {
   const netInvested = totalInvested - totalSold + totalDividends;
 
   const modalTitle = modalType === 'buy' ? 'Buy Stocks' : modalType === 'sell' ? 'Sell Stocks' : 'Record Dividend';
+
+  if (error) {
+    return (
+      <div className="space-y-5">
+        <SegmentedControl segments={subNav} value="/stocks/transactions" onChange={(v) => navigate(v)} />
+        <ErrorState message={typeof error === 'string' ? error : error.message} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

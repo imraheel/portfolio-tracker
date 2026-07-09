@@ -1,4 +1,5 @@
-import { TrendingUp, DollarSign, PieChart, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, DollarSign, PieChart, Wallet, ArrowUpRight, ArrowDownRight, AlertCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
@@ -10,8 +11,8 @@ import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
 import { useCrypto } from '@/hooks/crypto/useCrypto';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
 import { getInvestmentHistory } from '@/services/investmentHistory';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Transaction } from '@/components/dashboard/RecentActivity';
-import { useState, useEffect, useCallback } from 'react';
 
 function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', {
@@ -38,6 +39,16 @@ function LoadingSkeleton() {
         <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)] shadow-soft animate-pulse" />
         <div className="h-72 bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-subtle)] shadow-soft animate-pulse" />
       </div>
+    </div>
+  );
+}
+
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mb-4" />
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">Failed to load dashboard</h3>
+      <p className="text-sm text-[var(--text-muted)]">{message}</p>
     </div>
   );
 }
@@ -90,47 +101,50 @@ function useRecentActivityTransactions(
   return transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-function useInvestmentHistory(refreshTrigger?: number) {
-  const [history, setHistory] = useState<{
-    date: string;
-    stocksInvestment: number;
-    mutualFundsInvestment: number;
-    cryptoInvestment: number;
-  }[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchHistory = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await getInvestmentHistory(365);
-      setHistory(data);
-    } catch (error) {
-      console.error('Failed to fetch investment history:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory, refreshTrigger]);
-
-  return { history, loading, refresh: fetchHistory };
-}
-
 function calculateGainLossPercentage(invested: number, current: number): number {
   if (invested === 0) return 0;
   return ((current - invested) / invested) * 100;
 }
 
 export default function Dashboard() {
-  const { metrics: stockMetrics, loading: stockLoading } = usePortfolio();
-  const { balance, loading: walletLoading } = useWallet();
-  const { metrics: fundMetrics, loading: fundsLoading } = useMutualFunds();
-  const { metrics: cryptoMetrics, loading: cryptoLoading } = useCrypto();
-  const { buyTransactions, sellTransactions, dividends, loading: transactionsLoading } = useTransactions();
+  const { metrics: stockMetrics, loading: stockLoading, error: stockError } = usePortfolio();
+  const { balance, loading: walletLoading, error: walletError } = useWallet();
+  const { metrics: fundMetrics, loading: fundsLoading, error: fundsError } = useMutualFunds();
+  const { metrics: cryptoMetrics, loading: cryptoLoading, error: cryptoError } = useCrypto();
+  const { buyTransactions, sellTransactions, dividends, loading: transactionsLoading, error: transactionsError } = useTransactions();
 
-  const loading = stockLoading || walletLoading || fundsLoading || cryptoLoading || transactionsLoading;
+  const { data: investmentHistory, isLoading: historyLoading } = useQuery({
+    queryKey: queryKeys.investmentHistory(365),
+    queryFn: () => getInvestmentHistory(365),
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const loading = stockLoading || walletLoading || fundsLoading || cryptoLoading || transactionsLoading || historyLoading;
+  const error = stockError ?? walletError ?? fundsError ?? cryptoError ?? transactionsError;
+
+  if (error) {
+    return (
+      <div>
+        <PageHeader
+          title="Dashboard"
+          description="Performance overview of your investments"
+        />
+        <ErrorState message={typeof error === 'string' ? error : error.message} />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div>
+        <PageHeader
+          title="Dashboard"
+          description="Performance overview of your investments"
+        />
+        <LoadingSkeleton />
+      </div>
+    );
+  }
 
   const stocksValue = stockMetrics.reduce((sum, m) => sum + m.currentValue, 0);
   const stocksInvested = stockMetrics.reduce((sum, m) => sum + m.investedAmount, 0);
@@ -151,22 +165,6 @@ export default function Dashboard() {
     sellTransactions,
     dividends
   );
-
-  const { history: investmentHistory, loading: historyLoading } = useInvestmentHistory(balance);
-
-  const chartLoading = loading || historyLoading;
-
-  if (chartLoading) {
-    return (
-      <div>
-        <PageHeader
-          title="Dashboard"
-          description="Performance overview of your investments"
-        />
-        <LoadingSkeleton />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -208,7 +206,7 @@ export default function Dashboard() {
       </StatsGrid>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <NetInvestmentChart data={investmentHistory} loading={historyLoading} />
+        <NetInvestmentChart data={investmentHistory ?? []} loading={historyLoading} />
         <AssetAllocationChart
           stocks={stocksValue}
           mutualFunds={fundsValue}

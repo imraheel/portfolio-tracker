@@ -1,129 +1,84 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as cryptoService from '@/services/crypto/crypto';
-import type {
-  Cryptocurrency,
-  CryptoPurchase,
-  CryptoWithdrawal,
-  CryptoMetrics,
-} from '@/services/crypto/crypto';
+import { queryKeys } from '@/lib/queryKeys';
 
 export function useCrypto() {
-  const [cryptocurrencies, setCryptocurrencies] = useState<Cryptocurrency[]>([]);
-  const [purchases, setPurchases] = useState<CryptoPurchase[]>([]);
-  const [withdrawals, setWithdrawals] = useState<CryptoWithdrawal[]>([]);
-  const [metrics, setMetrics] = useState<CryptoMetrics[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchCryptocurrencies = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await cryptoService.getCryptocurrencies();
-      setCryptocurrencies(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch cryptocurrencies');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const cryptocurrenciesQuery = useQuery({
+    queryKey: queryKeys.crypto.list(),
+    queryFn: cryptoService.getCryptocurrencies,
+    staleTime: 10 * 60 * 1000,
+  });
 
-  const fetchPurchases = useCallback(async () => {
-    try {
-      const data = await cryptoService.getPurchases();
-      setPurchases(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch purchases');
-    }
-  }, []);
+  const purchasesQuery = useQuery({
+    queryKey: queryKeys.crypto.purchases(),
+    queryFn: cryptoService.getPurchases,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchWithdrawals = useCallback(async () => {
-    try {
-      const data = await cryptoService.getWithdrawals();
-      setWithdrawals(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch withdrawals');
-    }
-  }, []);
+  const withdrawalsQuery = useQuery({
+    queryKey: queryKeys.crypto.withdrawals(),
+    queryFn: cryptoService.getWithdrawals,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchMetrics = useCallback(async () => {
-    try {
-      const data = await cryptoService.getAllCryptoMetrics();
-      setMetrics(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch metrics');
-    }
-  }, []);
+  const metricsQuery = useQuery({
+    queryKey: queryKeys.crypto.metrics(),
+    queryFn: cryptoService.getAllCryptoMetrics,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  const addCryptocurrency = useCallback(
-    async (data: { symbol: string; name: string }) => {
-      const result = await cryptoService.addCryptocurrency(data);
+  const addCryptocurrencyMutation = useMutation({
+    mutationFn: cryptoService.addCryptocurrency,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchCryptocurrencies();
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.list() });
       }
-      return result;
     },
-    [fetchCryptocurrencies]
-  );
+  });
 
-  const updateTotalValue = useCallback(
-    async (data: { symbol: string; totalValue: number }) => {
-      const result = await cryptoService.updateTotalValue(data);
+  const updateTotalValueMutation = useMutation({
+    mutationFn: cryptoService.updateTotalValue,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchCryptocurrencies();
-        await fetchMetrics();
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.list() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.metrics() });
       }
-      return result;
     },
-    [fetchCryptocurrencies, fetchMetrics]
-  );
+  });
 
-  const addPurchase = useCallback(
-    async (data: { symbol: string; amountPkr: number; purchaseDate: Date; notes?: string }) => {
-      const result = await cryptoService.addPurchase(data);
+  const addPurchaseMutation = useMutation({
+    mutationFn: cryptoService.addPurchase,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchPurchases();
-        await fetchMetrics();
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.purchases() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.metrics() });
       }
-      return result;
     },
-    [fetchPurchases, fetchMetrics]
-  );
+  });
 
-  const addWithdrawal = useCallback(
-    async (data: { symbol: string; amountPkr: number; withdrawalDate: Date; notes?: string }) => {
-      const result = await cryptoService.addWithdrawal(data);
+  const addWithdrawalMutation = useMutation({
+    mutationFn: cryptoService.addWithdrawal,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchWithdrawals();
-        await fetchMetrics();
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.withdrawals() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.metrics() });
       }
-      return result;
     },
-    [fetchWithdrawals, fetchMetrics]
-  );
-
-  const refresh = useCallback(async () => {
-    await fetchCryptocurrencies();
-    await fetchPurchases();
-    await fetchWithdrawals();
-    await fetchMetrics();
-  }, [fetchCryptocurrencies, fetchPurchases, fetchWithdrawals, fetchMetrics]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  });
 
   return {
-    cryptocurrencies,
-    purchases,
-    withdrawals,
-    metrics,
-    loading,
-    error,
-    refresh,
-    addCryptocurrency,
-    updateTotalValue,
-    addPurchase,
-    addWithdrawal,
+    cryptocurrencies: cryptocurrenciesQuery.data ?? [],
+    purchases: purchasesQuery.data ?? [],
+    withdrawals: withdrawalsQuery.data ?? [],
+    metrics: metricsQuery.data ?? [],
+    loading: cryptocurrenciesQuery.isLoading || purchasesQuery.isLoading || withdrawalsQuery.isLoading || metricsQuery.isLoading,
+    error: cryptocurrenciesQuery.error ?? purchasesQuery.error ?? withdrawalsQuery.error ?? metricsQuery.error,
+    refresh: () => queryClient.invalidateQueries({ queryKey: queryKeys.crypto.all }),
+    addCryptocurrency: addCryptocurrencyMutation.mutateAsync,
+    updateTotalValue: updateTotalValueMutation.mutateAsync,
+    addPurchase: addPurchaseMutation.mutateAsync,
+    addWithdrawal: addWithdrawalMutation.mutateAsync,
   };
 }

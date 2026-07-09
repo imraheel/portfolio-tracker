@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, DollarSign, Landmark } from 'lucide-react';
+import { AlertCircle, TrendingUp, DollarSign, Landmark } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -19,15 +19,34 @@ function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mb-4" />
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">Failed to load mutual funds</h3>
+      <p className="text-sm text-[var(--text-muted)]">{message}</p>
+    </div>
+  );
+}
+
 export default function MutualFundsList() {
   const navigate = useNavigate();
-  const { funds, metrics, loading } = useMutualFunds();
+  const { funds, metrics, loading, error } = useMutualFunds();
   const [showModal, setShowModal] = useState(false);
 
   const totalValue = metrics.reduce((sum: number, m: FundMetrics) => sum + m.currentMarketValue, 0);
   const totalInvested = metrics.reduce((sum: number, m: FundMetrics) => sum + m.netInvestment, 0);
   const totalGainLoss = totalValue - totalInvested;
   const totalFunds = funds.length;
+
+  if (error) {
+    return (
+      <div className="space-y-5">
+        <SegmentedControl segments={subNav} value="/mutual-funds" onChange={(v) => navigate(v)} />
+        <ErrorState message={typeof error === 'string' ? error : error.message} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

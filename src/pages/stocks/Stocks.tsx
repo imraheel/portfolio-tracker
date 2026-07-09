@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
 import { useStocks } from '@/hooks/stocks/useStocks';
 import { StockForm } from '@/components/stocks/StockForm';
 import { UpdatePriceForm } from '@/components/stocks/UpdatePriceForm';
@@ -20,14 +21,33 @@ function formatPkr(amount: number): string {
   return `Rs. ${amount.toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mb-4" />
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">Failed to load stocks</h3>
+      <p className="text-sm text-[var(--text-muted)]">{message}</p>
+    </div>
+  );
+}
+
 export default function Stocks() {
   const navigate = useNavigate();
-  const { stocks, priceMap, loading } = useStocks();
+  const { stocks, priceMap, loading, error } = useStocks();
   const [showModal, setShowModal] = useState(false);
 
   const totalStocks = stocks.length;
   const totalValue = stocks.reduce((sum, s) => sum + (priceMap.get(s.symbol) || 0), 0);
   const avgPrice = totalStocks > 0 ? totalValue / totalStocks : 0;
+
+  if (error) {
+    return (
+      <div className="space-y-5">
+        <SegmentedControl segments={subNav} value="/stocks" onChange={(v) => navigate(v)} />
+        <ErrorState message={typeof error === 'string' ? error : error.message} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

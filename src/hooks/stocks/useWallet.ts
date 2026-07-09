@@ -1,107 +1,88 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as walletService from '@/services/stocks/wallet';
-import type { Deposit, Withdrawal } from '@/services/stocks/wallet';
+import { queryKeys } from '@/lib/queryKeys';
 
 export function useWallet() {
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-  const [balance, setBalance] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchDeposits = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await walletService.getDeposits();
-      setDeposits(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch deposits');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const depositsQuery = useQuery({
+    queryKey: queryKeys.wallet.deposits(),
+    queryFn: walletService.getDeposits,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchWithdrawals = useCallback(async () => {
-    try {
-      const data = await walletService.getWithdrawals();
-      setWithdrawals(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch withdrawals');
-    }
-  }, []);
+  const withdrawalsQuery = useQuery({
+    queryKey: queryKeys.wallet.withdrawals(),
+    queryFn: walletService.getWithdrawals,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchBalance = useCallback(async () => {
-    try {
-      const bal = await walletService.getWalletBalance();
-      setBalance(bal);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch balance');
-    }
-  }, []);
+  const balanceQuery = useQuery({
+    queryKey: queryKeys.wallet.balance(),
+    queryFn: walletService.getWalletBalance,
+    staleTime: 30 * 1000,
+  });
 
-  const addDeposit = useCallback(async (data: { amount: number; depositDate: Date; note?: string }) => {
-    const result = await walletService.addDeposit(data);
-    if (result.success) {
-      await fetchDeposits();
-      await fetchBalance();
-    }
-    return result;
-  }, [fetchDeposits, fetchBalance]);
+  const addDepositMutation = useMutation({
+    mutationFn: walletService.addDeposit,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.deposits() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance() });
+      }
+    },
+  });
 
-  const deleteDeposit = useCallback(async (id: string) => {
-    const result = await walletService.deleteDeposit(id);
-    if (result.success) {
-      await fetchDeposits();
-      await fetchBalance();
-    }
-    return result;
-  }, [fetchDeposits, fetchBalance]);
+  const deleteDepositMutation = useMutation({
+    mutationFn: walletService.deleteDeposit,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.deposits() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance() });
+      }
+    },
+  });
 
-  const addWithdrawal = useCallback(async (data: { amount: number; withdrawalDate: Date; note?: string }) => {
-    const result = await walletService.addWithdrawal(data);
-    if (result.success) {
-      await fetchWithdrawals();
-      await fetchBalance();
-    }
-    return result;
-  }, [fetchWithdrawals, fetchBalance]);
+  const addWithdrawalMutation = useMutation({
+    mutationFn: walletService.addWithdrawal,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.withdrawals() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance() });
+      }
+    },
+  });
 
-  const deleteWithdrawal = useCallback(async (id: string) => {
-    const result = await walletService.deleteWithdrawal(id);
-    if (result.success) {
-      await fetchWithdrawals();
-      await fetchBalance();
-    }
-    return result;
-  }, [fetchWithdrawals, fetchBalance]);
+  const deleteWithdrawalMutation = useMutation({
+    mutationFn: walletService.deleteWithdrawal,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.withdrawals() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance() });
+      }
+    },
+  });
 
-  useEffect(() => {
-    fetchDeposits();
-    fetchWithdrawals();
-    fetchBalance();
-  }, [fetchDeposits, fetchWithdrawals, fetchBalance]);
+  const deposits = depositsQuery.data ?? [];
+  const withdrawals = withdrawalsQuery.data ?? [];
 
-  const totalDeposited = deposits.reduce((sum, d) => sum + d.amount, 0);
-  const totalWithdrawn = withdrawals.reduce((sum, w) => sum + w.amount, 0);
+  const totalDeposited = useMemo(() => deposits.reduce((sum, d) => sum + d.amount, 0), [deposits]);
+  const totalWithdrawn = useMemo(() => withdrawals.reduce((sum, w) => sum + w.amount, 0), [withdrawals]);
 
   return {
     deposits,
     withdrawals,
-    balance,
+    balance: balanceQuery.data ?? 0,
     totalDeposited,
     totalWithdrawn,
     netDeposits: totalDeposited - totalWithdrawn,
-    loading,
-    error,
-    refresh: async () => {
-      await fetchDeposits();
-      await fetchWithdrawals();
-      await fetchBalance();
-    },
-    addDeposit,
-    deleteDeposit,
-    addWithdrawal,
-    deleteWithdrawal,
+    loading: depositsQuery.isLoading || withdrawalsQuery.isLoading || balanceQuery.isLoading,
+    error: depositsQuery.error ?? withdrawalsQuery.error ?? balanceQuery.error,
+    refresh: () => queryClient.invalidateQueries({ queryKey: queryKeys.wallet.all }),
+    addDeposit: addDepositMutation.mutateAsync,
+    deleteDeposit: deleteDepositMutation.mutateAsync,
+    addWithdrawal: addWithdrawalMutation.mutateAsync,
+    deleteWithdrawal: deleteWithdrawalMutation.mutateAsync,
   };
 }

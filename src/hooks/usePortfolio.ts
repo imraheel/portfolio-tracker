@@ -1,37 +1,28 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as portfolioService from '@/services/portfolio';
-import type { HoldingMetric } from '@/services/portfolio';
+import { queryKeys } from '@/lib/queryKeys';
 
 export function usePortfolio() {
-  const [metrics, setMetrics] = useState<HoldingMetric[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchMetrics = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await portfolioService.getPortfolioMetrics();
-      setMetrics(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch portfolio metrics');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const metricsQuery = useQuery({
+    queryKey: queryKeys.portfolio.metrics(),
+    queryFn: portfolioService.getPortfolioMetrics,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchMetrics();
-  }, [fetchMetrics]);
+  const metrics = metricsQuery.data ?? [];
 
-  const portfolioValue = metrics.reduce((sum, m) => sum + m.currentValue, 0);
-  const unrealizedPl = metrics.reduce((sum, m) => sum + m.unrealizedGainLoss, 0);
-  const realizedPl = metrics.reduce((sum, m) => sum + m.realizedGainLoss, 0);
-  const totalDividends = metrics.reduce((sum, m) => sum + m.totalDividends, 0);
-  const totalInvested = metrics.reduce((sum, m) => sum + m.investedAmount, 0);
+  const portfolioValue = useMemo(() => metrics.reduce((sum, m) => sum + m.currentValue, 0), [metrics]);
+  const unrealizedPl = useMemo(() => metrics.reduce((sum, m) => sum + m.unrealizedGainLoss, 0), [metrics]);
+  const realizedPl = useMemo(() => metrics.reduce((sum, m) => sum + m.realizedGainLoss, 0), [metrics]);
+  const totalDividends = useMemo(() => metrics.reduce((sum, m) => sum + m.totalDividends, 0), [metrics]);
+  const totalInvested = useMemo(() => metrics.reduce((sum, m) => sum + m.investedAmount, 0), [metrics]);
 
-  const holdingsMap = new Map<string, number>(
-    metrics.map(m => [m.symbol, m.remainingQty])
+  const holdingsMap = useMemo(
+    () => new Map<string, number>(metrics.map(m => [m.symbol, m.remainingQty])),
+    [metrics]
   );
 
   return {
@@ -42,8 +33,8 @@ export function usePortfolio() {
     totalDividends,
     totalInvested,
     holdingsMap,
-    loading,
-    error,
-    refresh: fetchMetrics,
+    loading: metricsQuery.isLoading,
+    error: metricsQuery.error,
+    refresh: () => queryClient.invalidateQueries({ queryKey: queryKeys.portfolio.metrics() }),
   };
 }

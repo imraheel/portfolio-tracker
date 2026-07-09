@@ -66,6 +66,7 @@
     ]
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "firebase": "^11.5.0",

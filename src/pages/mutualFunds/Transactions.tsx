@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { ShoppingCart, ArrowDownCircle, TrendingUp } from 'lucide-react';
+import { AlertCircle, ShoppingCart, ArrowDownCircle, TrendingUp } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
@@ -32,15 +32,34 @@ function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right'
   );
 }
 
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mb-4" />
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">Failed to load fund transactions</h3>
+      <p className="text-sm text-[var(--text-muted)]">{message}</p>
+    </div>
+  );
+}
+
 export default function MfTransactions() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentView = searchParams.get('view') === 'withdrawals' ? 'withdrawals' : 'invest';
   const [modalType, setModalType] = useState<'invest' | 'withdrawal' | null>(null);
 
-  const { purchases, withdrawals, funds } = useMutualFunds();
+  const { purchases, withdrawals, funds, loading, error } = useMutualFunds();
   const totalInvested = purchases.reduce((sum, p) => sum + p.amount, 0);
   const totalWithdrawn = withdrawals.reduce((sum, w) => sum + w.amount, 0);
+
+  if (error) {
+    return (
+      <div className="space-y-5">
+        <SegmentedControl segments={subNav} value="/mutual-funds/transactions" onChange={(v) => navigate(v)} />
+        <ErrorState message={typeof error === 'string' ? error : error.message} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -77,8 +96,8 @@ export default function MfTransactions() {
         </div>
       </div>
 
-      {currentView === 'invest' && <PurchasesTable purchases={purchases} loading={purchases.length === 0} />}
-      {currentView === 'withdrawals' && <WithdrawalsTable withdrawals={withdrawals} loading={withdrawals.length === 0} />}
+      {currentView === 'invest' && <PurchasesTable purchases={purchases} loading={loading} />}
+      {currentView === 'withdrawals' && <WithdrawalsTable withdrawals={withdrawals} loading={loading} />}
 
       <Modal open={modalType === 'invest'} onClose={() => setModalType(null)} title="Invest in Fund" width="sm">
         <PurchaseForm funds={funds} onSuccess={() => setModalType(null)} />

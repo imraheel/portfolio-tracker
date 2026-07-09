@@ -1,69 +1,54 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as stocksService from '@/services/stocks/stocks';
-import type { Stock, StockPrice } from '@/services/stocks/stocks';
+import { queryKeys } from '@/lib/queryKeys';
 
 export function useStocks() {
-  const [stocks, setStocks] = useState<Stock[]>([]);
-  const [prices, setPrices] = useState<StockPrice[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchStocks = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await stocksService.getStocks();
-      setStocks(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch stocks');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const stocksQuery = useQuery({
+    queryKey: queryKeys.stocks.list(),
+    queryFn: stocksService.getStocks,
+    staleTime: 10 * 60 * 1000,
+  });
 
-  const fetchPrices = useCallback(async () => {
-    try {
-      const data = await stocksService.getStockPrices();
-      setPrices(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch prices');
-    }
-  }, []);
+  const pricesQuery = useQuery({
+    queryKey: queryKeys.stocks.prices(),
+    queryFn: stocksService.getStockPrices,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  const addStock = useCallback(async (data: { symbol: string; companyName?: string; sector?: string }) => {
-    const result = await stocksService.addStock(data);
-    if (result.success) {
-      await fetchStocks();
-    }
-    return result;
-  }, [fetchStocks]);
+  const addStockMutation = useMutation({
+    mutationFn: stocksService.addStock,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.stocks.list() });
+      }
+    },
+  });
 
-  const updatePrice = useCallback(async (data: { symbol: string; currentPrice: number }) => {
-    const result = await stocksService.updateStockPrice(data);
-    if (result.success) {
-      await fetchPrices();
-    }
-    return result;
-  }, [fetchPrices]);
+  const updatePriceMutation = useMutation({
+    mutationFn: stocksService.updateStockPrice,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.stocks.prices() });
+      }
+    },
+  });
 
-  useEffect(() => {
-    fetchStocks();
-    fetchPrices();
-  }, [fetchStocks, fetchPrices]);
-
-  const priceMap = new Map(prices.map(p => [p.symbol, p.current_price]));
+  const priceMap = useMemo(
+    () => new Map((pricesQuery.data ?? []).map(p => [p.symbol, p.current_price])),
+    [pricesQuery.data]
+  );
 
   return {
-    stocks,
-    prices,
+    stocks: stocksQuery.data ?? [],
+    prices: pricesQuery.data ?? [],
     priceMap,
-    loading,
-    error,
-    refresh: async () => {
-      await fetchStocks();
-      await fetchPrices();
-    },
-    addStock,
-    updatePrice,
+    loading: stocksQuery.isLoading || pricesQuery.isLoading,
+    error: stocksQuery.error ?? pricesQuery.error,
+    refresh: () => queryClient.invalidateQueries({ queryKey: queryKeys.stocks.all }),
+    addStock: addStockMutation.mutateAsync,
+    updatePrice: updatePriceMutation.mutateAsync,
   };
 }

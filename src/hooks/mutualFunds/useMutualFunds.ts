@@ -1,129 +1,84 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as mutualFundsService from '@/services/mutualFunds/mutualFunds';
-import type {
-  MutualFund,
-  MutualFundPurchase,
-  MutualFundWithdrawal,
-  FundMetrics,
-} from '@/services/mutualFunds/mutualFunds';
+import { queryKeys } from '@/lib/queryKeys';
 
 export function useMutualFunds() {
-  const [funds, setFunds] = useState<MutualFund[]>([]);
-  const [purchases, setPurchases] = useState<MutualFundPurchase[]>([]);
-  const [withdrawals, setWithdrawals] = useState<MutualFundWithdrawal[]>([]);
-  const [metrics, setMetrics] = useState<FundMetrics[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchFunds = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await mutualFundsService.getMutualFunds();
-      setFunds(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch mutual funds');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fundsQuery = useQuery({
+    queryKey: queryKeys.mutualFunds.list(),
+    queryFn: mutualFundsService.getMutualFunds,
+    staleTime: 10 * 60 * 1000,
+  });
 
-  const fetchPurchases = useCallback(async () => {
-    try {
-      const data = await mutualFundsService.getPurchases();
-      setPurchases(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch purchases');
-    }
-  }, []);
+  const purchasesQuery = useQuery({
+    queryKey: queryKeys.mutualFunds.purchases(),
+    queryFn: mutualFundsService.getPurchases,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchWithdrawals = useCallback(async () => {
-    try {
-      const data = await mutualFundsService.getWithdrawals();
-      setWithdrawals(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch withdrawals');
-    }
-  }, []);
+  const withdrawalsQuery = useQuery({
+    queryKey: queryKeys.mutualFunds.withdrawals(),
+    queryFn: mutualFundsService.getWithdrawals,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchMetrics = useCallback(async () => {
-    try {
-      const data = await mutualFundsService.getAllFundMetrics();
-      setMetrics(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch metrics');
-    }
-  }, []);
+  const metricsQuery = useQuery({
+    queryKey: queryKeys.mutualFunds.metrics(),
+    queryFn: mutualFundsService.getAllFundMetrics,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  const addFund = useCallback(
-    async (data: { symbol: string; name: string; description?: string }) => {
-      const result = await mutualFundsService.addMutualFund(data);
+  const addFundMutation = useMutation({
+    mutationFn: mutualFundsService.addMutualFund,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchFunds();
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.list() });
       }
-      return result;
     },
-    [fetchFunds]
-  );
+  });
 
-  const updateMarketValue = useCallback(
-    async (data: { symbol: string; currentValue: number }) => {
-      const result = await mutualFundsService.updateMarketValue(data);
+  const updateMarketValueMutation = useMutation({
+    mutationFn: mutualFundsService.updateMarketValue,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchFunds();
-        await fetchMetrics();
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.list() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.metrics() });
       }
-      return result;
     },
-    [fetchFunds, fetchMetrics]
-  );
+  });
 
-  const addPurchase = useCallback(
-    async (data: { symbol: string; amount: number; purchaseDate: Date; notes?: string }) => {
-      const result = await mutualFundsService.addPurchase(data);
+  const addPurchaseMutation = useMutation({
+    mutationFn: mutualFundsService.addPurchase,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchPurchases();
-        await fetchMetrics();
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.purchases() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.metrics() });
       }
-      return result;
     },
-    [fetchPurchases, fetchMetrics]
-  );
+  });
 
-  const addWithdrawal = useCallback(
-    async (data: { symbol: string; amount: number; withdrawalDate: Date; notes?: string }) => {
-      const result = await mutualFundsService.addWithdrawal(data);
+  const addWithdrawalMutation = useMutation({
+    mutationFn: mutualFundsService.addWithdrawal,
+    onSuccess: (result) => {
       if (result.success) {
-        await fetchWithdrawals();
-        await fetchMetrics();
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.withdrawals() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.metrics() });
       }
-      return result;
     },
-    [fetchWithdrawals, fetchMetrics]
-  );
-
-  const refresh = useCallback(async () => {
-    await fetchFunds();
-    await fetchPurchases();
-    await fetchWithdrawals();
-    await fetchMetrics();
-  }, [fetchFunds, fetchPurchases, fetchWithdrawals, fetchMetrics]);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  });
 
   return {
-    funds,
-    purchases,
-    withdrawals,
-    metrics,
-    loading,
-    error,
-    refresh,
-    addFund,
-    updateMarketValue,
-    addPurchase,
-    addWithdrawal,
+    funds: fundsQuery.data ?? [],
+    purchases: purchasesQuery.data ?? [],
+    withdrawals: withdrawalsQuery.data ?? [],
+    metrics: metricsQuery.data ?? [],
+    loading: fundsQuery.isLoading || purchasesQuery.isLoading || withdrawalsQuery.isLoading || metricsQuery.isLoading,
+    error: fundsQuery.error ?? purchasesQuery.error ?? withdrawalsQuery.error ?? metricsQuery.error,
+    refresh: () => queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.all }),
+    addFund: addFundMutation.mutateAsync,
+    updateMarketValue: updateMarketValueMutation.mutateAsync,
+    addPurchase: addPurchaseMutation.mutateAsync,
+    addWithdrawal: addWithdrawalMutation.mutateAsync,
   };
 }

@@ -1,105 +1,64 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as transactionsService from '@/services/stocks/transactions';
-import type { BuyTransaction, SellTransaction, Dividend } from '@/services/stocks/transactions';
+import { queryKeys } from '@/lib/queryKeys';
 
 export function useTransactions() {
-  const [buyTransactions, setBuyTransactions] = useState<BuyTransaction[]>([]);
-  const [sellTransactions, setSellTransactions] = useState<SellTransaction[]>([]);
-  const [dividends, setDividends] = useState<Dividend[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchBuyTransactions = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await transactionsService.getBuyTransactions();
-      setBuyTransactions(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch buy transactions');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const buyTransactionsQuery = useQuery({
+    queryKey: queryKeys.transactions.buys(),
+    queryFn: transactionsService.getBuyTransactions,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchSellTransactions = useCallback(async () => {
-    try {
-      const data = await transactionsService.getSellTransactions();
-      setSellTransactions(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch sell transactions');
-    }
-  }, []);
+  const sellTransactionsQuery = useQuery({
+    queryKey: queryKeys.transactions.sells(),
+    queryFn: transactionsService.getSellTransactions,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const fetchDividends = useCallback(async () => {
-    try {
-      const data = await transactionsService.getDividends();
-      setDividends(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch dividends');
-    }
-  }, []);
+  const dividendsQuery = useQuery({
+    queryKey: queryKeys.transactions.dividends(),
+    queryFn: transactionsService.getDividends,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const addBuyTransaction = useCallback(async (data: {
-    symbol: string;
-    quantity: number;
-    buyRate: number;
-    buyDate: Date;
-    notes?: string;
-  }) => {
-    const result = await transactionsService.addBuyTransaction(data);
-    if (result.success) {
-      await fetchBuyTransactions();
-    }
-    return result;
-  }, [fetchBuyTransactions]);
+  const addBuyTransactionMutation = useMutation({
+    mutationFn: transactionsService.addBuyTransaction,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.buys() });
+      }
+    },
+  });
 
-  const addSellTransaction = useCallback(async (data: {
-    symbol: string;
-    quantity: number;
-    sellRate: number;
-    sellDate: Date;
-    notes?: string;
-  }) => {
-    const result = await transactionsService.addSellTransaction(data);
-    if (result.success) {
-      await fetchSellTransactions();
-    }
-    return result;
-  }, [fetchSellTransactions]);
+  const addSellTransactionMutation = useMutation({
+    mutationFn: transactionsService.addSellTransaction,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.sells() });
+      }
+    },
+  });
 
-  const addDividend = useCallback(async (data: {
-    symbol: string;
-    dividendAmount: number;
-    dividendDate: Date;
-    notes?: string;
-  }) => {
-    const result = await transactionsService.addDividend(data);
-    if (result.success) {
-      await fetchDividends();
-    }
-    return result;
-  }, [fetchDividends]);
-
-  useEffect(() => {
-    fetchBuyTransactions();
-    fetchSellTransactions();
-    fetchDividends();
-  }, [fetchBuyTransactions, fetchSellTransactions, fetchDividends]);
+  const addDividendMutation = useMutation({
+    mutationFn: transactionsService.addDividend,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.dividends() });
+      }
+    },
+  });
 
   return {
-    buyTransactions,
-    sellTransactions,
-    dividends,
-    loading,
-    error,
-    refresh: async () => {
-      await fetchBuyTransactions();
-      await fetchSellTransactions();
-      await fetchDividends();
-    },
-    addBuyTransaction,
-    addSellTransaction,
-    addDividend,
+    buyTransactions: buyTransactionsQuery.data ?? [],
+    sellTransactions: sellTransactionsQuery.data ?? [],
+    dividends: dividendsQuery.data ?? [],
+    loading: buyTransactionsQuery.isLoading || sellTransactionsQuery.isLoading || dividendsQuery.isLoading,
+    error: buyTransactionsQuery.error ?? sellTransactionsQuery.error ?? dividendsQuery.error,
+    refresh: () => queryClient.invalidateQueries({ queryKey: queryKeys.transactions.all }),
+    addBuyTransaction: addBuyTransactionMutation.mutateAsync,
+    addSellTransaction: addSellTransactionMutation.mutateAsync,
+    addDividend: addDividendMutation.mutateAsync,
   };
 }

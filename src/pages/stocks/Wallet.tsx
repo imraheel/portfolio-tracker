@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertCircle } from 'lucide-react';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { DepositForm } from '@/components/stocks/DepositForm';
 import { WithdrawalForm } from '@/components/stocks/WithdrawalForm';
@@ -23,10 +24,29 @@ function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
 }
 
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mb-4" />
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">Failed to load wallet</h3>
+      <p className="text-sm text-[var(--text-muted)]">{message}</p>
+    </div>
+  );
+}
+
 export default function Wallet() {
   const navigate = useNavigate();
-  const { balance, totalDeposited, totalWithdrawn, deposits, withdrawals, loading } = useWallet();
+  const { balance, totalDeposited, totalWithdrawn, deposits, withdrawals, loading, error } = useWallet();
   const [modalType, setModalType] = useState<'deposit' | 'withdrawal' | null>(null);
+
+  if (error) {
+    return (
+      <div className="space-y-5">
+        <SegmentedControl segments={subNav} value="/stocks/wallet" onChange={(v) => navigate(v)} />
+        <ErrorState message={typeof error === 'string' ? error : error.message} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">

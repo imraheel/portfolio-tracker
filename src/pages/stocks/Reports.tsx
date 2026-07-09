@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { clsx } from 'clsx';
+import { AlertCircle } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { useWallet } from '@/hooks/stocks/useWallet';
 import { useTransactions } from '@/hooks/stocks/useTransactions';
@@ -15,6 +16,28 @@ const subNav = [
 
 function formatPkr(amount: number) {
   return amount.toLocaleString('en-PK', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+}
+
+function ErrorState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <AlertCircle className="w-12 h-12 text-[var(--accent-red)] mb-4" />
+      <h3 className="text-base font-semibold text-[var(--text-primary)] mb-1">Failed to load reports</h3>
+      <p className="text-sm text-[var(--text-muted)]">{message}</p>
+    </div>
+  );
+}
+
+function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right' }[] }) {
+  return (
+    <thead>
+      <tr className="border-b border-[var(--border-subtle)]">
+        {cols.map((col, i) => (
+          <th key={i} className={clsx("px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)]", col.align === 'right' ? "text-right" : "text-left")}>{col.label}</th>
+        ))}
+      </tr>
+    </thead>
+  );
 }
 
 export default function Reports() {
@@ -68,20 +91,9 @@ export default function Reports() {
   );
 }
 
-function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right' }[] }) {
-  return (
-    <thead>
-      <tr className="border-b border-[var(--border-subtle)]">
-        {cols.map((col, i) => (
-          <th key={i} className={clsx("px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)]", col.align === 'right' ? "text-right" : "text-left")}>{col.label}</th>
-        ))}
-      </tr>
-    </thead>
-  );
-}
-
 function DepositsHistory() {
-  const { deposits, loading } = useWallet();
+  const { deposits, loading, error } = useWallet();
+  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
   if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
@@ -100,7 +112,8 @@ function DepositsHistory() {
 }
 
 function BuyHistory() {
-  const { buyTransactions, loading } = useTransactions();
+  const { buyTransactions, loading, error } = useTransactions();
+  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
   if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
@@ -121,7 +134,8 @@ function BuyHistory() {
 }
 
 function SellHistory() {
-  const { sellTransactions, loading } = useTransactions();
+  const { sellTransactions, loading, error } = useTransactions();
+  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
   if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
@@ -145,7 +159,8 @@ function SellHistory() {
 }
 
 function DividendHistory() {
-  const { dividends, loading } = useTransactions();
+  const { dividends, loading, error } = useTransactions();
+  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
   if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
