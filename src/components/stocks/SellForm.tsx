@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useTransactions } from '@/hooks/stocks/useTransactions';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as transactionsService from '@/services/stocks/transactions';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Stock } from '@/services/stocks/stocks';
 
 interface SellFormProps {
@@ -10,7 +12,7 @@ interface SellFormProps {
 }
 
 export function SellForm({ stocks, holdings, onSuccess }: SellFormProps) {
-  const { addSellTransaction } = useTransactions();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [qty, setQty] = useState<number>(0);
   const [rate, setRate] = useState<number>(0);
@@ -22,12 +24,21 @@ export function SellForm({ stocks, holdings, onSuccess }: SellFormProps) {
   const availableQty = symbol ? (holdings.get(symbol) || 0) : 0;
   const isExceeded = qty > availableQty;
 
+  const addSellTransactionMutation = useMutation({
+    mutationFn: transactionsService.addSellTransaction,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.sells() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isExceeded) { toast.error('Sell quantity exceeds available shares'); return; }
     setSubmitting(true);
     setErrors({});
-    const result = await addSellTransaction({
+    const result = await addSellTransactionMutation.mutateAsync({
       symbol, quantity: qty, sellRate: rate, sellDate: new Date(sellDate), notes: notes || undefined,
     });
     setSubmitting(false);

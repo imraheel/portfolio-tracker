@@ -25,6 +25,7 @@ Portfolio Tracker is a simple, cloud-based, personal-use investment tracking sys
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Database:** [Firebase Firestore](https://firebase.google.com/products/firestore)
 - **Validation:** [Zod](https://zod.dev/)
+- **Data Fetching:** [TanStack React Query](https://tanstack.com/query)
 - **Icons:** [Lucide React](https://lucide.dev/)
 - **Notifications:** [Sonner](https://sonner.emilkowal.ski/)
 - **Desktop:** [Electron](https://www.electronjs.org/) with [electron-builder](https://www.electron.build/)
@@ -143,11 +144,9 @@ src/
 │   ├── Dashboard.tsx  # Portfolio overview
 │   ├── Reports.tsx   # Reports and analytics
 │   └── Settings.tsx  # Settings and data management
-├── hooks/             # Custom React hooks
-│   ├── stocks/        # Stock hooks (useStocks, useTransactions, useWallet)
-│   ├── crypto/        # Crypto hooks (useCrypto)
-│   ├── mutualFunds/   # Mutual Fund hooks (useMutualFunds)
-│   ├── usePortfolio.ts  # Portfolio metrics aggregation
+├── hooks/             # Custom React hooks (non-data-fetching)
+│   ├── ThemeProvider.tsx  # Theme context provider
+│   ├── useTheme.tsx      # Theme state hook
 │   └── useDataExport.ts  # Data export/import functionality
 ├── services/          # Business logic (API calls)
 │   ├── stocks/        # Stock services (stocks, transactions, wallet)
@@ -206,6 +205,7 @@ Requires `firebase_service_account.json` (service account key) in the project ro
 
 ## Architecture Notes
 
+- **TanStack React Query:** All data fetching uses `useQuery` in page components and `useMutation` in form components. Query keys are centralized in `src/lib/queryKeys.ts`. No custom data-fetching hooks.
 - **Client-Side Only:** This is a pure React.js application with no server-side rendering
 - **HashRouter:** Uses hash-based routing for compatibility with Electron's `file://` protocol
 - **Relative Paths:** All assets use relative paths (`./`) for Electron compatibility

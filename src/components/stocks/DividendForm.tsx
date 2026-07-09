@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useTransactions } from '@/hooks/stocks/useTransactions';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as transactionsService from '@/services/stocks/transactions';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Stock } from '@/services/stocks/stocks';
 
 interface DividendFormProps {
@@ -9,7 +11,7 @@ interface DividendFormProps {
 }
 
 export function DividendForm({ stocks, onSuccess }: DividendFormProps) {
-  const { addDividend } = useTransactions();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [dividendAmount, setDividendAmount] = useState('');
   const [dividendDate, setDividendDate] = useState(new Date().toISOString().split('T')[0]);
@@ -17,11 +19,20 @@ export function DividendForm({ stocks, onSuccess }: DividendFormProps) {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addDividendMutation = useMutation({
+    mutationFn: transactionsService.addDividend,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.dividends() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
-    const result = await addDividend({
+    const result = await addDividendMutation.mutateAsync({
       symbol, dividendAmount: parseFloat(dividendAmount), dividendDate: new Date(dividendDate), notes: notes || undefined,
     });
     setSubmitting(false);

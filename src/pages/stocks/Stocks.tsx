@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
-import { useStocks } from '@/hooks/stocks/useStocks';
+import { useQuery } from '@tanstack/react-query';
+import { AlertCircle, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
+import * as stocksService from '@/services/stocks/stocks';
+import { queryKeys } from '@/lib/queryKeys';
 import { StockForm } from '@/components/stocks/StockForm';
 import { UpdatePriceForm } from '@/components/stocks/UpdatePriceForm';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
-import { TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
 
 const subNav = [
   { label: 'Holdings', value: '/stocks' },
@@ -33,8 +34,24 @@ function ErrorState({ message }: { message: string }) {
 
 export default function Stocks() {
   const navigate = useNavigate();
-  const { stocks, priceMap, loading, error } = useStocks();
   const [showModal, setShowModal] = useState(false);
+
+  const { data: stocks = [], isLoading: stocksLoading, error: stocksError } = useQuery({
+    queryKey: queryKeys.stocks.list(),
+    queryFn: stocksService.getStocks,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: prices = [], isLoading: pricesLoading, error: pricesError } = useQuery({
+    queryKey: queryKeys.stocks.prices(),
+    queryFn: stocksService.getStockPrices,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const loading = stocksLoading || pricesLoading;
+  const error = stocksError ?? pricesError;
+
+  const priceMap = useMemo(() => new Map(prices.map(p => [p.symbol, p.current_price])), [prices]);
 
   const totalStocks = stocks.length;
   const totalValue = stocks.reduce((sum, s) => sum + (priceMap.get(s.symbol) || 0), 0);

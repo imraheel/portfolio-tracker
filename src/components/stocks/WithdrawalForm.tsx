@@ -1,18 +1,31 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useWallet } from '@/hooks/stocks/useWallet';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as walletService from '@/services/stocks/wallet';
+import { queryKeys } from '@/lib/queryKeys';
 
 interface WithdrawalFormProps {
+  balance: number;
   onSuccess?: () => void;
 }
 
-export function WithdrawalForm({ onSuccess }: WithdrawalFormProps) {
-  const { addWithdrawal, balance } = useWallet();
+export function WithdrawalForm({ balance, onSuccess }: WithdrawalFormProps) {
+  const queryClient = useQueryClient();
   const [amount, setAmount] = useState('');
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split('T')[0]);
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  const addWithdrawalMutation = useMutation({
+    mutationFn: walletService.addWithdrawal,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.withdrawals() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance() });
+      }
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +39,7 @@ export function WithdrawalForm({ onSuccess }: WithdrawalFormProps) {
       return;
     }
 
-    const result = await addWithdrawal({
+    const result = await addWithdrawalMutation.mutateAsync({
       amount: withdrawalAmount,
       withdrawalDate: new Date(withdrawalDate),
       note: note || undefined,

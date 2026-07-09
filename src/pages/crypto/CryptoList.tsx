@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, TrendingUp, DollarSign, Bitcoin } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
-import { useCrypto } from '@/hooks/crypto/useCrypto';
+import * as cryptoService from '@/services/crypto/crypto';
+import { queryKeys } from '@/lib/queryKeys';
 import type { CryptoMetrics, Cryptocurrency } from '@/services/crypto/crypto';
 import { CryptoForm } from '@/components/crypto/CryptoForm';
 import { UpdateTotalValueForm } from '@/components/crypto/UpdateTotalValueForm';
@@ -31,11 +33,25 @@ function ErrorState({ message }: { message: string }) {
 
 export default function CryptoList() {
   const navigate = useNavigate();
-  const { cryptocurrencies, metrics, loading, error } = useCrypto();
   const [showModal, setShowModal] = useState(false);
 
-  const totalValue = metrics.reduce((sum: number, m: CryptoMetrics) => sum + m.currentTotalValue, 0);
-  const totalInvested = metrics.reduce((sum: number, m: CryptoMetrics) => sum + m.netInvestment, 0);
+  const { data: cryptocurrencies = [], isLoading: listLoading, error: listError } = useQuery({
+    queryKey: queryKeys.crypto.list(),
+    queryFn: cryptoService.getCryptocurrencies,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: metrics = [], isLoading: metricsLoading, error: metricsError } = useQuery({
+    queryKey: queryKeys.crypto.metrics(),
+    queryFn: cryptoService.getAllCryptoMetrics,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const loading = listLoading || metricsLoading;
+  const error = listError ?? metricsError;
+
+  const totalValue = useMemo(() => metrics.reduce((sum: number, m: CryptoMetrics) => sum + m.currentTotalValue, 0), [metrics]);
+  const totalInvested = useMemo(() => metrics.reduce((sum: number, m: CryptoMetrics) => sum + m.netInvestment, 0), [metrics]);
   const totalGainLoss = totalValue - totalInvested;
   const totalAssets = cryptocurrencies.length;
 

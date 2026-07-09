@@ -1,25 +1,37 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useWallet } from '@/hooks/stocks/useWallet';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as walletService from '@/services/stocks/wallet';
+import { queryKeys } from '@/lib/queryKeys';
 
 interface DepositFormProps {
   onSuccess?: () => void;
 }
 
 export function DepositForm({ onSuccess }: DepositFormProps) {
-  const { addDeposit } = useWallet();
+  const queryClient = useQueryClient();
   const [amount, setAmount] = useState('');
   const [depositDate, setDepositDate] = useState(new Date().toISOString().split('T')[0]);
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addDepositMutation = useMutation({
+    mutationFn: walletService.addDeposit,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.deposits() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.balance() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
 
-    const result = await addDeposit({
+    const result = await addDepositMutation.mutateAsync({
       amount: parseFloat(amount),
       depositDate: new Date(depositDate),
       note: note || undefined,

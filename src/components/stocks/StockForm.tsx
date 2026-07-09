@@ -1,24 +1,35 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useStocks } from '@/hooks/stocks/useStocks';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as stocksService from '@/services/stocks/stocks';
+import { queryKeys } from '@/lib/queryKeys';
 
 interface StockFormProps {
   onSuccess?: () => void;
 }
 
 export function StockForm({ onSuccess }: StockFormProps) {
-  const { addStock } = useStocks();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [sector, setSector] = useState('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addStockMutation = useMutation({
+    mutationFn: stocksService.addStock,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.stocks.list() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
-    const result = await addStock({
+    const result = await addStockMutation.mutateAsync({
       symbol, companyName: companyName || undefined, sector: sector || undefined,
     });
     setSubmitting(false);

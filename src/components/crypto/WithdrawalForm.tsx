@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormButton } from '@/components/FormButton';
-import { useCrypto } from '@/hooks/crypto/useCrypto';
+import * as cryptoService from '@/services/crypto/crypto';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Cryptocurrency } from '@/services/crypto/crypto';
 
 interface WithdrawalFormProps {
@@ -10,7 +12,7 @@ interface WithdrawalFormProps {
 }
 
 export function WithdrawalForm({ cryptocurrencies, onSuccess }: WithdrawalFormProps) {
-  const { addWithdrawal } = useCrypto();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [amountPkr, setAmountPkr] = useState('');
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split('T')[0]);
@@ -18,12 +20,22 @@ export function WithdrawalForm({ cryptocurrencies, onSuccess }: WithdrawalFormPr
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addWithdrawalMutation = useMutation({
+    mutationFn: cryptoService.addWithdrawal,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.withdrawals() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.metrics() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
 
-    const result = await addWithdrawal({
+    const result = await addWithdrawalMutation.mutateAsync({
       symbol,
       amountPkr: parseFloat(amountPkr),
       withdrawalDate: new Date(withdrawalDate),

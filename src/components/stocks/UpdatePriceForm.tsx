@@ -1,18 +1,29 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormButton } from '@/components/FormButton';
-import { useStocks } from '@/hooks/stocks/useStocks';
+import * as stocksService from '@/services/stocks/stocks';
+import { queryKeys } from '@/lib/queryKeys';
 
 export function UpdatePriceForm({ symbol, currentPrice }: { symbol: string, currentPrice: string }) {
-  const { updatePrice } = useStocks();
+  const queryClient = useQueryClient();
   const [price, setPrice] = useState(currentPrice);
   const [submitting, setSubmitting] = useState(false);
+
+  const updatePriceMutation = useMutation({
+    mutationFn: stocksService.updateStockPrice,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.stocks.prices() });
+      }
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
-    const result = await updatePrice({
+    const result = await updatePriceMutation.mutateAsync({
       symbol,
       currentPrice: parseFloat(price),
     });

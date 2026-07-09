@@ -1,9 +1,11 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { AlertCircle } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import { useWallet } from '@/hooks/stocks/useWallet';
-import { useTransactions } from '@/hooks/stocks/useTransactions';
+import * as walletService from '@/services/stocks/wallet';
+import * as transactionsService from '@/services/stocks/transactions';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Deposit } from '@/services/stocks/wallet';
 import type { BuyTransaction, SellTransaction, Dividend } from '@/services/stocks/transactions';
 
@@ -63,14 +65,8 @@ export default function Reports() {
 
       <div className="flex gap-1 bg-[var(--bg-tertiary)] p-0.5 rounded-lg w-fit">
         {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setSearchParams({ tab: tab.id })}
-            className={clsx(
-              "px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none",
-              currentTab === tab.id ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            )}
-          >
+          <button key={tab.id} onClick={() => setSearchParams({ tab: tab.id })}
+            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentTab === tab.id ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}>
             {tab.label}
           </button>
         ))}
@@ -92,9 +88,13 @@ export default function Reports() {
 }
 
 function DepositsHistory() {
-  const { deposits, loading, error } = useWallet();
+  const { data: deposits = [], isLoading, error } = useQuery({
+    queryKey: queryKeys.wallet.deposits(),
+    queryFn: walletService.getDeposits,
+    staleTime: 5 * 60 * 1000,
+  });
   if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
+  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
       <TableHeader cols={[{ label: 'Date' }, { label: 'Note' }, { label: 'Amount', align: 'right' }]} />
@@ -112,9 +112,13 @@ function DepositsHistory() {
 }
 
 function BuyHistory() {
-  const { buyTransactions, loading, error } = useTransactions();
+  const { data: buyTransactions = [], isLoading, error } = useQuery({
+    queryKey: queryKeys.transactions.buys(),
+    queryFn: transactionsService.getBuyTransactions,
+    staleTime: 5 * 60 * 1000,
+  });
   if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
+  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
       <TableHeader cols={[{ label: 'Date' }, { label: 'Stock' }, { label: 'Qty', align: 'right' }, { label: 'Rate', align: 'right' }, { label: 'Total', align: 'right' }]} />
@@ -134,9 +138,13 @@ function BuyHistory() {
 }
 
 function SellHistory() {
-  const { sellTransactions, loading, error } = useTransactions();
+  const { data: sellTransactions = [], isLoading, error } = useQuery({
+    queryKey: queryKeys.transactions.sells(),
+    queryFn: transactionsService.getSellTransactions,
+    staleTime: 5 * 60 * 1000,
+  });
   if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
+  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
       <TableHeader cols={[{ label: 'Date' }, { label: 'Stock' }, { label: 'Qty', align: 'right' }, { label: 'Rate', align: 'right' }, { label: 'Proceeds', align: 'right' }, { label: 'P/L', align: 'right' }]} />
@@ -159,9 +167,13 @@ function SellHistory() {
 }
 
 function DividendHistory() {
-  const { dividends, loading, error } = useTransactions();
+  const { data: dividends = [], isLoading, error } = useQuery({
+    queryKey: queryKeys.transactions.dividends(),
+    queryFn: transactionsService.getDividends,
+    staleTime: 5 * 60 * 1000,
+  });
   if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (loading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
+  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
   return (
     <table className="w-full">
       <TableHeader cols={[{ label: 'Date' }, { label: 'Stock' }, { label: 'Amount', align: 'right' }]} />

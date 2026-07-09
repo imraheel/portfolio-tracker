@@ -1,23 +1,34 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useCrypto } from '@/hooks/crypto/useCrypto';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as cryptoService from '@/services/crypto/crypto';
+import { queryKeys } from '@/lib/queryKeys';
 
 interface CryptoFormProps {
   onSuccess?: () => void;
 }
 
 export function CryptoForm({ onSuccess }: CryptoFormProps) {
-  const { addCryptocurrency } = useCrypto();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [name, setName] = useState('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addCryptocurrencyMutation = useMutation({
+    mutationFn: cryptoService.addCryptocurrency,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.list() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
-    const result = await addCryptocurrency({ symbol, name });
+    const result = await addCryptocurrencyMutation.mutateAsync({ symbol, name });
     setSubmitting(false);
     if (result.success) {
       toast.success(result.message);

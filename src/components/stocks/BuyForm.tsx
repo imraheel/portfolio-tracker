@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useTransactions } from '@/hooks/stocks/useTransactions';
-import { useWallet } from '@/hooks/stocks/useWallet';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as transactionsService from '@/services/stocks/transactions';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Stock } from '@/services/stocks/stocks';
 
 interface BuyFormProps {
@@ -11,8 +12,7 @@ interface BuyFormProps {
 }
 
 export function BuyForm({ stocks, balance, onSuccess }: BuyFormProps) {
-  const { addBuyTransaction } = useTransactions();
-  const { refresh: refreshWallet } = useWallet();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [qty, setQty] = useState<number>(0);
   const [rate, setRate] = useState<number>(0);
@@ -24,18 +24,27 @@ export function BuyForm({ stocks, balance, onSuccess }: BuyFormProps) {
   const totalCost = qty * rate;
   const isInsufficient = totalCost > balance;
 
+  const addBuyTransactionMutation = useMutation({
+    mutationFn: transactionsService.addBuyTransaction,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.transactions.buys() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.wallet.all });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isInsufficient) { toast.error('Insufficient wallet balance'); return; }
     setSubmitting(true);
     setErrors({});
-    const result = await addBuyTransaction({
+    const result = await addBuyTransactionMutation.mutateAsync({
       symbol, quantity: qty, buyRate: rate, buyDate: new Date(buyDate), notes: notes || undefined,
     });
     setSubmitting(false);
     if (result.success) {
       toast.success(result.message);
-      refreshWallet();
       onSuccess?.();
     } else {
       toast.error(result.message);

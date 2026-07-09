@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { AlertCircle, ShoppingCart, ArrowDownCircle, TrendingUp } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
-import { useCrypto } from '@/hooks/crypto/useCrypto';
+import * as cryptoService from '@/services/crypto/crypto';
+import { queryKeys } from '@/lib/queryKeys';
 import { PurchaseForm } from '@/components/crypto/PurchaseForm';
 import { WithdrawalForm } from '@/components/crypto/WithdrawalForm';
 import type { CryptoPurchase, CryptoWithdrawal } from '@/services/crypto/crypto';
@@ -48,7 +50,27 @@ export default function CryptoTransactions() {
   const currentView = searchParams.get('view') === 'withdrawals' ? 'withdrawals' : 'invest';
   const [modalType, setModalType] = useState<'invest' | 'withdrawal' | null>(null);
 
-  const { purchases, withdrawals, cryptocurrencies, loading, error } = useCrypto();
+  const { data: cryptocurrencies = [], isLoading: listLoading, error: listError } = useQuery({
+    queryKey: queryKeys.crypto.list(),
+    queryFn: cryptoService.getCryptocurrencies,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: purchases = [], isLoading: purchasesLoading, error: purchasesError } = useQuery({
+    queryKey: queryKeys.crypto.purchases(),
+    queryFn: cryptoService.getPurchases,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: withdrawals = [], isLoading: withdrawalsLoading, error: withdrawalsError } = useQuery({
+    queryKey: queryKeys.crypto.withdrawals(),
+    queryFn: cryptoService.getWithdrawals,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const loading = listLoading || purchasesLoading || withdrawalsLoading;
+  const error = listError ?? purchasesError ?? withdrawalsError;
+
   const totalInvested = purchases.reduce((sum, p) => sum + p.amount_pkr, 0);
   const totalWithdrawn = withdrawals.reduce((sum, w) => sum + w.amount_pkr, 0);
 
@@ -73,16 +95,10 @@ export default function CryptoTransactions() {
 
       <div className="flex items-center justify-between">
         <div className="flex gap-1 bg-[var(--bg-tertiary)] p-0.5 rounded-lg">
-          <button
-            onClick={() => setSearchParams({ view: 'invest' })}
-            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentView === 'invest' ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}
-          >Invest
-          </button>
-          <button
-            onClick={() => setSearchParams({ view: 'withdrawals' })}
-            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentView === 'withdrawals' ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}
-          >Withdrawals
-          </button>
+          <button onClick={() => setSearchParams({ view: 'invest' })}
+            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentView === 'invest' ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}>Invest</button>
+          <button onClick={() => setSearchParams({ view: 'withdrawals' })}
+            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentView === 'withdrawals' ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}>Withdrawals</button>
         </div>
         <div className="flex gap-2">
           {currentView === 'invest' && (

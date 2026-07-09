@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormButton } from '@/components/FormButton';
-import { useCrypto } from '@/hooks/crypto/useCrypto';
+import * as cryptoService from '@/services/crypto/crypto';
+import { queryKeys } from '@/lib/queryKeys';
 import type { Cryptocurrency } from '@/services/crypto/crypto';
 
 interface PurchaseFormProps {
@@ -10,7 +12,7 @@ interface PurchaseFormProps {
 }
 
 export function PurchaseForm({ cryptocurrencies, onSuccess }: PurchaseFormProps) {
-  const { addPurchase } = useCrypto();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [amountPkr, setAmountPkr] = useState('');
   const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
@@ -18,12 +20,22 @@ export function PurchaseForm({ cryptocurrencies, onSuccess }: PurchaseFormProps)
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addPurchaseMutation = useMutation({
+    mutationFn: cryptoService.addPurchase,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.purchases() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.metrics() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
 
-    const result = await addPurchase({
+    const result = await addPurchaseMutation.mutateAsync({
       symbol,
       amountPkr: parseFloat(amountPkr),
       purchaseDate: new Date(purchaseDate),

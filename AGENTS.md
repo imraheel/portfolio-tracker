@@ -27,8 +27,9 @@ pnpm lint                  # Run ESLint with max 0 warnings
 **Key Directories:**
 - `src/components/` - Reusable UI components (organized by investment type: stocks/, crypto/, mutualFunds/, dashboard/)
 - `src/pages/` - Route components (organized by investment type: stocks/, crypto/, mutualFunds/)
-- `src/hooks/` - Custom React hooks (organized by investment type: stocks/, crypto/, mutualFunds/)
+- `src/hooks/` - Non-data-fetching hooks only (ThemeProvider, useDataExport, useTheme)
 - `src/services/` - Business logic and API calls (organized by investment type: stocks/, crypto/, mutualFunds/)
+- `src/lib/queryKeys.ts` - Centralized TanStack React Query key factories
 - `src/lib/firebase/` - Firebase client configuration
 - `src/types/` - TypeScript type definitions
 - `electron/` - Electron main process and preload scripts
@@ -36,10 +37,10 @@ pnpm lint                  # Run ESLint with max 0 warnings
 ## Code Style Guidelines
 
 ### Imports
-- Use path alias `@/` for all imports from src (e.g., `import { useStocks } from '@/hooks/stocks/useStocks'`)
+- Use path alias `@/` for all imports from src (e.g., `import { useQuery } from '@tanstack/react-query'`)
 - Group imports: React/hooks first, then libraries, then local modules
 - Use named exports for hooks and services
-- Organize by investment type: import from ` '@/hooks/stocks/...'`, ` '@/hooks/crypto/...'`, ` '@/hooks/mutualFunds/...'`
+- Organize by investment type: import from ` '@/services/stocks/...'`, ` '@/services/crypto/...'`, ` '@/services/mutualFunds/...'`
 
 ### Types & Interfaces
 - Define interfaces in service files (e.g., `Stock`, `StockPrice` in stocks.ts)
@@ -49,7 +50,7 @@ pnpm lint                  # Run ESLint with max 0 warnings
 
 ### Naming Conventions
 - **Components:** PascalCase (e.g., `StockForm`, `Dashboard`)
-- **Hooks:** camelCase with `use` prefix (e.g., `useStocks`, `usePortfolio`)
+- **Hooks:** camelCase with `use` prefix (e.g., `useTheme`, `useDataExport`)
 - **Services:** camelCase (e.g., `addStock`, `getStocks`)
 - **Types/Interfaces:** PascalCase (e.g., `Stock`, `Transaction`)
 - **Files:** PascalCase for components, camelCase for hooks/services
@@ -59,7 +60,9 @@ pnpm lint                  # Run ESLint with max 0 warnings
 - Use functional components with hooks
 - Destructure props in function parameters
 - Use `clsx` for conditional class names
-- Form components use local state + service calls via hooks
+- Form components use `useMutation` from @tanstack/react-query + local state for inputs
+- Page components use `useQuery` for data fetching with centralized query keys from `@/lib/queryKeys`
+- All hooks must be called before any early return (error/loading guards) to avoid "Rendered more hooks" errors
 
 ### Error Handling
 - Services return `{ success: boolean, message: string, errors?: Record<string, string[]> }`
@@ -78,7 +81,7 @@ pnpm lint                  # Run ESLint with max 0 warnings
 
 ### State Management
 - React hooks for local state
-- Custom hooks for data fetching with SWR-like pattern
+- TanStack React Query for server state (useQuery in pages, useMutation in forms with centralized queryKeys)
 - Services handle all Firebase Firestore interactions
 - No global state library (Redux/Zustand) - use hooks composition
 

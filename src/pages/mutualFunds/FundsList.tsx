@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, TrendingUp, DollarSign, Landmark } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
-import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import * as mutualFundsService from '@/services/mutualFunds/mutualFunds';
+import { queryKeys } from '@/lib/queryKeys';
 import type { FundMetrics, MutualFund } from '@/services/mutualFunds/mutualFunds';
 import { FundForm } from '@/components/mutualFunds/FundForm';
 import { UpdateMarketValueForm } from '@/components/mutualFunds/UpdateMarketValueForm';
@@ -31,11 +33,25 @@ function ErrorState({ message }: { message: string }) {
 
 export default function MutualFundsList() {
   const navigate = useNavigate();
-  const { funds, metrics, loading, error } = useMutualFunds();
   const [showModal, setShowModal] = useState(false);
 
-  const totalValue = metrics.reduce((sum: number, m: FundMetrics) => sum + m.currentMarketValue, 0);
-  const totalInvested = metrics.reduce((sum: number, m: FundMetrics) => sum + m.netInvestment, 0);
+  const { data: funds = [], isLoading: listLoading, error: listError } = useQuery({
+    queryKey: queryKeys.mutualFunds.list(),
+    queryFn: mutualFundsService.getMutualFunds,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: metrics = [], isLoading: metricsLoading, error: metricsError } = useQuery({
+    queryKey: queryKeys.mutualFunds.metrics(),
+    queryFn: mutualFundsService.getAllFundMetrics,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const loading = listLoading || metricsLoading;
+  const error = listError ?? metricsError;
+
+  const totalValue = useMemo(() => metrics.reduce((sum: number, m: FundMetrics) => sum + m.currentMarketValue, 0), [metrics]);
+  const totalInvested = useMemo(() => metrics.reduce((sum: number, m: FundMetrics) => sum + m.netInvestment, 0), [metrics]);
   const totalGainLoss = totalValue - totalInvested;
   const totalFunds = funds.length;
 

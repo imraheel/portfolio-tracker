@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormButton } from '@/components/FormButton';
-import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import * as mutualFundsService from '@/services/mutualFunds/mutualFunds';
+import { queryKeys } from '@/lib/queryKeys';
 import type { MutualFund } from '@/services/mutualFunds/mutualFunds';
 
 interface WithdrawalFormProps {
@@ -10,7 +12,7 @@ interface WithdrawalFormProps {
 }
 
 export function WithdrawalForm({ funds, onSuccess }: WithdrawalFormProps) {
-  const { addWithdrawal } = useMutualFunds();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [amount, setAmount] = useState('');
   const [withdrawalDate, setWithdrawalDate] = useState(new Date().toISOString().split('T')[0]);
@@ -18,12 +20,22 @@ export function WithdrawalForm({ funds, onSuccess }: WithdrawalFormProps) {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addWithdrawalMutation = useMutation({
+    mutationFn: mutualFundsService.addWithdrawal,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.withdrawals() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.metrics() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
 
-    const result = await addWithdrawal({
+    const result = await addWithdrawalMutation.mutateAsync({
       symbol,
       amount: parseFloat(amount),
       withdrawalDate: new Date(withdrawalDate),

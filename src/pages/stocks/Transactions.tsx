@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { clsx } from 'clsx';
 import { AlertCircle, TrendingUp, DollarSign, ShoppingCart, ArrowDownCircle } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Modal } from '@/components/Modal';
 import { StatsGrid } from '@/components/ui/StatsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
-import { useStocks } from '@/hooks/stocks/useStocks';
-import { useWallet } from '@/hooks/stocks/useWallet';
-import { usePortfolio } from '@/hooks/usePortfolio';
-import { useTransactions } from '@/hooks/stocks/useTransactions';
+import * as stocksService from '@/services/stocks/stocks';
+import * as walletService from '@/services/stocks/wallet';
+import { getPortfolioMetrics } from '@/services/portfolio';
+import * as transactionsService from '@/services/stocks/transactions';
+import { queryKeys } from '@/lib/queryKeys';
 import type { BuyTransaction, SellTransaction, Dividend } from '@/services/stocks/transactions';
 import { BuyForm } from '@/components/stocks/BuyForm';
 import { SellForm } from '@/components/stocks/SellForm';
@@ -31,9 +33,7 @@ function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right'
     <thead>
       <tr className="border-b border-[var(--border-subtle)]">
         {cols.map((col, i) => (
-          <th key={i} className={clsx("px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)]", col.align === 'right' ? "text-right" : "text-left")}>
-            {col.label}
-          </th>
+          <th key={i} className={clsx("px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)]", col.align === 'right' ? "text-right" : "text-left")}>{col.label}</th>
         ))}
       </tr>
     </thead>
@@ -56,10 +56,46 @@ export default function Transactions() {
   const currentView = searchParams.get('view') === 'sell' ? 'sell' : (searchParams.get('view') === 'dividends' ? 'dividends' : 'buy');
   const [modalType, setModalType] = useState<'buy' | 'sell' | 'dividend' | null>(null);
 
-  const { stocks } = useStocks();
-  const { balance } = useWallet();
-  const { holdingsMap } = usePortfolio();
-  const { buyTransactions, sellTransactions, dividends, loading, error } = useTransactions();
+  const { data: stocks = [] } = useQuery({
+    queryKey: queryKeys.stocks.list(),
+    queryFn: stocksService.getStocks,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const { data: balance = 0 } = useQuery({
+    queryKey: queryKeys.wallet.balance(),
+    queryFn: walletService.getWalletBalance,
+    staleTime: 30 * 1000,
+  });
+
+  const { data: stockMetrics = [] } = useQuery({
+    queryKey: queryKeys.portfolio.metrics(),
+    queryFn: getPortfolioMetrics,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const holdingsMap = useMemo(() => new Map<string, number>(stockMetrics.map(m => [m.symbol, m.remainingQty])), [stockMetrics]);
+
+  const { data: buyTransactions = [], isLoading: buysLoading, error: buysError } = useQuery({
+    queryKey: queryKeys.transactions.buys(),
+    queryFn: transactionsService.getBuyTransactions,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: sellTransactions = [], isLoading: sellsLoading, error: sellsError } = useQuery({
+    queryKey: queryKeys.transactions.sells(),
+    queryFn: transactionsService.getSellTransactions,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: dividends = [], isLoading: dividendsLoading, error: dividendsError } = useQuery({
+    queryKey: queryKeys.transactions.dividends(),
+    queryFn: transactionsService.getDividends,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const loading = buysLoading || sellsLoading || dividendsLoading;
+  const error = buysError ?? sellsError ?? dividendsError;
 
   const totalInvested = buyTransactions.reduce((sum, tx) => sum + tx.total_cost, 0);
   const totalSold = sellTransactions.reduce((sum, tx) => sum + tx.total_proceeds, 0);
@@ -82,18 +118,9 @@ export default function Transactions() {
       <div className="flex items-center justify-between">
         <SegmentedControl segments={subNav} value="/stocks/transactions" onChange={(v) => navigate(v)} />
         <div className="flex gap-2">
-          <button onClick={() => setModalType('buy')}
-            className="h-[28px] px-3 rounded-[6px] bg-[var(--accent-blue)] text-white text-[12px] font-medium hover:bg-[var(--accent-blue-dark)] flex items-center gap-1.5">
-            + Buy
-          </button>
-          <button onClick={() => setModalType('sell')}
-            className="h-[28px] px-3 rounded-[6px] border border-[var(--border-default)] text-[var(--text-secondary)] text-[12px] font-medium hover:bg-[var(--bg-tertiary)] flex items-center gap-1.5">
-            + Sell
-          </button>
-          <button onClick={() => setModalType('dividend')}
-            className="h-[28px] px-3 rounded-[6px] border border-[var(--border-default)] text-[var(--text-secondary)] text-[12px] font-medium hover:bg-[var(--bg-tertiary)] flex items-center gap-1.5">
-            + Dividend
-          </button>
+          <button onClick={() => setModalType('buy')} className="h-[28px] px-3 rounded-[6px] bg-[var(--accent-blue)] text-white text-[12px] font-medium hover:bg-[var(--accent-blue-dark)] flex items-center gap-1.5">+ Buy</button>
+          <button onClick={() => setModalType('sell')} className="h-[28px] px-3 rounded-[6px] border border-[var(--border-default)] text-[var(--text-secondary)] text-[12px] font-medium hover:bg-[var(--bg-tertiary)] flex items-center gap-1.5">+ Sell</button>
+          <button onClick={() => setModalType('dividend')} className="h-[28px] px-3 rounded-[6px] border border-[var(--border-default)] text-[var(--text-secondary)] text-[12px] font-medium hover:bg-[var(--bg-tertiary)] flex items-center gap-1.5">+ Dividend</button>
         </div>
       </div>
 
@@ -106,28 +133,16 @@ export default function Transactions() {
 
       <div className="flex gap-1 bg-[var(--bg-tertiary)] p-0.5 rounded-lg w-fit">
         {['buy', 'sell', 'dividends'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setSearchParams({ view: tab })}
-            className={clsx(
-              "px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none",
-              currentView === tab ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            )}
-          >
+          <button key={tab} onClick={() => setSearchParams({ view: tab })}
+            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentView === tab ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}>
             {tab === 'buy' ? 'Buy History' : tab === 'sell' ? 'Sell History' : 'Dividend History'}
           </button>
         ))}
       </div>
 
-      {currentView === 'buy' && (
-        <BuyTransactionsTable buyTransactions={buyTransactions} loading={loading} />
-      )}
-      {currentView === 'sell' && (
-        <SellTransactionsTable sellTransactions={sellTransactions} loading={loading} />
-      )}
-      {currentView === 'dividends' && (
-        <DividendsTable dividends={dividends} loading={loading} />
-      )}
+      {currentView === 'buy' && <BuyTransactionsTable buyTransactions={buyTransactions} loading={loading} />}
+      {currentView === 'sell' && <SellTransactionsTable sellTransactions={sellTransactions} loading={loading} />}
+      {currentView === 'dividends' && <DividendsTable dividends={dividends} loading={loading} />}
 
       <Modal open={modalType === 'buy'} onClose={() => setModalType(null)} title={modalTitle} width="md">
         <BuyForm stocks={stocks} balance={balance} onSuccess={() => setModalType(null)} />

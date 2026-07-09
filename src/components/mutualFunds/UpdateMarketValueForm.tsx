@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormButton } from '@/components/FormButton';
-import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import * as mutualFundsService from '@/services/mutualFunds/mutualFunds';
+import { queryKeys } from '@/lib/queryKeys';
 import { X } from 'lucide-react';
 
 interface UpdateMarketValueFormProps {
@@ -10,10 +12,20 @@ interface UpdateMarketValueFormProps {
 }
 
 export function UpdateMarketValueForm({ symbol, currentValue }: UpdateMarketValueFormProps) {
-  const { updateMarketValue } = useMutualFunds();
+  const queryClient = useQueryClient();
   const [value, setValue] = useState(currentValue);
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const updateMarketValueMutation = useMutation({
+    mutationFn: mutualFundsService.updateMarketValue,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.list() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.metrics() });
+      }
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +38,7 @@ export function UpdateMarketValueForm({ symbol, currentValue }: UpdateMarketValu
       return;
     }
 
-    const result = await updateMarketValue({
+    const result = await updateMarketValueMutation.mutateAsync({
       symbol,
       currentValue: numericValue,
     });

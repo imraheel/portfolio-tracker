@@ -1,24 +1,35 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { useMutualFunds } from '@/hooks/mutualFunds/useMutualFunds';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import * as mutualFundsService from '@/services/mutualFunds/mutualFunds';
+import { queryKeys } from '@/lib/queryKeys';
 
 interface FundFormProps {
   onSuccess?: () => void;
 }
 
 export function FundForm({ onSuccess }: FundFormProps) {
-  const { addFund } = useMutualFunds();
+  const queryClient = useQueryClient();
   const [symbol, setSymbol] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const addFundMutation = useMutation({
+    mutationFn: mutualFundsService.addMutualFund,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.mutualFunds.list() });
+      }
+    },
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
-    const result = await addFund({ symbol, name, description: description || undefined });
+    const result = await addFundMutation.mutateAsync({ symbol, name, description: description || undefined });
     setSubmitting(false);
     if (result.success) {
       toast.success(result.message);

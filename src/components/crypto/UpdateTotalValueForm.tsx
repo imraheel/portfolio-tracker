@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FormButton } from '@/components/FormButton';
-import { useCrypto } from '@/hooks/crypto/useCrypto';
+import * as cryptoService from '@/services/crypto/crypto';
+import { queryKeys } from '@/lib/queryKeys';
 import { Edit3 } from 'lucide-react';
 
 interface UpdateTotalValueFormProps {
@@ -10,10 +12,20 @@ interface UpdateTotalValueFormProps {
 }
 
 export function UpdateTotalValueForm({ symbol, currentValue }: UpdateTotalValueFormProps) {
-  const { updateTotalValue } = useCrypto();
+  const queryClient = useQueryClient();
   const [value, setValue] = useState(currentValue);
   const [isEditing, setIsEditing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const updateTotalValueMutation = useMutation({
+    mutationFn: cryptoService.updateTotalValue,
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.list() });
+        queryClient.invalidateQueries({ queryKey: queryKeys.crypto.metrics() });
+      }
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +38,7 @@ export function UpdateTotalValueForm({ symbol, currentValue }: UpdateTotalValueF
       return;
     }
 
-    const result = await updateTotalValue({
+    const result = await updateTotalValueMutation.mutateAsync({
       symbol,
       totalValue: numericValue,
     });
