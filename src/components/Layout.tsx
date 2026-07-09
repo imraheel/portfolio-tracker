@@ -25,8 +25,8 @@ export default function Layout() {
 
   return (
     <div className="h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-hidden">
-      <div className="h-[47px] shrink-0 flex items-center px-4 bg-[var(--toolbar-bg)] border-b border-[var(--border-default)] select-none">
-        <Link to="/" className="flex items-center gap-2 text-[13px] font-semibold text-[var(--text-secondary)] no-underline shrink-0">
+      <div className="h-[47px] shrink-0 flex items-center pl-[80px] pr-4 bg-[var(--toolbar-bg)] border-b border-[var(--border-default)] select-none [-webkit-app-region:drag]">
+        <Link to="/" className="flex items-center gap-2 text-[13px] font-semibold text-[var(--text-secondary)] no-underline shrink-0 [-webkit-app-region:no-drag]">
           <div className="w-[18px] h-[18px] rounded bg-[var(--accent-blue)] flex items-center justify-center">
             <TrendingUp className="w-3 h-3 text-white" />
           </div>
@@ -35,7 +35,7 @@ export default function Layout() {
 
         <div className="flex-1" />
 
-        <nav className="flex items-center gap-0.5">
+        <nav className="flex items-center gap-0.5 [-webkit-app-region:no-drag]">
           <NavLink href="/stocks" current={pathname}>Stocks</NavLink>
           <NavLink href="/mutual-funds" current={pathname}>Mutual Funds</NavLink>
           <NavLink href="/crypto" current={pathname}>Crypto</NavLink>
