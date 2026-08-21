@@ -10,6 +10,7 @@ import StockReports from './pages/stocks/Reports';
 import Settings from './pages/Settings';
 import MutualFundsList from './pages/mutualFunds/FundsList';
 import MutualFundTransactions from './pages/mutualFunds/Transactions';
+import MutualFundReports from './pages/mutualFunds/Reports';
 import CryptoList from './pages/crypto/CryptoList';
 import CryptoTransactions from './pages/crypto/Transactions';
 
@@ -32,6 +33,7 @@ function App() {
         {/* Mutual Funds Routes */}
         <Route path="mutual-funds" element={<MutualFundsList />} />
         <Route path="mutual-funds/transactions" element={<MutualFundTransactions />} />
+        <Route path="mutual-funds/reports" element={<MutualFundReports />} />
         
         {/* Crypto Routes */}
         <Route path="crypto" element={<CryptoList />} />

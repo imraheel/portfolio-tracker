@@ -1,13 +1,27 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { clsx } from 'clsx';
-import { AlertCircle } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie,
+  Legend,
+} from 'recharts';
+import { AlertCircle, BarChart3, PieChartIcon, DollarSign, TrendingUp } from 'lucide-react';
 import { SegmentedControl } from '@/components/SegmentedControl';
-import * as walletService from '@/services/stocks/wallet';
 import * as transactionsService from '@/services/stocks/transactions';
+import * as walletService from '@/services/stocks/wallet';
+import * as stocksService from '@/services/stocks/stocks';
 import { queryKeys } from '@/lib/queryKeys';
-import type { Deposit } from '@/services/stocks/wallet';
-import type { BuyTransaction, SellTransaction, Dividend } from '@/services/stocks/transactions';
 
 const subNav = [
   { label: 'Holdings', value: '/stocks' },
@@ -30,162 +44,500 @@ function ErrorState({ message }: { message: string }) {
   );
 }
 
-function TableHeader({ cols }: { cols: { label: string; align?: 'left' | 'right' }[] }) {
+function ChartCard({ title, subtitle, icon, children }: { title: string; subtitle: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <thead>
-      <tr className="border-b border-[var(--border-subtle)]">
-        {cols.map((col, i) => (
-          <th key={i} className={clsx("px-4 py-2 text-[11px] font-semibold text-[var(--text-secondary)]", col.align === 'right' ? "text-right" : "text-left")}>{col.label}</th>
+    <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] p-5">
+      <div className="flex items-center gap-2 mb-4">
+        {icon}
+        <div>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>
+          <p className="text-xs text-[var(--text-muted)]">{subtitle}</p>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+const formatYAxis = (value: number): string => {
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+  return `${value}`;
+};
+
+const PIE_COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5AC8FA', '#FF2D55', '#FFCC00', '#30B0C7', '#AC8E68'];
+
+interface BarTooltipProps {
+  active?: boolean;
+  payload?: { payload: { symbol: string; totalInvested: number; totalShares?: number; totalDividends?: number } }[];
+}
+
+function InvestmentTooltip({ active, payload }: BarTooltipProps) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-subtle)] shadow-card">
+        <p className="text-xs font-semibold text-[var(--text-primary)] mb-1">{data.symbol}</p>
+        <p className="text-xs text-[var(--text-muted)]">
+          Invested: <span className="font-medium text-[var(--text-primary)]">Rs. {formatPkr(data.totalInvested)}</span>
+        </p>
+        {data.totalShares !== undefined && (
+          <p className="text-xs text-[var(--text-muted)]">
+            Shares: <span className="font-medium text-[var(--text-primary)]">{data.totalShares}</span>
+          </p>
+        )}
+      </div>
+    );
+  }
+  return null;
+}
+
+function DividendTooltip({ active, payload }: BarTooltipProps) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-subtle)] shadow-card">
+        <p className="text-xs font-semibold text-[var(--text-primary)] mb-1">{data.symbol}</p>
+        <p className="text-xs text-[var(--text-muted)]">
+          Dividends: <span className="font-medium text-[var(--accent-green)]">Rs. {formatPkr(data.totalDividends ?? 0)}</span>
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
+function PieTooltip({ active, payload }: { active?: boolean; payload?: { payload: { name: string; value: number } }[] }) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-subtle)] shadow-card">
+        <p className="text-xs text-[var(--text-muted)] mb-1">{data.name}</p>
+        <p className="text-sm font-semibold text-[var(--text-primary)]">Rs. {formatPkr(data.value)}</p>
+      </div>
+    );
+  }
+  return null;
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-5">
+      <div className="h-10 w-48 bg-[var(--bg-tertiary)] rounded animate-pulse" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] p-5">
+            <div className="h-4 w-36 bg-[var(--bg-tertiary)] rounded mb-4 animate-pulse" />
+            <div className="h-64 bg-[var(--bg-tertiary)] rounded-lg animate-pulse" />
+          </div>
         ))}
-      </tr>
-    </thead>
+      </div>
+    </div>
   );
 }
 
 export default function Reports() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const currentTab = searchParams.get('tab') || 'deposits';
 
-  const tabs = [
-    { id: 'deposits', label: 'Deposits' },
-    { id: 'buys', label: 'Buys' },
-    { id: 'sells', label: 'Sells' },
-    { id: 'dividends', label: 'Dividends' },
-  ];
+  const { data: buyTransactions = [], isLoading: buysLoading, error: buysError } = useQuery({
+    queryKey: queryKeys.transactions.buys(),
+    queryFn: transactionsService.getBuyTransactions,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: dividends = [], isLoading: divLoading, error: divError } = useQuery({
+    queryKey: queryKeys.transactions.dividends(),
+    queryFn: transactionsService.getDividends,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: deposits = [], isLoading: depLoading, error: depError } = useQuery({
+    queryKey: queryKeys.wallet.deposits(),
+    queryFn: walletService.getDeposits,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: stocks = [], isLoading: stocksLoading, error: stocksError } = useQuery({
+    queryKey: queryKeys.stocks.list(),
+    queryFn: stocksService.getStocks,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const loading = buysLoading || divLoading || depLoading || stocksLoading;
+  const error = buysError ?? divError ?? depError ?? stocksError;
+
+  const investmentData = useMemo(() => {
+    const map = new Map<string, { totalInvested: number; totalShares: number }>();
+    for (const tx of buyTransactions) {
+      const existing = map.get(tx.symbol) || { totalInvested: 0, totalShares: 0 };
+      map.set(tx.symbol, {
+        totalInvested: existing.totalInvested + tx.total_cost,
+        totalShares: existing.totalShares + tx.quantity,
+      });
+    }
+    return Array.from(map.entries())
+      .map(([symbol, data]) => ({ symbol, ...data }))
+      .sort((a, b) => b.totalInvested - a.totalInvested);
+  }, [buyTransactions]);
+
+  const dividendData = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const div of dividends) {
+      map.set(div.symbol, (map.get(div.symbol) || 0) + div.dividend_amount);
+    }
+    return Array.from(map.entries())
+      .map(([symbol, totalDividends]) => ({ symbol, totalDividends }))
+      .sort((a, b) => b.totalDividends - a.totalDividends);
+  }, [dividends]);
+
+  const allocationData = useMemo(() => {
+    return investmentData.map((d) => ({ name: d.symbol, value: d.totalInvested }));
+  }, [investmentData]);
+
+  const totalInvestment = useMemo(() => investmentData.reduce((sum, d) => sum + d.totalInvested, 0), [investmentData]);
+
+  const sectorData = useMemo(() => {
+    const sectorMap = new Map<string, number>();
+    const symbolToSector = new Map(stocks.map(s => [s.symbol, s.sector || 'Unknown']));
+    for (const item of investmentData) {
+      const sector = symbolToSector.get(item.symbol) || 'Unknown';
+      sectorMap.set(sector, (sectorMap.get(sector) || 0) + item.totalInvested);
+    }
+    return Array.from(sectorMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [investmentData, stocks]);
+
+  const monthlyData = useMemo(() => {
+    const monthMap = new Map<string, { deposits: number; invested: number }>();
+    for (const dep of deposits) {
+      const date = new Date(dep.deposit_date);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const existing = monthMap.get(key) || { deposits: 0, invested: 0 };
+      monthMap.set(key, { ...existing, deposits: existing.deposits + dep.amount });
+    }
+    for (const tx of buyTransactions) {
+      const date = new Date(tx.buy_date);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const existing = monthMap.get(key) || { deposits: 0, invested: 0 };
+      monthMap.set(key, { ...existing, invested: existing.invested + tx.total_cost });
+    }
+    return Array.from(monthMap.entries())
+      .map(([month, data]) => ({ month, ...data }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }, [deposits, buyTransactions]);
+
+  if (error) {
+    return (
+      <div className="space-y-5">
+        <SegmentedControl segments={subNav} value="/stocks/reports" onChange={(v) => navigate(v)} />
+        <ErrorState message={typeof error === 'string' ? error : error.message} />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-5">
+        <SegmentedControl segments={subNav} value="/stocks/reports" onChange={(v) => navigate(v)} />
+        <LoadingSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
       <SegmentedControl segments={subNav} value="/stocks/reports" onChange={(v) => navigate(v)} />
 
       <div>
-        <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Reports & History</h2>
-        <p className="text-[12px] text-[var(--text-muted)]">Detailed record of all financial activities</p>
+        <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">Reports & Analytics</h2>
+        <p className="text-[12px] text-[var(--text-muted)]">Visual breakdown of your stock portfolio</p>
       </div>
 
-      <div className="flex gap-1 bg-[var(--bg-tertiary)] p-0.5 rounded-lg w-fit">
-        {tabs.map((tab) => (
-          <button key={tab.id} onClick={() => setSearchParams({ tab: tab.id })}
-            className={clsx("px-3.5 py-1.5 rounded-[7px] text-[12px] font-medium transition-none", currentTab === tab.id ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]')}>
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <ChartCard
+          title="Investment per Stock"
+          subtitle="Total amount invested and shares held"
+          icon={<BarChart3 className="w-4 h-4 text-[var(--accent-blue)]" />}
+        >
+          {investmentData.length === 0 ? (
+            <div className="h-64 flex items-center justify-center text-[13px] text-[var(--text-muted)]">
+              No buy transactions recorded yet.
+            </div>
+          ) : (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={investmentData} margin={{ top: 25, right: 10, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                  <XAxis
+                    dataKey="symbol"
+                    tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tickFormatter={formatYAxis}
+                    tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<InvestmentTooltip />} cursor={{ fill: 'var(--bg-tertiary)' }} />
+                  <Bar
+                    dataKey="totalInvested"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    {investmentData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </ChartCard>
 
-      <div className="rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-subtle)] overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-[var(--border-subtle)]">
-          <span className="text-[13px] font-semibold text-[var(--text-primary)]">{tabs.find(t => t.id === currentTab)?.label} History</span>
-        </div>
-        <div className="overflow-x-auto">
-          {currentTab === 'deposits' && <DepositsHistory />}
-          {currentTab === 'buys' && <BuyHistory />}
-          {currentTab === 'sells' && <SellHistory />}
-          {currentTab === 'dividends' && <DividendHistory />}
-        </div>
+        <ChartCard
+          title="Dividend per Stock"
+          subtitle="Total dividends received per stock"
+          icon={<DollarSign className="w-4 h-4 text-[var(--accent-green)]" />}
+        >
+          {dividendData.length === 0 ? (
+            <div className="h-64 flex items-center justify-center text-[13px] text-[var(--text-muted)]">
+              No dividends recorded yet.
+            </div>
+          ) : (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dividendData} margin={{ top: 25, right: 10, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                  <XAxis
+                    dataKey="symbol"
+                    tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tickFormatter={formatYAxis}
+                    tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<DividendTooltip />} cursor={{ fill: 'var(--bg-tertiary)' }} />
+                  <Bar
+                    dataKey="totalDividends"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    {dividendData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </ChartCard>
+
+        <ChartCard
+          title="Portfolio Allocation"
+          subtitle="Investment distribution across stocks"
+          icon={<PieChartIcon className="w-4 h-4 text-[var(--accent-orange)]" />}
+        >
+          {allocationData.length === 0 ? (
+            <div className="h-72 flex items-center justify-center text-[13px] text-[var(--text-muted)]">
+              No investment data available.
+            </div>
+          ) : (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={allocationData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={95}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {allocationData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} stroke="var(--bg-secondary)" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<PieTooltip />} />
+                  <Legend
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                    height={36}
+                    formatter={(value: string, entry: { payload?: { value?: number } }) => {
+                      const item = entry.payload;
+                      const percent = totalInvestment > 0 && item?.value ? ((item.value / totalInvestment) * 100).toFixed(0) : '0';
+                      return (
+                        <span className="text-xs text-[var(--text-secondary)]">
+                          {value} <span className="text-[var(--text-muted)] ml-1">({percent}%)</span>
+                        </span>
+                      );
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </ChartCard>
+
+        <ChartCard
+          title="Sector Allocation"
+          subtitle="Investment distribution by sector"
+          icon={<PieChartIcon className="w-4 h-4 text-[var(--accent-green)]" />}
+        >
+          {sectorData.length === 0 ? (
+            <div className="h-72 flex items-center justify-center text-[13px] text-[var(--text-muted)]">
+              No investment data available.
+            </div>
+          ) : (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={sectorData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={95}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {sectorData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} stroke="var(--bg-secondary)" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<PieTooltip />} />
+                  <Legend
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                    height={36}
+                    formatter={(value: string, entry: { payload?: { value?: number } }) => {
+                      const item = entry.payload;
+                      const percent = totalInvestment > 0 && item?.value ? ((item.value / totalInvestment) * 100).toFixed(0) : '0';
+                      return (
+                        <span className="text-xs text-[var(--text-secondary)]">
+                          {value} <span className="text-[var(--text-muted)] ml-1">({percent}%)</span>
+                        </span>
+                      );
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </ChartCard>
+
+        <ChartCard
+          title="Monthly Trend"
+          subtitle="Deposits vs Investments over time"
+          icon={<TrendingUp className="w-4 h-4 text-[var(--accent-blue)]" />}
+        >
+          {monthlyData.length === 0 ? (
+            <div className="h-72 flex items-center justify-center text-[13px] text-[var(--text-muted)]">
+              No deposit or buy data available.
+            </div>
+          ) : (
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-subtle)" />
+                  <XAxis
+                    dataKey="month"
+                    tickFormatter={(val: string) => {
+                      const [y, m] = val.split('-');
+                      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                      return `${monthNames[parseInt(m, 10) - 1]} ${y.slice(2)}`;
+                    }}
+                    tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tickFormatter={formatYAxis}
+                    tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    content={({ active, payload, label }: any) => {
+                      if (active && payload && payload.length && label) {
+                        const [y, m] = String(label).split('-');
+                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const monthLabel = `${monthNames[parseInt(m, 10) - 1]} ${y}`;
+                        return (
+                          <div className="bg-[var(--bg-secondary)] p-3 rounded-lg border border-[var(--border-subtle)] shadow-card">
+                            <p className="text-xs text-[var(--text-muted)] mb-2">{monthLabel}</p>
+                            {payload.map((entry: { dataKey: string; color: string; value: number }, idx: number) => (
+                              <div key={idx} className="flex items-center gap-2 mb-1">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                                <span className="text-xs text-[var(--text-secondary)]">
+                                  {entry.dataKey === 'deposits' ? 'Deposited' : 'Invested'}:
+                                </span>
+                                <span className="text-sm font-semibold text-[var(--text-primary)]">
+                                  Rs. {formatPkr(entry.value)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ paddingTop: 16 }}
+                    formatter={(value: string) => (
+                      <span className="text-xs text-[var(--text-secondary)]">
+                        {value === 'deposits' ? 'Deposited' : 'Invested'}
+                      </span>
+                    )}
+                  />
+                  <Line type="monotone" dataKey="deposits" stroke="#34C759" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="invested" stroke="#007AFF" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </ChartCard>
+
+        <ChartCard
+          title="Investment Summary"
+          subtitle="Key metrics across your portfolio"
+          icon={<BarChart3 className="w-4 h-4 text-[var(--accent-blue)]" />}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-lg bg-[var(--bg-tertiary)] p-4">
+              <p className="text-xs text-[var(--text-muted)] mb-1">Total Deposited</p>
+              <p className="text-lg font-semibold text-[var(--accent-blue)]">
+                Rs. {formatPkr(deposits.reduce((sum, d) => sum + d.amount, 0))}
+              </p>
+            </div>
+            <div className="rounded-lg bg-[var(--bg-tertiary)] p-4">
+              <p className="text-xs text-[var(--text-muted)] mb-1">Total Invested</p>
+              <p className="text-lg font-semibold text-[var(--text-primary)]">Rs. {formatPkr(totalInvestment)}</p>
+            </div>
+            <div className="rounded-lg bg-[var(--bg-tertiary)] p-4">
+              <p className="text-xs text-[var(--text-muted)] mb-1">Total Dividends</p>
+              <p className="text-lg font-semibold text-[var(--accent-green)]">
+                Rs. {formatPkr(dividendData.reduce((sum, d) => sum + d.totalDividends, 0))}
+              </p>
+            </div>
+            <div className="rounded-lg bg-[var(--bg-tertiary)] p-4">
+              <p className="text-xs text-[var(--text-muted)] mb-1">Total Shares</p>
+              <p className="text-lg font-semibold text-[var(--text-primary)]">
+                {investmentData.reduce((sum, d) => sum + d.totalShares, 0)}
+              </p>
+            </div>
+          </div>
+        </ChartCard>
       </div>
     </div>
-  );
-}
-
-function DepositsHistory() {
-  const { data: deposits = [], isLoading, error } = useQuery({
-    queryKey: queryKeys.wallet.deposits(),
-    queryFn: walletService.getDeposits,
-    staleTime: 5 * 60 * 1000,
-  });
-  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
-  return (
-    <table className="w-full">
-      <TableHeader cols={[{ label: 'Date' }, { label: 'Note' }, { label: 'Amount', align: 'right' }]} />
-      <tbody className="divide-y divide-[var(--border-subtle)]">
-        {deposits.map((row: Deposit) => (
-          <tr key={row.id} className="hover:bg-[var(--bg-tertiary)]">
-            <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{row.deposit_date ? new Date(row.deposit_date).toLocaleDateString('en-PK') : '-'}</td>
-            <td className="px-4 py-2.5 text-[12px] text-[var(--text-muted)] italic">{row.note || '-'}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-green)]">+Rs. {formatPkr(row.amount)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-function BuyHistory() {
-  const { data: buyTransactions = [], isLoading, error } = useQuery({
-    queryKey: queryKeys.transactions.buys(),
-    queryFn: transactionsService.getBuyTransactions,
-    staleTime: 5 * 60 * 1000,
-  });
-  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
-  return (
-    <table className="w-full">
-      <TableHeader cols={[{ label: 'Date' }, { label: 'Stock' }, { label: 'Qty', align: 'right' }, { label: 'Rate', align: 'right' }, { label: 'Total', align: 'right' }]} />
-      <tbody className="divide-y divide-[var(--border-subtle)]">
-        {buyTransactions.map((row: BuyTransaction) => (
-          <tr key={row.id} className="hover:bg-[var(--bg-tertiary)]">
-            <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{new Date(row.buy_date).toLocaleDateString('en-PK')}</td>
-            <td className="px-4 py-2.5 text-[12px] font-semibold text-[var(--text-primary)]">{row.stock.symbol}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] text-[var(--text-secondary)]">{row.quantity}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] text-[var(--text-secondary)]">Rs. {formatPkr(row.buy_rate)}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-red)]">Rs. {formatPkr(row.total_cost)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-function SellHistory() {
-  const { data: sellTransactions = [], isLoading, error } = useQuery({
-    queryKey: queryKeys.transactions.sells(),
-    queryFn: transactionsService.getSellTransactions,
-    staleTime: 5 * 60 * 1000,
-  });
-  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
-  return (
-    <table className="w-full">
-      <TableHeader cols={[{ label: 'Date' }, { label: 'Stock' }, { label: 'Qty', align: 'right' }, { label: 'Rate', align: 'right' }, { label: 'Proceeds', align: 'right' }, { label: 'P/L', align: 'right' }]} />
-      <tbody className="divide-y divide-[var(--border-subtle)]">
-        {sellTransactions.map((row: SellTransaction) => (
-          <tr key={row.id} className="hover:bg-[var(--bg-tertiary)]">
-            <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{new Date(row.sell_date).toLocaleDateString('en-PK')}</td>
-            <td className="px-4 py-2.5 text-[12px] font-semibold text-[var(--text-primary)]">{row.stock.symbol}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] text-[var(--text-secondary)]">{row.quantity}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] text-[var(--text-secondary)]">Rs. {formatPkr(row.sell_rate)}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-green)]">Rs. {formatPkr(row.total_proceeds)}</td>
-            <td className={clsx("px-4 py-2.5 text-right text-[12px] font-medium", Number(row.realized_gain_loss) >= 0 ? "text-[var(--accent-green)]" : "text-[var(--accent-red)]")}>
-              {Number(row.realized_gain_loss) >= 0 ? '+' : ''}Rs. {formatPkr(row.realized_gain_loss)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
-function DividendHistory() {
-  const { data: dividends = [], isLoading, error } = useQuery({
-    queryKey: queryKeys.transactions.dividends(),
-    queryFn: transactionsService.getDividends,
-    staleTime: 5 * 60 * 1000,
-  });
-  if (error) return <ErrorState message={typeof error === 'string' ? error : error.message} />;
-  if (isLoading) return <div className="p-5 animate-pulse"><div className="h-32 bg-[var(--bg-tertiary)] rounded" /></div>;
-  return (
-    <table className="w-full">
-      <TableHeader cols={[{ label: 'Date' }, { label: 'Stock' }, { label: 'Amount', align: 'right' }]} />
-      <tbody className="divide-y divide-[var(--border-subtle)]">
-        {dividends.map((row: Dividend) => (
-          <tr key={row.id} className="hover:bg-[var(--bg-tertiary)]">
-            <td className="px-4 py-2.5 text-[12px] text-[var(--text-secondary)]">{new Date(row.dividend_date).toLocaleDateString('en-PK')}</td>
-            <td className="px-4 py-2.5 text-[12px] font-semibold text-[var(--text-primary)]">{row.stock.symbol}</td>
-            <td className="px-4 py-2.5 text-right text-[12px] font-medium text-[var(--accent-green)]">+Rs. {formatPkr(row.dividend_amount)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
   );
 }

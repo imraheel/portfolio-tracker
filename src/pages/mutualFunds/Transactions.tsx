@@ -16,6 +16,7 @@ import type { MutualFundPurchase, MutualFundWithdrawal } from '@/services/mutual
 const subNav = [
   { label: 'Holdings', value: '/mutual-funds' },
   { label: 'Transactions', value: '/mutual-funds/transactions' },
+  { label: 'Reports', value: '/mutual-funds/reports' },
 ];
 
 function formatPkr(amount: number): string {
