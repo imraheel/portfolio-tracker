@@ -1,5 +1,82 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
+const axios = require('axios');
+const cheerio = require('cheerio');
+
+// IPC handler: fetch live stock price from PSX
+ipcMain.handle('psx:get-price', async (_event, symbol) => {
+  try {
+    const { data: html } = await axios.get(
+      `https://dps.psx.com.pk/company/${encodeURIComponent(symbol)}`,
+      {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        },
+        timeout: 10000,
+      }
+    );
+
+    const $ = cheerio.load(html);
+
+    const close = $('.quote__close').first().text().trim();
+    const name = $('.quote__name').first().text().trim();
+
+    if (!close) {
+      return { success: false, message: `Price not found for ${symbol}` };
+    }
+
+    // Parse "Rs.182.77" → 182.77
+    const price = parseFloat(close.replace(/Rs\.\s*/i, '').replace(/,/g, ''));
+
+    if (isNaN(price)) {
+      return { success: false, message: `Invalid price format for ${symbol}` };
+    }
+
+    return {
+      success: true,
+      symbol: symbol.toUpperCase(),
+      name: name || null,
+      price,
+    };
+  } catch (error) {
+    console.error(`PSX scraping error for ${symbol}:`, error.message);
+    return { success: false, message: error.message };
+  }
+});
+
+// IPC handler: fetch multiple stock prices from PSX
+ipcMain.handle('psx:get-prices', async (_event, symbols) => {
+  const results = await Promise.allSettled(
+    symbols.map(async (symbol) => {
+      try {
+        const { data: html } = await axios.get(
+          `https://dps.psx.com.pk/company/${encodeURIComponent(symbol)}`,
+          {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            },
+            timeout: 10000,
+          }
+        );
+
+        const $ = cheerio.load(html);
+        const close = $('.quote__close').first().text().trim();
+        const name = $('.quote__name').first().text().trim();
+
+        if (!close) return { symbol, success: false, message: 'Price not found' };
+
+        const price = parseFloat(close.replace(/Rs\.\s*/i, '').replace(/,/g, ''));
+        if (isNaN(price)) return { symbol, success: false, message: 'Invalid format' };
+
+        return { symbol: symbol.toUpperCase(), name: name || null, price, success: true };
+      } catch (error) {
+        return { symbol, success: false, message: error.message };
+      }
+    })
+  );
+
+  return results.map((r) => (r.status === 'fulfilled' ? r.value : { symbol: 'unknown', success: false, message: 'Request failed' }));
+});
 
 // Check if we're in development or production
 const isDev = !app.isPackaged;
