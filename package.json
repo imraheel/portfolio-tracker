@@ -1,6 +1,6 @@
 {
   "name": "portfolio-tracker",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -8,10 +8,11 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
+    "clean": "rm -rf dist && rm -rf dist-electron",
     "electron:dev": "concurrently \"pnpm dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "pnpm build && electron-builder",
-    "electron:build:mac": "pnpm build && electron-builder --mac",
-    "electron:build:win": "pnpm build && electron-builder --win",
+    "electron:build": "pnpm clean && pnpm build && electron-builder",
+    "electron:build:mac": "pnpm clean && pnpm build && electron-builder --mac",
+    "electron:build:win": "pnpm clean && pnpm build && electron-builder --win",
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {
