@@ -13,6 +13,7 @@ import MutualFundTransactions from './pages/mutualFunds/Transactions';
 import MutualFundReports from './pages/mutualFunds/Reports';
 import CryptoList from './pages/crypto/CryptoList';
 import CryptoTransactions from './pages/crypto/Transactions';
+import Notes from './pages/Notes/Notes';
 
 function App() {
   const { theme } = useTheme();
@@ -38,6 +39,9 @@ function App() {
         {/* Crypto Routes */}
         <Route path="crypto" element={<CryptoList />} />
         <Route path="crypto/transactions" element={<CryptoTransactions />} />
+
+        {/* Notes Route */}
+        <Route path="notes" element={<Notes />} />
       </Route>
     </Routes>
     </>

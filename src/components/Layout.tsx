@@ -39,6 +39,7 @@ export default function Layout() {
           <NavLink href="/stocks" current={pathname}>Stocks</NavLink>
           <NavLink href="/mutual-funds" current={pathname}>Mutual Funds</NavLink>
           <NavLink href="/crypto" current={pathname}>Crypto</NavLink>
+          <NavLink href="/notes" current={pathname}>Notes</NavLink>
           <Link
             to="/settings"
             className={clsx(
