@@ -126,3 +126,46 @@ No test framework is currently configured. When adding tests:
 - **Validation:** Buy requires sufficient wallet balance; Sell requires sufficient stock quantity
 - **Manual Price Updates:** Stock prices are updated manually, not fetched from API
 - **Investment History:** Cumulative investment tracking by asset type (Stocks, Mutual Funds, Crypto)
+
+## Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── stocks/         # Stock-related forms (StockForm, BuyForm, SellForm, etc.)
+│   ├── crypto/         # Crypto-related forms (CryptoForm, PurchaseForm, etc.)
+│   ├── mutualFunds/    # Mutual Fund forms (FundForm, PurchaseForm, etc.)
+│   ├── dashboard/     # Dashboard charts (NetInvestmentChart, AssetAllocationChart, etc.)
+│   ├── FormButton.tsx # Shared form button
+│   ├── Header.tsx     # App header
+│   ├── Layout.tsx     # App layout
+│   └── Sidebar.tsx    # Navigation sidebar
+├── pages/              # Route components
+│   ├── stocks/        # Stock pages (Wallet, Stocks, Transactions)
+│   ├── crypto/        # Crypto pages (CryptoList, Purchases, Withdrawals)
+│   ├── mutualFunds/   # Mutual Fund pages (FundsList, Purchases, Withdrawals)
+│   ├── Dashboard.tsx  # Portfolio overview
+│   ├── Reports.tsx   # Reports and analytics
+│   └── Settings.tsx  # Settings and data management
+├── hooks/             # Custom React hooks (non-data-fetching)
+│   ├── ThemeProvider.tsx  # Theme context provider
+│   ├── useTheme.tsx      # Theme state hook
+│   └── useDataExport.ts  # Data export/import functionality
+├── services/          # Business logic (API calls)
+│   ├── stocks/        # Stock services (stocks, transactions, wallet)
+│   ├── crypto/        # Crypto services (crypto)
+│   ├── mutualFunds/   # Mutual Fund services (mutualFunds)
+│   ├── portfolio.ts   # Portfolio metrics calculation
+│   ├── investmentHistory.ts  # Investment history chart data
+│   └── data.ts        # Data export/import
+├── lib/firebase/       # Firebase client configuration
+│   └── client.ts
+├── types/              # TypeScript type definitions
+├── App.tsx             # React Router setup
+├── main.tsx            # Application entry point
+└── globals.css         # Tailwind CSS styles
+
+electron/
+├── main.js             # Electron main process
+└── preload.js          # Security preload script
+```
